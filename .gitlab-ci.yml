@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2024 Espressif Systems (Shanghai) CO LTD
+# SPDX-License-Identifier: Apache-2.0
+
+stages:
+    - build
+
+build_mfg_tool:
+  stage: build
+  image: python:3.9
+  tags:
+    - build
+
+  artifacts:
+    paths:
+      - mfg_tool/dist/
+
+  script:
+    - cd mfg_tool
+    - python3 -m pip install --upgrade pip build setuptools
+    - python3 -m build

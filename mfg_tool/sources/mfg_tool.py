@@ -37,22 +37,12 @@ from types import SimpleNamespace
 
 from esp_secure_cert.tlv_format import *
 
-if not os.getenv('IDF_PATH'):
-    logging.error("IDF_PATH environment variable is not set")
-    sys.exit(1)
-
-if not os.getenv('ESP_MATTER_PATH'):
-    logging.error("ESP_MATTER_PATH environment variable is not set")
-    sys.exit(1)
-
-sys.path.insert(0, os.path.join(os.getenv('ESP_MATTER_PATH'), 'connectedhomeip', 'connectedhomeip', 'scripts', 'tools', 'spake2p'))
-from spake2p import generate_verifier
-
-sys.path.insert(0, os.path.join(os.getenv('IDF_PATH'), 'tools', 'mass_mfg'))
-from mfg_gen import generate
-
-sys.path.insert(0, os.path.join(os.getenv('ESP_MATTER_PATH'), 'connectedhomeip', 'connectedhomeip', 'src', 'setup_payload', 'python'))
-from generate_setup_payload import SetupPayload, CommissioningFlow
+# In order to made the esp-matter-mfg-tool standalone we copied few dependencies from esp-idf
+# and connectedhomeip to deps/ directory.
+# TODO: Remove the dependencies from deps/ once available on pypi
+from deps.spake2p import generate_verifier
+from deps.mfg_gen import generate
+from deps.generate_setup_payload import SetupPayload, CommissioningFlow
 
 TOOLS = {
     'chip-cert': None,
@@ -504,6 +494,7 @@ def generate_onboarding_data(args, index, discriminator, passcode):
 
 def get_args():
     def any_base_int(s): return int(s, 0)
+
     parser = argparse.ArgumentParser(description='Manufacuring partition generator tool',
                                      formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
 
@@ -559,9 +550,9 @@ def get_args():
     input_cert_group.add_argument('--pai', action='store_true', help='Use input certificate as PAI certificate.')
 
     g_dev_inst_info = parser.add_argument_group('Device instance information options')
-    g_dev_inst_info.add_argument('-v', '--vendor-id', type=any_base_int, help='Vendor id')
+    g_dev_inst_info.add_argument('-v', '--vendor-id', type=any_base_int, help='Vendor id', required=True)
     g_dev_inst_info.add_argument('--vendor-name', help='Vendor name')
-    g_dev_inst_info.add_argument('-p', '--product-id', type=any_base_int, help='Product id')
+    g_dev_inst_info.add_argument('-p', '--product-id', type=any_base_int, help='Product id', required=True)
     g_dev_inst_info.add_argument('--product-name', help='Product name')
     g_dev_inst_info.add_argument('--hw-ver', type=any_base_int, help='Hardware version')
     g_dev_inst_info.add_argument('--hw-ver-str', help='Hardware version string')
@@ -592,6 +583,10 @@ def get_args():
             [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#csv-configuration-file]')
     g_extra_info.add_argument('--mcsv', help='Master CSV file containig optional/extra values specified by the user. \
             [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#master-value-csv-file]')
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     return parser.parse_args()
 
