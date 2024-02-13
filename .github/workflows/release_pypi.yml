@@ -3,19 +3,19 @@ name: PyPI release
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build_and_upload:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.7'
+        python-version: '3.9'
 
     - name: Install dependencies
       run: |
@@ -26,6 +26,7 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_PROJECT_TOKEN }}
       run: |
+        cd mfg_tool
         PUBLISHED_VERSION=$(curl https://pypi.org/pypi/esp-matter-mfg-tool/json 2>/dev/null | jq -r '.info.version')
         CURRENT_VERSION=$(python setup.py --version 2>/dev/null)
         if [ "$PUBLISHED_VERSION" == "$CURRENT_VERSION" ]; then
