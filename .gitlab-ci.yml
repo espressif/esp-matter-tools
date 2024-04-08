@@ -6,7 +6,10 @@ stages:
 
 build_mfg_tool:
   stage: build
-  image: python:3.9
+  image:
+    name: python:3.9-bullseye
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+
   tags:
     - build
 
