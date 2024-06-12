@@ -359,18 +359,18 @@ def write_per_device_unique_data(args):
                         if args.efuse_key_id == -1:
                             logging.error("--efuse-key-id <value> is required when -ds or --ds-peripheral option is used")
                             exit(1)
-                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_ECDSA_PERIPHERAL_KEY, 
+                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_ECDSA_PERIPHERAL_KEY,
                                                   key_path = os.path.abspath(dacs[3]), key_pass = None)
                         priv_key.priv_key_len = 256
                         priv_key.efuse_key_id = args.efuse_key_id
-                        generate_partition_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]), 
-                                              ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target, 
+                        generate_partition_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]),
+                                              ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target,
                                               op_file = secure_cert_partition_file_path)
                     else:
-                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_DEFAULT_FORMAT_KEY, 
+                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_DEFAULT_FORMAT_KEY,
                                                   key_path = os.path.abspath(dacs[3]), key_pass = None)
-                        generate_partition_no_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]), 
-                                                 ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target, 
+                        generate_partition_no_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]),
+                                                 ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target,
                                                  op_file = secure_cert_partition_file_path)
 
                 if args.dac_key is not None and args.dac_cert is not None:
@@ -474,6 +474,7 @@ def generate_partitions(suffix, size, encrypt):
         partition_args.keygen = True
     else:
         partition_args.keygen = False
+    partition_args.key_protect_hmac = False
     generate(partition_args)
 
 
