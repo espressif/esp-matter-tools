@@ -1,0 +1,4 @@
+app,namespace,
+firmware_key,data,hex2bin
+serial_no,data,string,REPEAT
+device_no,data,i32
