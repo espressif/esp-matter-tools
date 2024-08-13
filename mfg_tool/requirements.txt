@@ -8,3 +8,4 @@ PyQRCode==1.2.1
 python_stdnum==1.18
 esp-secure-cert-tool==1.0.1
 ecdsa==0.18.0
+esp_idf_nvs_partition_gen==0.1.2
