@@ -422,10 +422,11 @@ def organize_output_files(suffix, args):
 
         logging.info('Generated output files at: {}'.format(os.sep.join([OUT_DIR['top'], UUIDs[i]])))
 
-    os.rmdir(os.sep.join([OUT_DIR['top'], 'bin']))
-    os.rmdir(os.sep.join([OUT_DIR['top'], 'csv']))
+    shutil.rmtree(os.sep.join([OUT_DIR['top'], 'bin']), ignore_errors=True)
+    shutil.rmtree(os.sep.join([OUT_DIR['top'], 'csv']), ignore_errors=True)
+
     if args.encrypt:
-        os.rmdir(os.sep.join([OUT_DIR['top'], 'keys']))
+        shutil.rmtree(os.sep.join([OUT_DIR['top'], 'keys']), ignore_errors=True)
 
 def generate_summary(args):
     master_csv = os.sep.join([OUT_DIR['stage'], 'master.csv'])
