@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-Contains utilitiy functions for validating argument, certs/keys conversion, etc.
+Contains utilitiy functions for validating argument.
 """
 
 import sys
@@ -24,10 +24,6 @@ import logging
 import subprocess
 from bitarray import bitarray
 from bitarray.util import ba2int
-import cryptography.hazmat.backends
-import cryptography.x509
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 
 ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS = 128
 SERIAL_NUMBER_LEN = 16
@@ -298,62 +294,3 @@ def get_supported_modes_dict(supported_modes):
             output_dict[ep] = [mode_dict]
 
     return output_dict
-
-
-# Convert the certificate in PEM format to DER format
-def convert_x509_cert_from_pem_to_der(pem_file, out_der_file):
-    with open(pem_file, 'rb') as f:
-        pem_data = f.read()
-
-    pem_cert = cryptography.x509.load_pem_x509_certificate(pem_data, default_backend())
-    der_cert = pem_cert.public_bytes(serialization.Encoding.DER)
-
-    with open(out_der_file, 'wb') as f:
-        f.write(der_cert)
-
-def convert_private_key_from_pem_to_der(pem_file, out_der_file):
-    with open(pem_file, 'rb') as f:
-        pem_data = f.read()
-
-    pem_key = serialization.load_pem_private_key(pem_data, None, default_backend())
-
-    der_key = pem_key.private_bytes(
-        encoding=serialization.Encoding.DER,
-        format=serialization.PrivateFormat.TraditionalOpenSSL,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-
-    with open(out_der_file, 'wb') as f:
-        f.write(der_key)
-
-# Generate the Public and Private key pair binaries
-def generate_keypair_bin(pem_file, out_privkey_bin, out_pubkey_bin):
-    with open(pem_file, 'rb') as f:
-        pem_data = f.read()
-
-    key_pem = cryptography.hazmat.primitives.serialization.load_pem_private_key(pem_data, None)
-    private_number_val = key_pem.private_numbers().private_value
-    public_number_x = key_pem.public_key().public_numbers().x
-    public_number_y = key_pem.public_key().public_numbers().y
-    public_key_first_byte = 0x04
-
-    with open(out_privkey_bin, 'wb') as f:
-        f.write(private_number_val.to_bytes(32, byteorder='big'))
-
-    with open(out_pubkey_bin, 'wb') as f:
-        f.write(public_key_first_byte.to_bytes(1, byteorder='big'))
-        f.write(public_number_x.to_bytes(32, byteorder='big'))
-        f.write(public_number_y.to_bytes(32, byteorder='big'))
-
-
-def execute_cmd(cmd):
-    logging.debug('Executing Command: {}'.format(cmd))
-    status = subprocess.run(cmd, capture_output=True)
-
-    try:
-        status.check_returncode()
-    except subprocess.CalledProcessError as e:
-        if status.stderr:
-            logging.error('[stderr]: {}'.format(status.stderr.decode('utf-8').strip()))
-        logging.error('Command failed with error: {}'.format(e))
-        sys.exit(1)
