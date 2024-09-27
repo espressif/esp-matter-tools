@@ -422,10 +422,11 @@ def organize_output_files(suffix, args):
 
         logging.info('Generated output files at: {}'.format(os.sep.join([OUT_DIR['top'], UUIDs[i]])))
 
-    os.rmdir(os.sep.join([OUT_DIR['top'], 'bin']))
-    os.rmdir(os.sep.join([OUT_DIR['top'], 'csv']))
+    shutil.rmtree(os.sep.join([OUT_DIR['top'], 'bin']), ignore_errors=True)
+    shutil.rmtree(os.sep.join([OUT_DIR['top'], 'csv']), ignore_errors=True)
+
     if args.encrypt:
-        os.rmdir(os.sep.join([OUT_DIR['top'], 'keys']))
+        shutil.rmtree(os.sep.join([OUT_DIR['top'], 'keys']), ignore_errors=True)
 
 def generate_summary(args):
     master_csv = os.sep.join([OUT_DIR['stage'], 'master.csv'])
@@ -581,6 +582,16 @@ def get_args():
     g_dev_inst_info.add_argument('--enable-rotating-device-id', action='store_true', help='Enable Rotating device id in the generated binaries')
     g_dev_inst_info.add_argument('--rd-id-uid',
                         help='128-bit unique identifier for generating rotating device identifier, provide 32-byte hex string, e.g. "1234567890abcdef1234567890abcdef"')
+    product_finish_choices = [finish.name for finish in ProductFinish]
+    g_dev_inst_info.add_argument("--product-finish", type=str, choices=product_finish_choices,
+                        help='Product finishes choices for product appearance')
+
+    product_color_choices = [color.name for color in ProductColor]
+    g_dev_inst_info.add_argument("--product-color", type=str, choices=product_color_choices,
+                        help='Product colors choices for product appearance')
+
+    g_dev_inst_info.add_argument("--part-number", type=str, help='human readable product number')
+
 
     g_dev_inst = parser.add_argument_group('Device instance options')
     g_dev_inst.add_argument('--calendar-types', nargs='+',
@@ -629,6 +640,12 @@ def add_optional_KVs(args):
         chip_factory_append('mfg-date', 'data', 'string', args.mfg_date)
     if args.enable_rotating_device_id:
         chip_factory_append('rd-id-uid', 'data', 'hex2bin', args.rd_id_uid)
+    if args.product_finish:
+        chip_factory_append('product-finish', 'data', 'u32', ProductFinish[args.product_finish].value)
+    if args.product_color:
+        chip_factory_append('product-color', 'data', 'u32', ProductColor[args.product_color].value)
+    if args.part_number:
+        chip_factory_append('part-number', 'data', 'string', args.part_number)
 
     # Add the serial-num
     chip_factory_append('serial-num', 'data', 'string', args.serial_num)

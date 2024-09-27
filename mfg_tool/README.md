@@ -151,7 +151,7 @@ esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
-    -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
+    -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-in-secure-cert --ds-peripheral --target esp32h2 --efuse-key-id 1
 ```
 *NOTE*: Currently, only esp32h2 supports DS peripheral. 
@@ -198,7 +198,7 @@ Output binary contains all the chip specific key/value and key/values specified 
 #### Generate factory partitions without device attestation certificates and keys
 ```
 esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 \
-    -cd $ESP_MATTER_PATH/connectedhomeip/connectedhomeip/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
+    -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
 ```
 
 * NOTE: These factory partitions are only for firmwares with other ways to get the certificates and sign message with the private key.

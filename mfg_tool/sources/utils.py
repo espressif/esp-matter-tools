@@ -57,6 +57,38 @@ class CalendarTypes(enum.Enum):
     Persian = 10
     Taiwanese = 11
 
+class ProductFinish(enum.Enum):
+    other = 0
+    matte = 1
+    satin = 2
+    polished = 3
+    rugged = 4
+    fabric = 5
+
+
+class ProductColor(enum.Enum):
+    black = 0
+    navy = 1
+    green = 2
+    teal = 3
+    maroon = 4
+    purple = 5
+    olive = 6
+    gray = 7
+    blue = 8
+    lime = 9
+    aqua = 10
+    red = 11
+    fuchsia = 12
+    yellow = 13
+    white = 14
+    nickel = 15
+    chrome = 16
+    brass = 17
+    copper = 18
+    silver = 19
+    gold = 20
+
 
 def vid_pid_str(vid, pid):
     return '_'.join([hex(vid)[2:], hex(pid)[2:]])
