@@ -53,13 +53,14 @@ test_mfg_tool:
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --dac-in-secure-cert --target esp32
 
+    # For esp32h2, there is a system limitation to test the efuse. Hence
+    # the below test only tests for creating a esp_secure_cert_partition.
     - |
       esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
-                          --dac-in-secure-cert --ds-peripheral          \
-                          --target esp32h2 --efuse-key-id 1
+                          --dac-in-secure-cert --target esp32h2
 
     - |
       esp-matter-mfg-tool -n 5 -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai  \
