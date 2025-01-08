@@ -35,6 +35,7 @@ from utils import *
 from datetime import datetime
 from types import SimpleNamespace
 
+from esp_secure_cert import configure_ds
 from esp_secure_cert.tlv_format import *
 
 # In order to made the esp-matter-mfg-tool standalone we copied few dependencies from esp-idf
@@ -356,9 +357,23 @@ def write_per_device_unique_data(args):
                         if args.target != "esp32h2":
                             logging.error("DS peripheral is only supported for esp32h2 target")
                             exit(1)
+
                         if args.efuse_key_id == -1:
                             logging.error("--efuse-key-id <value> is required when -ds or --ds-peripheral option is used")
                             exit(1)
+
+                        if args.port and args.count == 1:
+                            esp_secure_cert_data_dir = 'esp_secure_cert_data'
+                            if (os.path.exists(esp_secure_cert_data_dir) is False):
+                                os.makedirs(esp_secure_cert_data_dir)
+                            ecdsa_key_file = os.path.join(esp_secure_cert_data_dir, 'ecdsa_key.bin')
+
+                            ecdsa_key_size = '256'
+                            configure_ds.configure_efuse_for_ecdsa(args.target, args.port, ecdsa_key_file, None, esp_secure_cert_data_dir, ecdsa_key_size, os.path.abspath(dacs[3]), args.priv_key_pass, args.efuse_key_id)
+                        else:
+                            logging.error('Port not specified or number of partitions count is greater than 1')
+                            exit(1)
+
                         priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_ECDSA_PERIPHERAL_KEY,
                                                   key_path = os.path.abspath(dacs[3]), key_pass = None)
                         priv_key.priv_key_len = 256
@@ -565,6 +580,8 @@ def get_args():
                        help='Use DS Peripheral in generating secure cert partition.')
     g_dac.add_argument('--efuse-key-id', type=int, choices=range(0, 6), default=-1,
                         help='Provide the efuse key_id which contains/will contain HMAC_KEY, default is 1')
+    g_dac.add_argument('--port', dest='port', help='UART com port to which the ESP device is connected')
+    g_dac.add_argument('--pwd', '--password', dest='priv_key_pass', help='The password associated with the private key')
 
     input_cert_group = g_dac.add_mutually_exclusive_group(required=False)
     input_cert_group.add_argument('--paa', action='store_true', help='Use input certificate as PAA certificate.')
