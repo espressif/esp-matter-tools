@@ -16,29 +16,6 @@ esp-matter-mfg-tool can be installed using package installer for Python
 python3 -m pip install esp-matter-mfg-tool
 ```
 
-### Optional dependency
-
-If you want to use the esp-matter-mfg-tool for signing DAC by providing PAI or PAA certificate and key, then chip-cert is required.
-
-[CHIP Certificate Tool](https://github.com/project-chip/connectedhomeip/tree/master/src/tools/chip-cert), *chip-cert*,
-provides command line interface (CLI) utility used for generating and manipulating CHIP certificates and CHIP private keys.
-
-If you have already setup the esp-matter and ran `install.sh` and sourced `export.sh` then you can skip building and adding tools to path steps.
-
-#### Build chip-cert
-```
-cd $ESP_MATTER_PATH/connectedhomeip/connectedhomeip
-source scripts/activate.sh
-gn gen out/host
-ninja -C out/host chip-cert
-```
-Above commands will generate chip-cert at `esp-matter/connectedhomeip/connectedhomeip/out/host`.
-
-#### Add the tools path to $PATH
-```
-export PATH="$PATH:$ESP_MATTER_PATH/connectedhomeip/connectedhomeip/out/host"
-```
-
 ## Configure your app
 Open the project configuration menu using - 
 
