@@ -34,6 +34,7 @@ from chip_nvs import *
 from utils import *
 from datetime import datetime
 from types import SimpleNamespace
+from cert_utils import *
 
 from esp_secure_cert import configure_ds
 from esp_secure_cert.tlv_format import *
@@ -44,10 +45,6 @@ from esp_secure_cert.tlv_format import *
 from deps.spake2p import generate_verifier
 from deps.mfg_gen import generate
 from deps.generate_setup_payload import SetupPayload, CommissioningFlow
-
-TOOLS = {
-    'chip-cert': None,
-}
 
 PAI = {
     'cert_pem': None,
@@ -70,20 +67,6 @@ OUT_FILE = {
 }
 
 UUIDs = list()
-
-
-def check_tools_exists(args):
-    # if the certs and keys are not in the generated partitions or the specific dac cert and key are used,
-    # the chip-cert is not needed.
-    if args.paa or (args.pai and (args.dac_cert is None and args.dac_key is None)):
-        TOOLS['chip-cert'] = shutil.which('chip-cert')
-        if TOOLS['chip-cert'] is None:
-            logging.error('chip-cert not found, please add chip-cert path to PATH environment variable')
-            sys.exit(1)
-
-    logging.debug('Using following tools:')
-    logging.debug('chip-cert:  {}'.format(TOOLS['chip-cert']))
-
 
 def generate_passcodes(args):
     iter_count_max = 10000
@@ -159,27 +142,11 @@ def append_chip_mcsv_row(row_data):
         f.write(row_data + '\n')
 
 def generate_pai(args, ca_key, ca_cert, out_key, out_cert):
-    cmd = [
-        TOOLS['chip-cert'], 'gen-att-cert',
-        '--type', 'i',
-        '--subject-cn', '"{} PAI {}"'.format(args.cn_prefix, '00'),
-        '--out-key', out_key,
-        '--out', out_cert,
-    ]
+    vendor_id = hex(args.vendor_id)[2:].upper()
+    product_id = hex(args.product_id)[2:].upper()
 
-    if args.lifetime:
-        cmd.extend(['--lifetime', str(args.lifetime)])
-    if args.valid_from:
-        cmd.extend(['--valid-from', str(args.valid_from)])
+    build_certificate(vendor_id, product_id, ca_cert, ca_key, out_cert, out_key, True, args.cn_prefix, args.valid_from if not None else None, args.lifetime if args.lifetime != 4294967295 else None)
 
-    cmd.extend([
-        '--subject-vid', hex(args.vendor_id)[2:],
-        '--subject-pid', hex(args.product_id)[2:],
-        '--ca-key', ca_key,
-        '--ca-cert', ca_cert,
-    ])
-
-    execute_cmd(cmd)
     logging.info('Generated PAI certificate: {}'.format(out_cert))
     logging.info('Generated PAI private key: {}'.format(out_key))
 
@@ -191,33 +158,18 @@ def generate_dac(iteration, args, ca_key, ca_cert):
     out_cert_der = out_key_pem.replace('key.pem', 'cert.der')
     out_private_key_bin = out_key_pem.replace('key.pem', 'private_key.bin')
     out_public_key_bin = out_key_pem.replace('key.pem', 'public_key.bin')
-    cmd = [
-        TOOLS['chip-cert'], 'gen-att-cert',
-        '--type', 'd',
-        '--subject-cn', UUIDs[iteration],
-        '--out-key', out_key_pem,
-        '--out', out_cert_pem,
-    ]
 
-    if args.lifetime:
-        cmd.extend(['--lifetime', str(args.lifetime)])
-    if args.valid_from:
-        cmd.extend(['--valid-from', str(args.valid_from)])
+    vendor_id = hex(args.vendor_id)[2:].upper()
+    product_id = hex(args.product_id)[2:].upper()
+    build_certificate(vendor_id, product_id, ca_cert, ca_key, out_cert_pem, out_key_pem, False, args.cn_prefix, args.valid_from if not None else None, args.lifetime if args.lifetime != 4294967295 else None)
 
-    cmd.extend(['--subject-vid', hex(args.vendor_id)[2:],
-                '--subject-pid', hex(args.product_id)[2:],
-                '--ca-key', ca_key,
-                '--ca-cert', ca_cert,
-                ])
-
-    execute_cmd(cmd)
     logging.info('Generated DAC certificate: {}'.format(out_cert_pem))
     logging.info('Generated DAC private key: {}'.format(out_key_pem))
 
     convert_x509_cert_from_pem_to_der(out_cert_pem, out_cert_der)
     logging.info('Generated DAC certificate in DER format: {}'.format(out_cert_der))
 
-    generate_keypair_bin(out_key_pem, out_private_key_bin, out_public_key_bin)
+    store_keypair_as_raw(out_key_pem, out_private_key_bin, out_public_key_bin)
     logging.info('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
     logging.info('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
     convert_private_key_from_pem_to_der(out_key_pem, out_private_key_der)
@@ -238,7 +190,7 @@ def use_dac_from_args(args):
     convert_x509_cert_from_pem_to_der(args.dac_cert, out_cert_der)
     logging.info('Generated DAC certificate in DER format: {}'.format(out_cert_der))
 
-    generate_keypair_bin(args.dac_key, out_private_key_bin, out_public_key_bin)
+    store_keypair_as_raw(args.dac_key, out_private_key_bin, out_public_key_bin)
     logging.info('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
     logging.info('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
     convert_private_key_from_pem_to_der(args.dac_key, out_private_key_der)
@@ -757,7 +709,6 @@ def main():
 
     args = get_args()
     validate_args(args)
-    check_tools_exists(args)
     setup_out_dirs(args.vendor_id, args.product_id, args.count)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)

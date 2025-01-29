@@ -41,7 +41,6 @@ Above commands will generate chip-cert at `esp-matter/connectedhomeip/connectedh
 ```
 export PATH="$PATH:$ESP_MATTER_PATH/connectedhomeip/connectedhomeip/out/host"
 ```
-
 ## Configure your app
 
 Open the project configuration menu using -
@@ -53,12 +52,16 @@ idf.py menuconfig
 
 In the configuration menu, set the following additional configuration to use custom factory partition and different values for Data and Device Info Providers.
 
-1. Enable `ESP32 Factory Data Provider` [Component config → CHIP Device Layer → Commissioning options → Use ESP32 Factory Data Provider]
+1. Enable the `ESP32 Factory Data Provider` [Component config → CHIP Device Layer → Commissioning options → Use ESP32 Factory Data Provider] to use the ESP32-specific implementation of CommissionableDataProvider and DeviceAttestationCredentialsProvider.
 
-   Enable config option [`CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER`](https://github.com/project-chip/connectedhomeip/blob/master/config/esp32/components/chip/Kconfig#L645)
-   to use ESP32 specific implementation of CommissionableDataProvider and DeviceAttestationCredentialsProvider.
+2. Enable the ESP32 Device Instance Info Provider options to get device instance info from the factory partition during attestation.
 
-2. Enable `ESP32 Device Instance Info Provider` [Component config → CHIP Device Layer → Commissioning options → Use ESP32 Device Instance Info Provider]
+
+    Enable `ENABLE_ESP32_DEVICE_INSTANCE_INFO_PROVIDER` [Component config → CHIP Device Layer → Commissioning options → Use ESP32 Device Instance Info Provider].
+
+
+    Enable `FACTORY_DEVICE_INSTANCE_INFO_PROVIDER` [Component config → ESP Matter → Device Instance Info Provider options → Device Instance Info - Factory].
+
 
    Enable config option [`ENABLE_ESP32_DEVICE_INSTANCE_INFO_PROVIDER`](https://github.com/project-chip/connectedhomeip/blob/master/config/esp32/components/chip/Kconfig#L655)
    to get device instance info from factory partition.
@@ -68,9 +71,13 @@ In the configuration menu, set the following additional configuration to use cus
    Set config option [`CHIP_FACTORY_NAMESPACE_PARTITION_LABEL`](https://github.com/project-chip/connectedhomeip/blob/master/config/esp32/components/chip/Kconfig#L856)
    to choose the label of the partition to store key-values in the "chip-factory" namespace. The default chosen partition label is `nvs`.
 
-4. Enable `Attestation - Factory` [ Component config → ESP Matter → DAC Provider options → Attestation - Factory]
+4. Enable either of the following options to use DAC certificates during attestion from a valid partition (the default is Attestation - Test):
 
-   Enable config option `CONFIG_FACTORY_PARTITION_DAC_PROVIDER` to use DAC certificates from the factory partition during Attestation.
+   Enable `FACTORY_PARTITION_DAC_PROVIDER` [Component config → ESP Matter → DAC Provider options → Attestation - Factory] to use DAC certificates from the factory partition.
+
+   `OR`
+
+   Enable `SEC_CERT_DAC_PROVIDER` [Component config → ESP Matter → DAC Provider options → Attestation - Secure Cert] to use DAC certificates from the secure cert partition.
 
 5. Set `Vendor ID` & `Device ID` [Component config → CHIP Device Layer → Device Identification Options]`
 
@@ -78,6 +85,7 @@ In the configuration menu, set the following additional configuration to use cus
    - Device ID 0x8001
 
    NOTE that those values have to match the values used for [generating the factory partition](#generate-a-factory-partition) with `esp-matter-mfg-tool`
+
 
 ## Output files and directory structure
 
