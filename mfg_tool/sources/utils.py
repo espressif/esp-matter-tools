@@ -120,6 +120,7 @@ def check_int_range(value, min_value, max_value, name):
 # Validates discriminator and passcode
 def validate_commissionable_data(args):
     check_int_range(args.discriminator, 0x0000, 0x0FFF, 'Discriminator')
+    check_int_range(args.discovery_mode, 0, 7, 'Discovery mode')
     if args.passcode is not None:
         if ((args.passcode < 0x0000001 and args.passcode > 0x5F5E0FE) or (args.passcode in INVALID_PASSCODES)):
             logging.error('Invalid passcode' + str(args.passcode))
