@@ -144,8 +144,19 @@ def append_chip_mcsv_row(row_data):
 def generate_pai(args, ca_key, ca_cert, out_key, out_cert):
     vendor_id = hex(args.vendor_id)[2:].upper()
     product_id = hex(args.product_id)[2:].upper()
+    common_name = "{} PAI {}".format(args.cn_prefix, "00") if args.cn_prefix else "MATTER TEST PAI " + str(random.randint(10, 99))
 
-    build_certificate(vendor_id, product_id, ca_cert, ca_key, out_cert, out_key, True, args.cn_prefix, args.valid_from if not None else None, args.lifetime if args.lifetime != 4294967295 else None)
+    build_certificate(
+        vendor_id=vendor_id,
+        product_id=product_id,
+        ca_cert_file=ca_cert,
+        ca_privkey_file=ca_key,
+        out_cert_file=out_cert,
+        out_key_file=out_key,
+        is_pai=True,
+        common_name=common_name,
+        valid_from=args.valid_from,
+        lifetime=args.lifetime)
 
     logging.info('Generated PAI certificate: {}'.format(out_cert))
     logging.info('Generated PAI private key: {}'.format(out_key))
@@ -161,7 +172,19 @@ def generate_dac(iteration, args, ca_key, ca_cert):
 
     vendor_id = hex(args.vendor_id)[2:].upper()
     product_id = hex(args.product_id)[2:].upper()
-    build_certificate(vendor_id, product_id, ca_cert, ca_key, out_cert_pem, out_key_pem, False, args.cn_prefix, args.valid_from if not None else None, args.lifetime if args.lifetime != 4294967295 else None)
+    common_name = UUIDs[iteration]
+
+    build_certificate(
+        vendor_id=vendor_id,
+        product_id=product_id,
+        ca_cert_file=ca_cert,
+        ca_privkey_file=ca_key,
+        out_cert_file=out_cert_pem,
+        out_key_file=out_key_pem,
+        is_pai=False,
+        common_name=common_name,
+        valid_from=args.valid_from,
+        lifetime=args.lifetime)
 
     logging.info('Generated DAC certificate: {}'.format(out_cert_pem))
     logging.info('Generated DAC private key: {}'.format(out_key_pem))
@@ -501,9 +524,9 @@ def get_args():
     g_commissioning.add_argument('-cf', '--commissioning-flow', type=any_base_int, default=0,
                                  help='Device commissioning flow, 0:Standard, 1:User-Intent, 2:Custom. \
                                           Default is 0.', choices=[0, 1, 2])
-    g_commissioning.add_argument('-dm', '--discovery-mode', type=any_base_int, default=1,
-                                 help='Commissionable device discovery networking technology. \
-                                          0:WiFi-SoftAP, 1:BLE, 2:On-network. Default is BLE.', choices=[0, 1, 2])
+    g_commissioning.add_argument('-dm', '--discovery-mode', type=any_base_int, default=2,
+                                 help='3-bit bitmap representing discovery modes for commissionable device discovery \
+                                          Bit 0:WiFi-SoftAP, Bit 1:BLE, Bit 2:On-network. Default is BLE. Specify values between 0-7')
     g_commissioning.add_argument('--enable-dynamic-passcode', action="store_true", required=False,
                                  help='Enable dynamic passcode. If enabling this option, the generated binaries will \
                                          not include the spake2p verifier. so this option should work with a custom \
@@ -513,8 +536,8 @@ def get_args():
     g_dac = parser.add_argument_group('Device attestation credential options')
     g_dac.add_argument('--dac-in-secure-cert', action="store_true", required=False,
                         help='Store DAC in secure cert partition. By default, DAC is stored in nvs factory partition.')
-    g_dac.add_argument('-lt', '--lifetime', default=4294967295, type=any_base_int,
-                       help='Lifetime of the generated certificate. Default is 4294967295 if not specified, \
+    g_dac.add_argument('-lt', '--lifetime', default=36500, type=any_base_int,
+                       help='Lifetime of the generated certificate. Default is 100 years if not specified, \
                               this indicate that certificate does not have well defined expiration date.')
     g_dac.add_argument('-vf', '--valid-from',
                        help='The start date for the certificate validity period in format <YYYY>-<MM>-<DD> [ <HH>:<MM>:<SS> ]. \

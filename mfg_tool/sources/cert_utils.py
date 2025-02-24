@@ -179,18 +179,14 @@ def extract_vid(cert):
     """
     return extract_matter_rdn(cert, VENDOR_ID_OID)
 
-def generate_cert_subject(vendor_id, product_id, cn_prefix, is_pai):
+def generate_cert_subject(vendor_id, product_id, common_name):
     x509_attrs = []
-    if cn_prefix:
-        x509_attrs.append(x509.NameAttribute(NameOID.COMMON_NAME, cn_prefix))
-    else:
-        x509_attrs.append(x509.NameAttribute(NameOID.COMMON_NAME, "MATTER TEST PAI " if is_pai else "MATTER TEST DAC " + str(random.randint(1000, 9999))))
-
+    x509_attrs.append(x509.NameAttribute(NameOID.COMMON_NAME, common_name))
     x509_attrs.append(x509.NameAttribute(VENDOR_ID_OID, vendor_id))
     x509_attrs.append(x509.NameAttribute(PRODUCT_ID_OID, product_id))
     return x509.Name(x509_attrs)
 
-def build_certificate(vendor_id:str, product_id:str, ca_cert_file: str, ca_privkey_file: str, out_cert_file: str, out_key_file: str, is_pai: bool, cn: Optional[str] = None, valid_from=None, lifetime=None):
+def build_certificate(vendor_id:str, product_id:str, ca_cert_file: str, ca_privkey_file: str, out_cert_file: str, out_key_file: str, is_pai: bool, common_name: str, valid_from=None, lifetime=None):
     """
     Build a certificate for a Matter device.
 
@@ -202,7 +198,7 @@ def build_certificate(vendor_id:str, product_id:str, ca_cert_file: str, ca_privk
         out_cert_file (str): Path to save the generated certificate.
         out_key_file (str): Path to save the private key for the certificate.
         is_pai (bool): Indicates if the certificate is a Product Attestation Intermediate (PAI) certificate.
-        cn (str, optional): Common Name for the certificate subject. Defaults to a randomly generated UUID.
+        common_name (str): Common Name for the certificate subject.
         valid_from (str, optional): Start date for the certificate validity period in ISO 8601 format ("YYYY-MM-DDTHH:MM:SS").
             Defaults to None, in which case the current date is used.
         lifetime (int, optional): Lifetime of the certificate in days. Defaults to None, in which case a default period (e.g., 100 years) is used.
@@ -223,7 +219,7 @@ def build_certificate(vendor_id:str, product_id:str, ca_cert_file: str, ca_privk
         public_key = private_key.public_key()
 
         # Build subject attributes
-        cert_subject = generate_cert_subject(vendor_id, product_id, cn, is_pai)
+        cert_subject = generate_cert_subject(vendor_id, product_id, common_name)
 
         # Define validity period
         nvb_time = datetime.utcnow()
