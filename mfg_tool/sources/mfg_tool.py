@@ -298,8 +298,7 @@ def overwrite_values_in_mcsv(args, index):
 
 def append_cn_dac_to_csv(common_name, cert_path):
     with open(OUT_FILE['cn_dac_csv'], 'a') as csv_file:
-        with open(cert_path, 'r') as device_cert_file:
-            device_cert_contents = device_cert_file.read()
+        device_cert_contents = load_cert_from_file(cert_path).public_bytes(serialization.Encoding.PEM).decode('utf-8')
         csv_file.write('{},"{}"\n'.format(common_name, device_cert_contents))
 
 # This function generates the DACs, picks the commissionable data from the already present csv file,
