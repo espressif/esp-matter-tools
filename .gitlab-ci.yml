@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2024-2025 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 
 stages:
@@ -41,34 +41,48 @@ test_mfg_tool:
     - export PATH=$PATH:$PWD/test_data
 
     - |
+      echo "Test 1 - factory partition with generated DAC"
       esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
-                          -cd test_data/Chip-Test-CD-FFF2-8001.der
+                          -cd test_data/Chip-Test-CD-FFF2-8001.der &> /tmp/output.txt
+      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
+                                  -i out/fff2_8001/staging/pai_cert.der \
+                                  -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+
+    # Test with different vendor ID and product ID with width less than 4 bytes
+    - |
+      echo "Test 2 - factory partition with generated PAI and DAC and VID/PID with width less than 4 bytes"
+      esp-matter-mfg-tool -v 0x4d2 -p 0xb --paa                     \
+                          -c test_data/Chip-Test-PAA-NoVID-Cert.pem \
+                          -k test_data/Chip-Test-PAA-NoVID-Key.pem &> /tmp/output.txt
+      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
+                                  -i out/4d2_b/staging/pai_cert.der \
+                                  -a test_data/Chip-Test-PAA-NoVID-Cert.pem
 
     - |
+      echo "Test 3 - factory partition with generated DAC and dac-in-secure-cert"
       esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
-                          --dac-in-secure-cert --target esp32
-
-    # For esp32h2, there is a system limitation to test the efuse. Hence
-    # the below test only tests for creating a esp_secure_cert_partition.
-    - |
-      esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
-                          -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
-                          -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
-                          -cd test_data/Chip-Test-CD-FFF2-8001.der      \
-                          --dac-in-secure-cert --target esp32h2
+                          --dac-in-secure-cert --target esp32  &> /tmp/output.txt
+      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
+                                  -i out/fff2_8001/staging/pai_cert.der \
+                                  -a test_data/Chip-Test-PAA-NoVID-Cert.pem
 
     - |
+      echo "Test 4 - factory partition with with generated DAC for 5 devices"
       esp-matter-mfg-tool -n 5 -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai  \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der
 
     - |
+      echo "Test 5 - factory partition with external DAC"
       esp-matter-mfg-tool -cn "My Bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
@@ -76,20 +90,28 @@ test_mfg_tool:
                           --dac-cert test_data/DAC_cert.pem
 
     - |
+      echo "Test 6 - factory partition with rotating device id"
       esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --passcode 20202021 --discriminator 3840      \
                           --enable-rotating-device-id                   \
-                          --rd-id-uid d2f351f57bb9387445a5f92a601d1c14
+                          --rd-id-uid d2f351f57bb9387445a5f92a601d1c14 &> /tmp/output.txt
+      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
+                                  -i out/fff2_8001/staging/pai_cert.der \
+                                  -a test_data/Chip-Test-PAA-NoVID-Cert.pem
 
     - |
+      echo "Test 7 - factory partition with extra nvs key config and value"
       esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --csv test_data/extra_nvs_key_config.csv      \
-                          --mcsv test_data/extra_nvs_key_value.csv
+                          --mcsv test_data/extra_nvs_key_value.csv &> /tmp/output.txt
 
-    - esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cd test_data/Chip-Test-CD-FFF2-8001.der
+    - |
+      echo "Test 8 - factory partition without DAC"
+      esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cd test_data/Chip-Test-CD-FFF2-8001.der
