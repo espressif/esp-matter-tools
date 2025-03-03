@@ -182,8 +182,8 @@ def extract_vid(cert):
 def generate_cert_subject(vendor_id, product_id, common_name):
     x509_attrs = []
     x509_attrs.append(x509.NameAttribute(NameOID.COMMON_NAME, common_name))
-    x509_attrs.append(x509.NameAttribute(VENDOR_ID_OID, vendor_id))
-    x509_attrs.append(x509.NameAttribute(PRODUCT_ID_OID, product_id))
+    x509_attrs.append(x509.NameAttribute(VENDOR_ID_OID, vendor_id.zfill(4)))
+    x509_attrs.append(x509.NameAttribute(PRODUCT_ID_OID, product_id.zfill(4)))
     return x509.Name(x509_attrs)
 
 def build_certificate(vendor_id:str, product_id:str, ca_cert_file: str, ca_privkey_file: str, out_cert_file: str, out_key_file: str, is_pai: bool, common_name: str, valid_from=None, lifetime=None):
