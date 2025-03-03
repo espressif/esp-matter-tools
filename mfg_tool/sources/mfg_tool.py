@@ -435,7 +435,7 @@ def generate_summary(args):
                 if not args.enable_dynamic_passcode:
                     pincode = row['PIN Code']
                     discriminator = row['Discriminator']
-                    payloads = SetupPayload(int(discriminator), int(pincode), 1 << args.discovery_mode, CommissioningFlow(args.commissioning_flow),
+                    payloads = SetupPayload(int(discriminator), int(pincode), args.discovery_mode, CommissioningFlow(args.commissioning_flow),
                                             args.vendor_id, args.product_id)
                     qrcode = payloads.generate_qrcode()
                     manualcode = payloads.generate_manualcode()
@@ -469,7 +469,7 @@ def generate_partitions(suffix, size, encrypt):
 
 
 def generate_onboarding_data(args, index, discriminator, passcode):
-    payloads = SetupPayload(discriminator, passcode, 1 << args.discovery_mode, CommissioningFlow(args.commissioning_flow),
+    payloads = SetupPayload(discriminator, passcode, args.discovery_mode, CommissioningFlow(args.commissioning_flow),
                             args.vendor_id, args.product_id)
     chip_qrcode = payloads.generate_qrcode()
     chip_manualcode = payloads.generate_manualcode()
@@ -524,8 +524,8 @@ def get_args():
                                  help='Device commissioning flow, 0:Standard, 1:User-Intent, 2:Custom. \
                                           Default is 0.', choices=[0, 1, 2])
     g_commissioning.add_argument('-dm', '--discovery-mode', type=any_base_int, default=2,
-                                 help='3-bit bitmap representing discovery modes for commissionable device discovery \
-                                          Bit 0:WiFi-SoftAP, Bit 1:BLE, Bit 2:On-network. Default is BLE. Specify values between 0-7')
+                                 help='The discovery mode for commissionable device discovery. \
+                                        2: BLE, 4: On-network, 6: BLE + On-network. Default is BLE.')
     g_commissioning.add_argument('--enable-dynamic-passcode', action="store_true", required=False,
                                  help='Enable dynamic passcode. If enabling this option, the generated binaries will \
                                          not include the spake2p verifier. so this option should work with a custom \
