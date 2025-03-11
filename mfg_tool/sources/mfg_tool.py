@@ -399,14 +399,15 @@ def organize_output_files(suffix, args):
         dest_path = os.sep.join([OUT_DIR['top'], UUIDs[i]])
         internal_path = os.sep.join([dest_path, 'internal'])
 
-        replace = os.sep.join([OUT_DIR['top'], 'bin', '{}-{}.bin'.format(suffix, str(i + 1))])
-        replace_with = os.sep.join([dest_path, '{}-partition.bin'.format(UUIDs[i])])
-        os.rename(replace, replace_with)
-
-        if args.encrypt:
-            replace = os.sep.join([OUT_DIR['top'], 'keys', 'keys-{}-{}.bin'.format(suffix, str(i + 1))])
-            replace_with = os.sep.join([dest_path, '{}-keys-partition.bin'.format(UUIDs[i])])
+        if args.generate_bin:
+            replace = os.sep.join([OUT_DIR['top'], 'bin', '{}-{}.bin'.format(suffix, str(i + 1))])
+            replace_with = os.sep.join([dest_path, '{}-partition.bin'.format(UUIDs[i])])
             os.rename(replace, replace_with)
+
+            if args.encrypt:
+                 replace = os.sep.join([OUT_DIR['top'], 'keys', 'keys-{}-{}.bin'.format(suffix, str(i + 1))])
+                 replace_with = os.sep.join([dest_path, '{}-keys-partition.bin'.format(UUIDs[i])])
+                 os.rename(replace, replace_with)
 
         replace = os.sep.join([OUT_DIR['top'], 'csv', '{}-{}.csv'.format(suffix, str(i + 1))])
         replace_with = os.sep.join([internal_path, 'partition.csv'])
@@ -458,7 +459,7 @@ def generate_summary(args):
     with open(summary_csv, 'w') as scsvf:
         scsvf.write(summary_csv_data)
 
-def generate_partitions(suffix, size, encrypt):
+def generate_partitions(suffix, size, encrypt, generate_partition_bin):
     partition_args = SimpleNamespace(fileid = None,
                                      version = 2,
                                      inputkey = None,
@@ -466,7 +467,8 @@ def generate_partitions(suffix, size, encrypt):
                                      conf = OUT_FILE['config_csv'],
                                      values = OUT_FILE['mcsv'],
                                      size = hex(size),
-                                     prefix = suffix)
+                                     prefix = suffix,
+                                     generate_bin = generate_partition_bin)
     if encrypt:
         partition_args.keygen = True
     else:
@@ -525,6 +527,8 @@ def get_args():
                       help='Set the log level (default: %(default)s)')
     g_gen.add_argument('--outdir', default=os.path.join(os.getcwd(), 'out'),
                       help='The output directory for the generated files (default: %(default)s)')
+    g_gen.add_argument('--no-bin', action='store_false', dest='generate_bin',
+                        help='Do not generate the factory partition binary')
 
     g_commissioning = parser.add_argument_group('Commisioning options')
     g_commissioning.add_argument('--passcode', type=any_base_int,
@@ -746,7 +750,7 @@ def main_internal(args):
     if args.paa or args.pai:
         setup_root_certs(args)
     write_per_device_unique_data(args)
-    generate_partitions('matter_partition', args.size, args.encrypt)
+    generate_partitions('matter_partition', args.size, args.encrypt, args.generate_bin)
     organize_output_files('matter_partition', args)
     generate_summary(args)
 
