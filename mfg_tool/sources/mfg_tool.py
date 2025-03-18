@@ -232,7 +232,7 @@ def setup_out_dirs(vid, pid, count):
     OUT_FILE['mcsv'] = os.sep.join([OUT_DIR['stage'], 'master.csv'])
     OUT_FILE['pin_csv'] = os.sep.join([OUT_DIR['stage'], 'pin.csv'])
     OUT_FILE['pin_disc_csv'] = os.sep.join([OUT_DIR['stage'], 'pin_disc.csv'])
-    OUT_FILE['cn_dac_csv'] = os.sep.join([OUT_DIR['top'], 'cn_dacs-{}.csv'.format(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))])
+    OUT_FILE['cn_dac_csv'] = os.sep.join([OUT_DIR['top'], 'cn_dacs-{}.csv'.format(datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f"))])
 
     # Create directories to store the generated files
     for i in range(count):
