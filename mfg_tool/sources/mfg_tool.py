@@ -66,6 +66,13 @@ OUT_FILE = {
     'cn_dac_csv': None
 }
 
+# Supported log levels, mapping string values required for argument
+# parsing into logging constants
+__LOG_LEVELS__ = {
+    'info': logging.INFO,
+    'error': logging.ERROR,
+}
+
 UUIDs = list()
 
 def generate_passcodes(args):
@@ -221,9 +228,9 @@ def use_dac_from_args(args):
     return out_cert_der, out_private_key_bin, out_public_key_bin, out_private_key_der
 
 
-def setup_out_dirs(vid, pid, count):
-    OUT_DIR['top'] = os.sep.join(['out', vid_pid_str(vid, pid)])
-    OUT_DIR['stage'] = os.sep.join(['out', vid_pid_str(vid, pid), 'staging'])
+def setup_out_dirs(vid, pid, count, outdir):
+    OUT_DIR['top'] = os.sep.join([outdir, vid_pid_str(vid, pid)])
+    OUT_DIR['stage'] = os.sep.join([outdir, vid_pid_str(vid, pid), 'staging'])
 
     os.makedirs(OUT_DIR['top'], exist_ok=True)
     os.makedirs(OUT_DIR['stage'], exist_ok=True)
@@ -514,6 +521,10 @@ def get_args():
                        help='The size of manufacturing partition binaries to generate. Default is 0x6000.')
     g_gen.add_argument('-e', '--encrypt', action='store_true', required=False,
                       help='Encrypt the factory parititon NVS binary')
+    g_gen.add_argument('--log-level', default='info', choices=__LOG_LEVELS__.keys(),
+                      help='Set the log level (default: %(default)s)')
+    g_gen.add_argument('--outdir', default=os.path.join(os.getcwd(), 'out'),
+                      help='The output directory for the generated files (default: %(default)s)')
 
     g_commissioning = parser.add_argument_group('Commisioning options')
     g_commissioning.add_argument('--passcode', type=any_base_int,
@@ -725,13 +736,10 @@ def add_optional_KVs(args):
     if args.product_url is not None:
         chip_factory_append('product-url', 'data', 'string', args.product_url)
 
-
-def main():
-    logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=logging.INFO)
-
-    args = get_args()
+def main_internal(args):
+    logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])
     validate_args(args)
-    setup_out_dirs(args.vendor_id, args.product_id, args.count)
+    setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)
     write_csv_files(args)
@@ -742,6 +750,9 @@ def main():
     organize_output_files('matter_partition', args)
     generate_summary(args)
 
+def main():
+    args = get_args()
+    main_internal(args)
 
 if __name__ == "__main__":
     main()

@@ -115,3 +115,15 @@ test_mfg_tool:
     - |
       echo "Test 8 - factory partition without DAC"
       esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cd test_data/Chip-Test-CD-FFF2-8001.der
+
+    - |
+      echo "Test 9 - store artefacts in /tmp/out directory"
+      esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
+                          -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
+                          -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
+                          -cd test_data/Chip-Test-CD-FFF2-8001.der       \
+                          --outdir /tmp &> /tmp/output.txt
+      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
+                                  -i out/fff2_8001/staging/pai_cert.der \
+                                  -a test_data/Chip-Test-PAA-NoVID-Cert.pem
