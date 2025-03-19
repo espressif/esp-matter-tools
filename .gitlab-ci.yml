@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 stages:
-    - build
-    - test
+  - build
+  - test
 
 build_mfg_tool:
   stage: build
@@ -46,7 +46,7 @@ test_mfg_tool:
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der &> /tmp/output.txt
-      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
@@ -57,7 +57,7 @@ test_mfg_tool:
       esp-matter-mfg-tool -v 0x4d2 -p 0xb --paa                     \
                           -c test_data/Chip-Test-PAA-NoVID-Cert.pem \
                           -k test_data/Chip-Test-PAA-NoVID-Key.pem &> /tmp/output.txt
-      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/4d2_b/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
@@ -69,13 +69,13 @@ test_mfg_tool:
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --dac-in-secure-cert --target esp32  &> /tmp/output.txt
-      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
 
     - |
-      echo "Test 4 - factory partition with with generated DAC for 5 devices"
+      echo "Test 4 - factory partition with generated DAC for 5 devices"
       esp-matter-mfg-tool -n 5 -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai  \
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
@@ -98,7 +98,7 @@ test_mfg_tool:
                           --passcode 20202021 --discriminator 3840      \
                           --enable-rotating-device-id                   \
                           --rd-id-uid d2f351f57bb9387445a5f92a601d1c14 &> /tmp/output.txt
-      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
@@ -123,7 +123,21 @@ test_mfg_tool:
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der       \
                           --outdir /tmp &> /tmp/output.txt
-      out_path=$(cat /tmp/output.txt | grep 'Generated output files at:' | awk -F'Generated output files at: ' '{print $2}')
+      out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+    - |
+      echo "Test 10 - Test the no-bin option"
+      rm -rf out
+      esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai       \
+                          -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
+                          -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
+                          -cd test_data/Chip-Test-CD-FFF2-8001.der --no-bin
+      if ! find out/fff2_8001 -name '*-partition.bin' | grep -q .; then
+          echo "File checks passed successfully."
+      else
+          echo "Error: File checks failed. partition-bin file is present"
+          exit 1
+      fi
+

@@ -1,3 +1,9 @@
+# [1.0.8] - (17-March-2025)
+
+* Added `--no-bin` option to skip generating factory partition binary.
+* Added `--log-level` option to limit the verbosity of logging.
+* Added `--outdir` option to store the artefacts at different location.
+
 # [1.0.7] - (28-February-2025)
 ### Breaking Changes
 
