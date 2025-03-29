@@ -228,7 +228,7 @@ def use_dac_from_args(args):
     return out_cert_der, out_private_key_bin, out_public_key_bin, out_private_key_der
 
 
-def setup_out_dirs(vid, pid, count, outdir):
+def setup_out_dirs(vid, pid, count, outdir, UUID):
     OUT_DIR['top'] = os.sep.join([outdir, vid_pid_str(vid, pid)])
     OUT_DIR['stage'] = os.sep.join([outdir, vid_pid_str(vid, pid), 'staging'])
 
@@ -243,7 +243,10 @@ def setup_out_dirs(vid, pid, count, outdir):
 
     # Create directories to store the generated files
     for i in range(count):
-        uuid_str = str(uuid.uuid4())
+        if UUID is None:
+            uuid_str = str(uuid.uuid4())
+        else:
+            uuid_str = UUID
         UUIDs.append(uuid_str)
         os.makedirs(os.sep.join([OUT_DIR['top'], uuid_str, 'internal']), exist_ok=True)
 
@@ -529,6 +532,7 @@ def get_args():
                       help='The output directory for the generated files (default: %(default)s)')
     g_gen.add_argument('--no-bin', action='store_false', dest='generate_bin',
                         help='Do not generate the factory partition binary')
+    g_gen.add_argument('--UUID', default=None, help='Use a custom UUID instead of generating one')
 
     g_commissioning = parser.add_argument_group('Commisioning options')
     g_commissioning.add_argument('--passcode', type=any_base_int,
@@ -743,7 +747,7 @@ def add_optional_KVs(args):
 def main_internal(args):
     logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])
     validate_args(args)
-    setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir)
+    setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir, args.UUID)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)
     write_csv_files(args)
