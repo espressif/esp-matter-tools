@@ -209,6 +209,9 @@ def validate_args(args):
 
             # Subtract 1 for the header line
             args.count = lines - 1
+    if args.UUID is not None and args.count > 1:
+        logging.error("Count can only be one if a custom UUID is used")
+        sys.exit(1)
 
     validate_commissionable_data(args)
     validate_device_instance_info(args)
