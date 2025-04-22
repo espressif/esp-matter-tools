@@ -138,15 +138,19 @@ def generate_config_csv(args):
 
 def write_chip_mcsv_header(args):
     logging.info('Writing chip manifest CSV header...')
-    mcsv_header = chip_get_keys_as_csv() + '\n'
-    with open(OUT_FILE['mcsv'], 'w') as f:
-        f.write(mcsv_header)
+    mcsv_header = chip_get_keys_as_csv()
+    with open(OUT_FILE['mcsv'], 'w', newline='') as f:
+        header_values = mcsv_header.split(',')
+        writer = csv.writer(f)
+        writer.writerow(header_values)
 
 
 def append_chip_mcsv_row(row_data):
     logging.info('Appending chip master CSV row...')
-    with open(OUT_FILE['mcsv'], 'a') as f:
-        f.write(row_data + '\n')
+    with open(OUT_FILE['mcsv'], 'a', newline='') as f:
+        row_values = row_data.split(',')
+        writer = csv.writer(f)
+        writer.writerow(row_values)
 
 def generate_pai(args, ca_key, ca_cert, out_key, out_cert):
     vendor_id = hex(args.vendor_id)[2:].upper()
@@ -275,8 +279,9 @@ def generate_passcodes_and_discriminators(args):
 
 
 def write_cn_dac_csv_header():
-    with open(OUT_FILE['cn_dac_csv'], 'a') as csv_file:
-        csv_file.write("CN,certs\n")
+    with open(OUT_FILE['cn_dac_csv'], 'a', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["CN", "certs"])
     return
 
 def write_csv_files(args):
@@ -321,9 +326,10 @@ def overwrite_values_in_mcsv(args, index):
 
 
 def append_cn_dac_to_csv(common_name, cert_path):
-    with open(OUT_FILE['cn_dac_csv'], 'a') as csv_file:
+    with open(OUT_FILE['cn_dac_csv'], 'a', newline='') as csv_file:
         device_cert_contents = load_cert_from_file(cert_path).public_bytes(serialization.Encoding.PEM).decode('utf-8')
-        csv_file.write('{},"{}"\n'.format(common_name, device_cert_contents))
+        writer = csv.writer(csv_file)
+        writer.writerow([common_name, device_cert_contents])
 
 # This function generates the DACs, picks the commissionable data from the already present csv file,
 # and generates the onboarding payloads, and writes everything to the master csv
@@ -449,39 +455,52 @@ def organize_output_files(suffix, args):
     if args.encrypt:
         shutil.rmtree(os.sep.join([OUT_DIR['top'], 'keys']), ignore_errors=True)
 
+def format_manual_code(manual_code, flow):
+    if flow == CommissioningFlow.Standard:
+        return f'{manual_code[:4]}-{manual_code[4:7]}-{manual_code[7:]}'
+    else:
+        return f'{manual_code[:4]}-{manual_code[4:7]}-{manual_code[7:11]}\n{manual_code[11:15]}-{manual_code[15:18]}-{manual_code[18:20]}-{manual_code[20:21]}'
+
 def generate_summary(args):
     master_csv = os.sep.join([OUT_DIR['stage'], 'master.csv'])
     summary_csv = os.sep.join([OUT_DIR['top'], 'summary-{}.csv'.format(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))])
 
-    summary_csv_data = ''
-    with open(master_csv, 'r') as mcsvf:
-        summary_lines = mcsvf.read().splitlines()
-        summary_csv_data += summary_lines[0]
-        if not args.enable_dynamic_passcode:
-            summary_csv_data += ',pincode,qrcode,manualcode\n'
-        else:
-            summary_csv_data += '\n'
-        with open(OUT_FILE['pin_disc_csv'], 'r') as pdcsvf:
-            pin_disc_dict = csv.DictReader(pdcsvf)
-            for row in pin_disc_dict:
-                if not args.enable_dynamic_passcode:
-                    pincode = row['PIN Code']
-                    discriminator = row['Discriminator']
-                    payloads = SetupPayload(int(discriminator), int(pincode), args.discovery_mode, CommissioningFlow(args.commissioning_flow),
-                                            args.vendor_id, args.product_id)
-                    qrcode = payloads.generate_qrcode()
-                    manualcode = payloads.generate_manualcode()
-                    # ToDo: remove this if qrcode tool can handle the standard manual code format
-                    if args.commissioning_flow == CommissioningFlow.Standard:
-                        manualcode = manualcode[:4] + '-' + manualcode[4:7] + '-' + manualcode[7:]
-                    else:
-                        manualcode = '"' + manualcode[:4] + '-' + manualcode[4:7] + '-' + manualcode[7:11] + '\n' + manualcode[11:15] + '-' + manualcode[15:18] + '-' + manualcode[18:20] + '-' + manualcode[20:21] + '"'
-                    summary_csv_data += summary_lines[1 + int(row['Index'])] + ',' + pincode + ',' + qrcode + ',' + manualcode + '\n'
-                else:
-                    summary_csv_data += summary_lines[1 + int(row['Index'])] + '\n'
+    with open(master_csv, 'r', newline='') as mcsvf:
+        master_csv_reader = csv.reader(mcsvf)
+        master_headers = next(master_csv_reader)
+        master_rows = list(master_csv_reader)
 
-    with open(summary_csv, 'w') as scsvf:
-        scsvf.write(summary_csv_data)
+        with open(OUT_FILE['pin_disc_csv'], 'r', newline='') as pdcsvf:
+            pin_disc_dict = list(csv.DictReader(pdcsvf))
+
+            with open(summary_csv, 'w', newline='') as scsvf:
+                summary_writer = csv.writer(scsvf)
+
+                # Prepare the header row
+                header_row = master_headers[:]
+                if not args.enable_dynamic_passcode:
+                    header_row.extend(['pincode', 'qrcode', 'manualcode'])
+
+                summary_writer.writerow(header_row)
+
+                # Write each row
+                for i, row in enumerate(pin_disc_dict):
+                    if i < len(master_rows):
+                        master_row = master_rows[i]
+                        output_row = master_row[:]
+
+                        if not args.enable_dynamic_passcode:
+                            pincode = row['PIN Code']
+                            discriminator = row['Discriminator']
+                            payloads = SetupPayload(int(discriminator), int(pincode), args.discovery_mode,
+                                                   CommissioningFlow(args.commissioning_flow),
+                                                   args.vendor_id, args.product_id)
+                            qrcode = payloads.generate_qrcode()
+                            manualcode = format_manual_code(payloads.generate_manualcode(), args.commissioning_flow)
+
+                            output_row.extend([pincode, qrcode, manualcode])
+
+                        summary_writer.writerow(output_row)
 
 def generate_partitions(suffix, size, encrypt, generate_partition_bin):
     partition_args = SimpleNamespace(fileid = None,
