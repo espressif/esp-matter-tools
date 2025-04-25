@@ -228,7 +228,15 @@ def use_dac_from_args(args):
     return out_cert_der, out_private_key_bin, out_public_key_bin, out_private_key_der
 
 
-def setup_out_dirs(vid, pid, count, outdir):
+def is_valid_uuid(uuid_str: str) -> bool:
+    try:
+        uuid.UUID(uuid_str)
+        return True
+    except ValueError:
+        return False
+
+
+def setup_out_dirs(vid, pid, count, outdir, arg_dac_cert):
     OUT_DIR['top'] = os.sep.join([outdir, vid_pid_str(vid, pid)])
     OUT_DIR['stage'] = os.sep.join([outdir, vid_pid_str(vid, pid), 'staging'])
 
@@ -240,6 +248,15 @@ def setup_out_dirs(vid, pid, count, outdir):
     OUT_FILE['pin_csv'] = os.sep.join([OUT_DIR['stage'], 'pin.csv'])
     OUT_FILE['pin_disc_csv'] = os.sep.join([OUT_DIR['stage'], 'pin_disc.csv'])
     OUT_FILE['cn_dac_csv'] = os.sep.join([OUT_DIR['top'], 'cn_dacs-{}.csv'.format(datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f"))])
+
+    # If user provided the DAC, then count is 1 and this gets called only after
+    # arguments have been validated. So we can safely assume that count is 1, and return
+    if arg_dac_cert:
+        subject_cn = extract_common_name(load_cert_from_file(arg_dac_cert))
+        if subject_cn and is_valid_uuid(subject_cn):
+            UUIDs.append(subject_cn)
+            os.makedirs(os.sep.join([OUT_DIR['top'], subject_cn, 'internal']), exist_ok=True)
+        return
 
     # Create directories to store the generated files
     for i in range(count):
@@ -369,10 +386,17 @@ def write_per_device_unique_data(args):
                                                  ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target,
                                                  op_file = secure_cert_partition_file_path)
 
+                # appends the subject's common name and DAC certificate encoded as PEM to the csv file
+                file_name = os.sep.join([OUT_DIR['top'], UUIDs[int(row['Index'])], "internal", "DAC_cert.pem"])
                 if args.dac_key is not None and args.dac_cert is not None:
-                    append_cn_dac_to_csv(UUIDs[int(row['Index'])], args.dac_cert)
+                    file_name = args.dac_cert
+
+                subject_cn = extract_common_name(load_cert_from_file(file_name))
+                # If common name is not present, lets skip adding that entry to the csv file
+                if subject_cn:
+                    append_cn_dac_to_csv(subject_cn, file_name)
                 else:
-                    append_cn_dac_to_csv(UUIDs[int(row['Index'])], os.sep.join([OUT_DIR['top'], UUIDs[int(row['Index'])], "internal", "DAC_cert.pem"]))
+                    logging.warning("Skipping entry for device with index {} as common name is not present in the DAC certificate".format(row['Index']))
 
             # If serial number is not passed, then generate one
             if (args.serial_num is None):
@@ -743,7 +767,7 @@ def add_optional_KVs(args):
 def main_internal(args):
     logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])
     validate_args(args)
-    setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir)
+    setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir, args.dac_cert)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)
     write_csv_files(args)

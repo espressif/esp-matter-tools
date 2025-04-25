@@ -17,7 +17,6 @@
 """
 contains utility functions for generating csr, build certificates, certs/keys conversion etc.
 """
-import random
 import datetime
 from typing import Optional
 from cryptography import x509
@@ -161,7 +160,7 @@ def extract_matter_rdn(cert, oid):
 
 def extract_pid(cert):
     """
-    Extract the Product ID (PID) from a certificate.
+    Extract the Product ID (PID) from a certificate's subject.
     Args:
         cert (x509.Certificate): Certificate from which to extract the PID.
     Returns:
@@ -171,13 +170,23 @@ def extract_pid(cert):
 
 def extract_vid(cert):
     """
-    Extract the Vendor ID (VID) from a certificate.
+    Extract the Vendor ID (VID) from a certificate's subject.
     Args:
         cert (x509.Certificate): Certificate from which to extract the VID.
     Returns:
         str: Extracted VID or None if not found.
     """
     return extract_matter_rdn(cert, VENDOR_ID_OID)
+
+def extract_common_name(cert: x509.Certificate) -> Optional[str]:
+    """
+    Extract the Common Name (CN) from a certificate's subject.
+    Args:
+        cert (x509.Certificate): Certificate from which to extract the CN.
+    Returns:
+        str: Extracted CN or None if not found.
+    """
+    return extract_matter_rdn(cert, x509.NameOID.COMMON_NAME)
 
 def generate_cert_subject(vendor_id, product_id, common_name):
     x509_attrs = []
