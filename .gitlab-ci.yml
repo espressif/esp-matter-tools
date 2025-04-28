@@ -161,3 +161,13 @@ test_mfg_tool:
           exit 1
       fi
       rm -rf out/
+
+    - |
+      echo "Test 11 - factory partition with extra nvs key config and multiline values"
+      esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai                \
+                          -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem           \
+                          -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem          \
+                          -cd test_data/Chip-Test-CD-FFF2-8001.der               \
+                          --csv test_data/extra_nvs_keys_for_multiline_items.csv \
+                          --mcsv test_data/extra_nvs_values_for_multiline_items.csv &> /tmp/output.txt
+      rm -rf out/

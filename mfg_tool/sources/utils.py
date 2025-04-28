@@ -22,6 +22,7 @@ import sys
 import enum
 import logging
 import subprocess
+import csv
 from bitarray import bitarray
 from bitarray.util import ba2int
 
@@ -204,11 +205,13 @@ def validate_args(args):
     else:
         # Read the number of lines in mcsv file
         if args.mcsv is not None:
-            with open(args.mcsv, 'r') as f:
-                lines = sum(1 for line in f)
+            with open(args.mcsv, 'r', newline='') as f:
+                csv_reader = csv.reader(f)
+                # Count rows properly even when fields contain newlines
+                row_count = sum(1 for row in csv_reader)
 
-            # Subtract 1 for the header line
-            args.count = lines - 1
+            # Subtract 1 for the header row
+            args.count = row_count - 1
 
     validate_commissionable_data(args)
     validate_device_instance_info(args)
