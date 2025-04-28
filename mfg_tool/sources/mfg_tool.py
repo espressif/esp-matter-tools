@@ -260,7 +260,7 @@ def setup_out_dirs(vid, pid, count, outdir, arg_dac_cert):
         if subject_cn and is_valid_uuid(subject_cn):
             UUIDs.append(subject_cn)
             os.makedirs(os.sep.join([OUT_DIR['top'], subject_cn, 'internal']), exist_ok=True)
-        return
+            return
 
     # Create directories to store the generated files
     for i in range(count):
