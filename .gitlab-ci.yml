@@ -171,3 +171,12 @@ test_mfg_tool:
                           --csv test_data/extra_nvs_keys_for_multiline_items.csv \
                           --mcsv test_data/extra_nvs_values_for_multiline_items.csv &> /tmp/output.txt
       rm -rf out/
+
+    - |
+      echo "Test 12 - factory partition with external DAC with no UUID in common name"
+      esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai       \
+                          -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
+                          -cd test_data/Chip-Test-CD-FFF2-8001.der      \
+                          --dac-key test_data/DAC_key_No_UUID.der           \
+                          --dac-cert test_data/DAC_cert_No_UUID.der
+      rm -rf out/
