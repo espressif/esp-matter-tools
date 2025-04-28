@@ -50,6 +50,7 @@ test_mfg_tool:
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+      rm -rf out/
 
     # Test with different vendor ID and product ID with width less than 4 bytes
     - |
@@ -61,6 +62,7 @@ test_mfg_tool:
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/4d2_b/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+      rm -rf out/
 
     - |
       echo "Test 3 - factory partition with generated DAC and dac-in-secure-cert"
@@ -73,6 +75,7 @@ test_mfg_tool:
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+      rm -rf out/
 
     - |
       echo "Test 4 - factory partition with generated DAC for 5 devices"
@@ -80,14 +83,26 @@ test_mfg_tool:
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der
+      rm -rf out/
 
     - |
       echo "Test 5 - factory partition with external DAC"
-      esp-matter-mfg-tool -cn "My Bulb" -v 0xFFF2 -p 0x8001 --pai       \
+      esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai       \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --dac-key test_data/DAC_key.pem               \
                           --dac-cert test_data/DAC_cert.pem
+      # verify the directory with the same name as DAC Subject's common name is created
+      if [ ! -d "out/fff2_8001/8e7d7030-8814-4104-a9df-99a4c56922e0" ]; then
+        echo "Error: Directory with the same name as DAC Subject's common name is not created"
+        exit 1
+      fi
+      if ! grep -q 8e7d7030-8814-4104-a9df-99a4c56922e0 out/fff2_8001/cn_dacs-*.csv; then
+        echo "Error: CN not found in cn_dacs*.csv"
+        exit 1
+      fi
+
+      rm -rf out/
 
     - |
       echo "Test 6 - factory partition with rotating device id"
@@ -102,6 +117,7 @@ test_mfg_tool:
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
                                   -i out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+      rm -rf out/
 
     - |
       echo "Test 7 - factory partition with extra nvs key config and value"
@@ -111,10 +127,12 @@ test_mfg_tool:
                           -cd test_data/Chip-Test-CD-FFF2-8001.der      \
                           --csv test_data/extra_nvs_key_config.csv      \
                           --mcsv test_data/extra_nvs_key_value.csv &> /tmp/output.txt
+      rm -rf out/
 
     - |
       echo "Test 8 - factory partition without DAC"
       esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cd test_data/Chip-Test-CD-FFF2-8001.der
+      rm -rf out/
 
     - |
       echo "Test 9 - store artefacts in /tmp/out directory"
@@ -122,11 +140,13 @@ test_mfg_tool:
                           -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem  \
                           -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem \
                           -cd test_data/Chip-Test-CD-FFF2-8001.der       \
-                          --outdir /tmp &> /tmp/output.txt
+                          --outdir /tmp/out &> /tmp/output.txt
       out_path=$(grep 'Generated output files at:' /tmp/output.txt | awk -F'Generated output files at: ' '{print $2}')
       chip-cert validate-att-cert -d $out_path/internal/DAC_cert.pem \
-                                  -i out/fff2_8001/staging/pai_cert.der \
+                                  -i /tmp/out/fff2_8001/staging/pai_cert.der \
                                   -a test_data/Chip-Test-PAA-NoVID-Cert.pem
+      rm -rf /tmp/out
+
     - |
       echo "Test 10 - Test the no-bin option"
       rm -rf out
@@ -140,4 +160,4 @@ test_mfg_tool:
           echo "Error: File checks failed. partition-bin file is present"
           exit 1
       fi
-
+      rm -rf out/
