@@ -7,6 +7,6 @@ pycparser==2.21
 pypng==0.0.21
 PyQRCode==1.2.1
 python_stdnum==1.18
-esp-secure-cert-tool==2.1.3
+esp-secure-cert-tool==2.1.5
 ecdsa==0.18.0
-esp_idf_nvs_partition_gen==0.1.6
+esp_idf_nvs_partition_gen==0.1.9
