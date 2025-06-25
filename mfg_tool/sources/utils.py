@@ -18,10 +18,11 @@
 Contains utilitiy functions for validating argument.
 """
 
+import re
 import sys
 import enum
 import logging
-import subprocess
+from datetime import datetime
 import csv
 from bitarray import bitarray
 from bitarray.util import ba2int
@@ -86,6 +87,34 @@ class ProductColor(enum.Enum):
     silver = 19
     gold = 20
 
+def VERIFY_OR_EXIT(condition, message = None):
+    """
+    Verify a condition and exit if it fails.
+
+    Args:
+        condition: Boolean condition to verify
+        message: Error message to log and include in exit
+    """
+    if not condition:
+        if message:
+            logging.error(message)
+        sys.exit(1)
+
+def VERIFY_OR_RAISE(condition, message=None):
+    """
+    Verify a condition and raise an exception if it fails.
+
+    Args:
+        condition: Boolean condition to verify
+        message: Error message to log and include in exception
+
+    Raises:
+        AssertionError: If the condition is False
+    """
+    if not condition:
+        if message:
+            logging.error(message)
+        raise AssertionError(message)
 
 def vid_pid_str(vid, pid):
     return '_'.join([hex(vid)[2:], hex(pid)[2:]])
@@ -106,16 +135,17 @@ def ishex(s):
 
 # Validate the input string length against the min and max length
 def check_str_range(s, min_len, max_len, name):
-    if s and ((len(s) < min_len) or (len(s) > max_len)):
-        logging.error('%s must be between %d and %d characters', name, min_len, max_len)
-        sys.exit(1)
+    VERIFY_OR_EXIT(not(s and ((len(s) < min_len) or (len(s) > max_len))), f'{name} must be between {min_len} and {max_len} characters')
 
+
+# Validate the date format
+def check_date_format(date_str):
+    VERIFY_OR_EXIT(not(date_str and not re.match(r'^\d{8}?$', date_str[0:8])), "First 8 bytes should be in ISO 8601 format YYYYMMDD (e.g., 20250416), last 8 can be anything specific to the manufacturer")
 
 # Validate the input integer range
 def check_int_range(value, min_value, max_value, name):
-    if value and ((value < min_value) or (value > max_value)):
-        logging.error('%s is out of range, should be in range [%d, %d]', name, min_value, max_value)
-        sys.exit(1)
+    VERIFY_OR_EXIT(not(value and ((value < min_value) or (value > max_value))), f'{name} is out of range, should be in range [{min_value}, {max_value}]')
+
 
 
 # Validates discriminator and passcode
@@ -123,10 +153,7 @@ def validate_commissionable_data(args):
     check_int_range(args.discriminator, 0x0000, 0x0FFF, 'Discriminator')
     check_int_range(args.discovery_mode, 0, 7, 'Discovery mode')
     if args.passcode is not None:
-        if ((args.passcode < 0x0000001 and args.passcode > 0x5F5E0FE) or (args.passcode in INVALID_PASSCODES)):
-            logging.error('Invalid passcode' + str(args.passcode))
-            sys.exit(1)
-
+        VERIFY_OR_EXIT(not((args.passcode < 0x0000001 and args.passcode > 0x5F5E0FE) or (args.passcode in INVALID_PASSCODES)), f'Invalid passcode {args.passcode}')
 
 # Validate the device instance information
 def validate_device_instance_info(args):
@@ -139,6 +166,8 @@ def validate_device_instance_info(args):
     check_str_range(args.hw_ver_str, 1, 64, 'Hardware version string')
     check_str_range(args.mfg_date, 8, 16, 'Manufacturing date')
     check_str_range(args.rd_id_uid, 32, 32, 'Rotating device Unique id')
+    check_str_range(args.part_number, 1, 32, 'Part number')
+    check_date_format(args.mfg_date)
 
 
 # Validate the device information: calendar types and fixed labels
@@ -153,27 +182,16 @@ def validate_device_info(args):
 
     if args.fixed_labels is not None:
         for fl in args.fixed_labels:
-            _l = fl.split('/')
-            if len(_l) != 3:
-                logging.error('Invalid fixed label: %s', fl)
-                sys.exit(1)
-
-            if not (ishex(_l[0]) and (len(_l[1]) > 0 and len(_l[1]) < 16) and (len(_l[2]) > 0 and len(_l[2]) < 16)):
-                logging.error('Invalid fixed label: %s', fl)
-                sys.exit(1)
-
+            # Validate fixed label format: <endpoint_id>/<label_name>/<label_value>
+            # Examples of valid fixed labels:
+            # "0/orientation/up"
+            VERIFY_OR_EXIT(re.match(r'^([0-9a-fA-F]{1,4})/(.{1,16})/(.{1,16})$', fl), f'Invalid fixed label: {fl}')
 
 # Validates the attestation related arguments
 def validate_attestation_info(args):
     # DAC key and DAC cert both should be present or none
-    if (args.dac_key is not None) != (args.dac_cert is not None):
-        logging.error("dac_key and dac_cert should be both present or none")
-        sys.exit(1)
-    else:
-        # Make sure PAI certificate is present if DAC is present
-        if (args.dac_key is not None) and (args.pai is False):
-            logging.error('Please provide PAI certificate along with DAC certificate and DAC key')
-            sys.exit(1)
+    VERIFY_OR_EXIT((args.dac_key is not None) == (args.dac_cert is not None), "dac_key and dac_cert should be both present or none")
+    VERIFY_OR_EXIT(not(args.dac_key is not None and args.pai is False), "Please provide PAI certificate along with DAC certificate and DAC key")
 
     # Validate the input certificate type, if DAC is not present
     if args.dac_key is None and args.dac_cert is None:
@@ -185,38 +203,39 @@ def validate_attestation_info(args):
             logging.info('Do not include the device attestation certificates and keys in partition binaries')
 
         # Check if Key and certificate are present
-        if (args.paa or args.pai) and (args.key is None or args.cert is None):
-            logging.error('CA key and certificate are required to generate DAC key and certificate')
-            sys.exit(1)
+        VERIFY_OR_EXIT(not((args.paa or args.pai) and (args.key is None or args.cert is None)), 'CA key and certificate are required to generate DAC key and certificate')
 
+
+# Validates DS peripheral related arguments
+def validate_ds_peripheral_info(args):
+    VERIFY_OR_EXIT(not(args.ds_peripheral and args.target.lower() != "esp32h2"), "DS peripheral is only supported for esp32h2 target")
+    VERIFY_OR_EXIT(not(args.ds_peripheral and args.efuse_key_id == -1), "--efuse-key-id <value> is required when -ds or --ds-peripheral option is used")
+    VERIFY_OR_EXIT(args.ds_peripheral is None or (not args.port or args.count == 1),"Port not specified or number of partitions count is greater than 1")
 
 # Validates few basic cluster related arguments: product-label and product-url
 def validate_basic_cluster_info(args):
     check_str_range(args.product_label, 1, 64, 'Product Label')
     check_str_range(args.product_url, 1, 256, 'Product URL')
 
-
 # Validates the input arguments, this calls the above functions
 def validate_args(args):
     # csv and mcsv both should present or none
-    if (args.csv is not None) != (args.mcsv is not None):
-        logging.error("csv and mcsv should be both present or none")
-        sys.exit(1)
-    else:
+    VERIFY_OR_EXIT((args.csv is not None) == (args.mcsv is not None), "csv and mcsv should be both present or none")
+    if args.mcsv is not None:
         # Read the number of lines in mcsv file
-        if args.mcsv is not None:
-            with open(args.mcsv, 'r', newline='') as f:
-                csv_reader = csv.reader(f)
-                # Count rows properly even when fields contain newlines
-                row_count = sum(1 for row in csv_reader)
+        with open(args.mcsv, 'r', newline='') as f:
+            csv_reader = csv.reader(f)
+            # Count rows properly even when fields contain newlines
+            row_count = sum(1 for row in csv_reader)
 
-            # Subtract 1 for the header row
-            args.count = row_count - 1
+        # Subtract 1 for the header row
+        args.count = row_count - 1
 
     validate_commissionable_data(args)
     validate_device_instance_info(args)
     validate_device_info(args)
     validate_attestation_info(args)
+    validate_ds_peripheral_info(args)
     validate_basic_cluster_info(args)
 
     # If discriminator/passcode/DAC/serial_number/rotating_device_id is present
@@ -226,9 +245,7 @@ def validate_args(args):
             or args.dac_key is not None
             or args.serial_num is not None
             or args.rd_id_uid is not None):
-        if args.count > 1:
-            logging.error('Number of partitions should be 1 when discriminator or passcode or DAC or serial number or rotating device id is present')
-            sys.exit(1)
+        VERIFY_OR_EXIT(args.count == 1, 'Number of partitions should be 1 when discriminator or passcode or DAC or serial number or rotating device id is present')
 
     logging.info('Number of manufacturing NVS images to generate: {}'.format(args.count))
 
@@ -251,13 +268,10 @@ def get_fixed_label_dict(fixed_labels):
     for fl in fixed_labels:
         _l = fl.split('/')
 
-        if len(_l) != 3:
-            logging.error('Invalid fixed label: %s', fl)
-            sys.exit(1)
-
-        if not (ishex(_l[0]) and (len(_l[1]) > 0 and len(_l[1]) < 16) and (len(_l[2]) > 0 and len(_l[2]) < 16)):
-            logging.error('Invalid fixed label: %s', fl)
-            sys.exit(1)
+        VERIFY_OR_EXIT(len(_l) == 3, f'Invalid fixed label: {fl}')
+        VERIFY_OR_EXIT(ishex(_l[0]), f'Invalid fixed label: {fl}')
+        VERIFY_OR_EXIT((len(_l[1]) > 0 and len(_l[1]) < 16), f'Invalid fixed label: {fl}')
+        VERIFY_OR_EXIT((len(_l[2]) > 0 and len(_l[2]) < 16), f'Invalid fixed label: {fl}')
 
         if _l[0] not in fl_dict.keys():
             fl_dict[_l[0]] = list()

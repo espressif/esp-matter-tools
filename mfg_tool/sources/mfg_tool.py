@@ -256,7 +256,7 @@ def setup_out_dirs(vid, pid, count, outdir, arg_dac_cert):
     # If user provided the DAC, then count is 1 and this gets called only after
     # arguments have been validated. So we can safely assume that count is 1, and return
     if arg_dac_cert:
-        subject_cn = extract_common_name(load_cert_from_file(arg_dac_cert))
+        subject_cn = extract_common_name(load_cert_from_file(arg_dac_cert).subject)
         if subject_cn and is_valid_uuid(subject_cn):
             UUIDs.append(subject_cn)
             os.makedirs(os.sep.join([OUT_DIR['top'], subject_cn, 'internal']), exist_ok=True)
@@ -358,14 +358,6 @@ def write_per_device_unique_data(args):
                 # esp secure cert partition
                     secure_cert_partition_file_path = os.sep.join([OUT_DIR['top'], UUIDs[int(row['Index'])], UUIDs[int(row['Index'])] + '_esp_secure_cert.bin'])
                     if args.ds_peripheral:
-                        if args.target != "esp32h2":
-                            logging.error("DS peripheral is only supported for esp32h2 target")
-                            exit(1)
-
-                        if args.efuse_key_id == -1:
-                            logging.error("--efuse-key-id <value> is required when -ds or --ds-peripheral option is used")
-                            exit(1)
-
                         if args.port and args.count == 1:
                             esp_secure_cert_data_dir = 'esp_secure_cert_data'
                             if (os.path.exists(esp_secure_cert_data_dir) is False):
@@ -374,9 +366,6 @@ def write_per_device_unique_data(args):
 
                             ecdsa_key_size = '256'
                             configure_ds.configure_efuse_for_ecdsa(args.target, args.port, ecdsa_key_file, None, esp_secure_cert_data_dir, ecdsa_key_size, os.path.abspath(dacs[3]), args.priv_key_pass, args.efuse_key_id)
-                        else:
-                            logging.error('Port not specified or number of partitions count is greater than 1')
-                            exit(1)
 
                         priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_ECDSA_PERIPHERAL_KEY,
                                                   key_path = os.path.abspath(dacs[3]), key_pass = None)
@@ -397,7 +386,7 @@ def write_per_device_unique_data(args):
                 if args.dac_key is not None and args.dac_cert is not None:
                     file_name = args.dac_cert
 
-                subject_cn = extract_common_name(load_cert_from_file(file_name))
+                subject_cn = extract_common_name(load_cert_from_file(file_name).subject)
                 # If common name is not present, lets skip adding that entry to the csv file
                 if subject_cn:
                     append_cn_dac_to_csv(subject_cn, file_name)
@@ -786,6 +775,7 @@ def add_optional_KVs(args):
 def main_internal(args):
     logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])
     validate_args(args)
+    validate_certificates(args)
     setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir, args.dac_cert)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)
