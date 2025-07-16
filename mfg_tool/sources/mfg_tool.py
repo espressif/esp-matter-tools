@@ -29,15 +29,31 @@ import logging
 import binascii
 import argparse
 import pyqrcode
-
-from chip_nvs import *
-from utils import *
 from datetime import datetime
 from types import SimpleNamespace
-from cert_utils import *
+from cryptography.hazmat.primitives import serialization
 
+from chip_nvs import (
+    chip_nvs_get_config_csv, chip_get_keys_as_csv, chip_nvs_map_update,
+    chip_factory_update, chip_factory_append, chip_get_values_as_csv,
+    chip_factory_get_val, chip_nvs_map_append_config_csv
+)
+from utils import (
+    INVALID_PASSCODES, vid_pid_str, SERIAL_NUMBER_LEN,
+    ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS, ProductFinish, ProductColor,
+    validate_args, calendar_types_to_uint32, get_fixed_label_dict,
+    get_supported_modes_dict
+)
+from cert_utils import (
+    build_certificate, convert_x509_cert_from_pem_to_der, store_keypair_as_raw,
+    convert_private_key_from_pem_to_der, extract_common_name, load_cert_from_file,
+    validate_certificates
+)
 from esp_secure_cert import configure_ds
-from esp_secure_cert.tlv_format import *
+from esp_secure_cert.tlv_format import (
+    tlv_priv_key_t, tlv_priv_key_type_t, generate_partition_ds,
+    generate_partition_no_ds
+)
 
 # In order to made the esp-matter-mfg-tool standalone we copied few dependencies from esp-idf
 # and connectedhomeip to deps/ directory.

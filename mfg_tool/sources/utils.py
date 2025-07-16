@@ -22,7 +22,6 @@ import re
 import sys
 import enum
 import logging
-from datetime import datetime
 import csv
 from bitarray import bitarray
 from bitarray.util import ba2int
@@ -127,7 +126,7 @@ def disc_pin_str(discriminator, passcode):
 # Checks if the input string is a valid hex string
 def ishex(s):
     try:
-        n = int(s, 16)
+        int(s, 16)
         return True
     except ValueError:
         return False

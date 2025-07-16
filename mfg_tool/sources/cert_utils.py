@@ -17,9 +17,7 @@
 """
 contains utility functions for generating csr, build certificates, certs/keys conversion etc.
 """
-import sys
 import logging
-import datetime
 from typing import Optional
 from cryptography import x509
 from datetime import datetime, timedelta
@@ -29,7 +27,6 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
-from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 from utils import VERIFY_OR_EXIT, VERIFY_OR_RAISE
 
