@@ -2,14 +2,27 @@
 # SPDX-License-Identifier: Apache-2.0
 
 stages:
+  - lint
   - build
   - test
 
+ruff_check:
+  stage: lint
+  image: python:3.9-alpine
+
+  tags:
+    - build
+
+  script:
+    - python3 -m pip install --upgrade pip ruff
+    - cd mfg_tool
+    # TODO: perform format check later
+    # - ruff format --check sources/ || echo "Warning: Formatting issues found, can be fixed by running 'ruff format sources/'"
+    - ruff check sources tests
+
 build_mfg_tool:
   stage: build
-  image:
-    name: python:3.9-bullseye
-    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  image: python:3.9-alpine
 
   tags:
     - build
@@ -20,13 +33,14 @@ build_mfg_tool:
     expire_in: 1 week
 
   script:
+    - apk add --no-cache patch
     - cd mfg_tool
     - python3 -m pip install --upgrade pip build setuptools
     - python3 -m build
 
 test_mfg_tool:
   stage: test
-  image: python:3.9-bullseye
+  image: python:3.9-bullseye  # Reliable for evolving test dependencies
 
   tags:
     - build
@@ -37,7 +51,7 @@ test_mfg_tool:
   script:
     - cd mfg_tool
     - python3 -m pip install --upgrade pip build setuptools
+    - python3 -m build
     - python3 -m pip install dist/esp_matter_mfg_tool*.whl
     - python3 -m pip install -r requirements-test.txt
-    - export PATH=$PATH:$PWD/test_data
     - python -m pytest tests/ -v -s --log-cli-level=INFO
