@@ -80,6 +80,10 @@ def chip_factory_update(key, value):
     CHIP_NVS_MAP['chip-factory'][key]['value'] = value
 
 
+def chip_factory_delete(key):
+    CHIP_NVS_MAP['chip-factory'].pop(key, None)
+
+
 def chip_nvs_map_update(namespace, key, type, encoding, value):
     CHIP_NVS_MAP[namespace].update(get_dict(key, type, encoding, value))
 

@@ -179,6 +179,33 @@ esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 \
 
 * NOTE: These factory partitions are only for firmwares with other ways to get the certificates and sign message with the private key.
 
+#### Matter unique data in secure cert partition
+
+Below command will store attestation, commissionable data, and rotating device ID in secure cert partition,
+and other data in factory partition.
+
+```
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+    -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
+    -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
+    -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
+    --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert
+```
+
+#### Matter unique data in secure cert partition for ESP32-H2 chip using DS peripheral
+
+Below command will store attestation, commissionable data, and rotating device ID in secure cert partition,
+and other data in factory partition. It will also program the DS peripheral with the private key.
+
+```
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+    -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
+    -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
+    -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
+    --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert \
+    --ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0
+```
+
 ## Flashing the manufacturing binary
 Please note that `esp-matter-mfg-tool` only generates manufacturing binary images which need to be flashed onto device using `esptool.py`.
 

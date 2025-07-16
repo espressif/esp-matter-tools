@@ -87,6 +87,26 @@ class TestEspMatterMfgToolIntegration:
         assert "*-partition.bin" not in output, "partition.bin files generated but expected to be skipped"
         logger.info("No partition.bin files generated")
 
+    def _validate_secure_cert_partitions(self, parsed_output: List[ParsedOutput], should_exist: bool = True):
+        """
+        Validate that secure cert partition files are generated when expected
+
+        Args:
+            parsed_output: Parsed output of the esp-matter-mfg-tool command
+            should_exist: Whether secure cert partition files should exist
+
+        Returns:
+            None
+        """
+        for output in parsed_output:
+            secure_cert_exists = Path(output.secure_cert_bin).exists()
+            if should_exist:
+                assert secure_cert_exists, f"Secure cert partition file not found: {output.secure_cert_bin}"
+                logger.info(f"Secure cert partition file validated: {output.secure_cert_bin}")
+            else:
+                assert not secure_cert_exists, f"Secure cert partition file should not exist: {output.secure_cert_bin}"
+                logger.info("No secure cert partition files found as expected")
+
     def _validate_output_paths_with_dac_cert_common_name(self, parsed_output: List[ParsedOutput], present: bool = True):
         """
         Validate that output paths match DAC certificate common names
@@ -132,6 +152,10 @@ class TestEspMatterMfgToolIntegration:
             self._validate_certificates_with_chip_cert(parsed_output)
         if config.validate_cn_in_path or config.validate_cn_not_in_path:
             self._validate_output_paths_with_dac_cert_common_name(parsed_output, True if config.validate_cn_in_path else False)
+        if config.validate_secure_cert:
+            self._validate_secure_cert_partitions(parsed_output, should_exist=True)
+        if config.validate_no_secure_cert_bin:
+            self._validate_secure_cert_partitions(parsed_output, should_exist=False)
 
     def _load_test_data(self) -> List[Config]:
         """
@@ -225,7 +249,7 @@ class TestEspMatterMfgToolIntegration:
         master_csv = Path(out_dir) / "staging" / "master.csv"
         assert master_csv.exists(), "master.csv not found"
 
-        with open(master_csv, 'r', newline='') as f:
+        with open(master_csv, "r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                assert "Test Vendor,LLC" == row['vendor-name'], "Vendor name should be quoted"
+                assert "Test Vendor,LLC" == row["vendor-name"], "Vendor name should be quoted"
