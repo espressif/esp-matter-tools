@@ -23,7 +23,7 @@ import os
 import shutil
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 from cryptography.x509.oid import NameOID
 
 from sources.cert_utils import load_cert_from_file
