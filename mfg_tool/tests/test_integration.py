@@ -24,9 +24,8 @@ import shutil
 import logging
 from pathlib import Path
 from typing import List
-from cryptography.x509.oid import NameOID
 
-from sources.cert_utils import load_cert_from_file
+from sources.cert_utils import load_cert_from_file, extract_common_name
 from .utils import run_command, parse_mfg_tool_output, Config, ParsedOutput
 
 logging.basicConfig(level=logging.INFO)
@@ -100,7 +99,7 @@ class TestEspMatterMfgToolIntegration:
         """
         for output in parsed_output:
             dac_cert = load_cert_from_file(output.dac_cert)
-            cn = dac_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+            cn = extract_common_name(dac_cert.subject)
             if present:
                 assert cn in output.out_path, "DAC certificate common name not found in output path"
             else:
@@ -128,9 +127,7 @@ class TestEspMatterMfgToolIntegration:
         if config.validate_cert:
             self._validate_certificates_with_chip_cert(parsed_output)
         if config.validate_cn_in_path or config.validate_cn_not_in_path:
-            self._validate_output_paths_with_dac_cert_common_name(
-                parsed_output, True if config.validate_cn_in_path else False
-            )
+            self._validate_output_paths_with_dac_cert_common_name(parsed_output, True if config.validate_cn_in_path else False)
 
     def _load_test_data(self) -> List[Config]:
         """
