@@ -144,7 +144,7 @@ def append_discriminator(discriminator):
 
 
 # Generates the csv file containing chip specific keys and keys provided by user in csv file
-def generate_config_csv(args):
+def generate_config_csv():
     logging.info("Generating Config CSV...")
     csv_data = chip_nvs_get_config_csv()
 
@@ -152,7 +152,7 @@ def generate_config_csv(args):
         f.write(csv_data)
 
 
-def write_chip_mcsv_header(args):
+def write_chip_mcsv_header():
     logging.info('Writing chip manifest CSV header...')
     mcsv_header = chip_get_keys_as_csv()
     with open(OUT_FILE['mcsv'], 'w', newline='') as f:
@@ -300,9 +300,9 @@ def write_cn_dac_csv_header():
         writer.writerow(["CN", "certs"])
     return
 
-def write_csv_files(args):
-    generate_config_csv(args)
-    write_chip_mcsv_header(args)
+def write_csv_files():
+    generate_config_csv()
+    write_chip_mcsv_header()
     write_cn_dac_csv_header()
 
 
@@ -768,17 +768,6 @@ def add_optional_KVs(args):
                 for j in range(len(item["Semantic_Tag"])):
                     entry = item["Semantic_Tag"][j]
 
-                    _value = {
-                        'type': 'data',
-                        'encoding': 'u32',
-                        'value': entry["value"]
-                    }
-                    _mfg_code = {
-                        'type': 'data',
-                        'encoding': 'u32',
-                        'value': entry["mfgCode"]
-                    }
-
                     chip_factory_append('st-v/{:x}/{:x}/{:x}'.format(int(ep), i, j), 'data', 'u32', entry["value"])
                     chip_factory_append('st-mfg/{:x}/{:x}/{:x}'.format(int(ep), i, j), 'data', 'u32', entry["mfgCode"])
 
@@ -795,7 +784,7 @@ def main_internal(args):
     setup_out_dirs(args.vendor_id, args.product_id, args.count, args.outdir, args.dac_cert)
     add_optional_KVs(args)
     generate_passcodes_and_discriminators(args)
-    write_csv_files(args)
+    write_csv_files()
     if args.paa or args.pai:
         setup_root_certs(args)
     write_per_device_unique_data(args)
