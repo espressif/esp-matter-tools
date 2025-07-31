@@ -21,9 +21,10 @@ Integration test suite for esp-matter-mfg-tool
 import json
 import os
 import shutil
+import shlex
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from sources.cert_utils import load_cert_from_file, extract_common_name
 from .utils import run_command, parse_mfg_tool_output, Config, ParsedOutput
@@ -145,6 +146,18 @@ class TestEspMatterMfgToolIntegration:
 
         return [Config.from_dict(test) for test in data.get("tests", [])]
 
+    def _extract_outdir(self, cmd: str) -> Optional[str]:
+        """
+        Get the outdir from the command if present
+        """
+        args = shlex.split(cmd)
+        for i, arg in enumerate(args):
+            if arg == "--outdir" and i + 1 < len(args):
+                return args[i + 1]
+            elif arg.startswith("--outdir="):
+                return arg.split("=", 1)[1]
+        return None
+
     def _run_single_test(self, test_num: int, config: Config):
         """
         Run a single test case
@@ -159,6 +172,10 @@ class TestEspMatterMfgToolIntegration:
         logger.info(f"\n\n--- Test {test_num} - {config.description} ---")
         logger.info(f"Command: {config.command}")
         logger.info(f"Expected output: {config.expected_output}")
+
+        # use the outdir from the command if present, else fallback to default outdir
+        outdir_in_cmd = self._extract_outdir(config.command)
+        self.output_dir = Path(outdir_in_cmd) if outdir_in_cmd else Path("out/")
 
         # Run the command
         result = run_command(config.command)
