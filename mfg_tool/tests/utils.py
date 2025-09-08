@@ -44,6 +44,7 @@ class Config:
     validate_cn_in_path: bool = False
     validate_cn_not_in_path: bool = False
     validate_no_bin: bool = False
+    validate_csv_quoting: bool = False
 
     @classmethod
     def from_dict(cls, data: dict) -> "Config":
@@ -66,6 +67,7 @@ class Config:
             validate_cn_in_path=data.get("validate_cn_in_path", False),
             validate_cn_not_in_path=data.get("validate_cn_not_in_path", False),
             validate_no_bin=data.get("validate_no_bin", False),
+            validate_csv_quoting=data.get("validate_csv_quoting", False),
         )
 
 

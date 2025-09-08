@@ -24,7 +24,7 @@ import shutil
 import shlex
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from sources.cert_utils import load_cert_from_file, extract_common_name
 from .utils import run_command, parse_mfg_tool_output, Config, ParsedOutput
@@ -125,6 +125,9 @@ class TestEspMatterMfgToolIntegration:
 
         parsed_output = parse_mfg_tool_output(output)
 
+        if config.validate_csv_quoting:
+            self._validate_csv_quoting(config.command)
+
         if config.validate_cert:
             self._validate_certificates_with_chip_cert(parsed_output)
         if config.validate_cn_in_path or config.validate_cn_not_in_path:
@@ -158,6 +161,23 @@ class TestEspMatterMfgToolIntegration:
                 return arg.split("=", 1)[1]
         return None
 
+    def _extract_vid_pid(self, cmd: str) -> Optional[Tuple[str, str]]:
+        """
+        Get the vid and pid string from the command if present
+        """
+        args = shlex.split(cmd)
+        vid, pid = None, None
+        for i, arg in enumerate(args):
+            if (arg == "-v" or arg == "--vendor-id") and i + 1 < len(args):
+                vid = args[i + 1]
+            elif (arg == "-p" or arg == "--product-id") and i + 1 < len(args):
+                pid = args[i + 1]
+        return vid, pid
+
+    def _extract_vid_pid_str(self, cmd: str) -> str:
+        vid, pid = self._extract_vid_pid(cmd)
+        return f"{int(vid, 16):04x}_{int(pid, 16):04x}"
+
     def _run_single_test(self, test_num: int, config: Config):
         """
         Run a single test case
@@ -175,7 +195,8 @@ class TestEspMatterMfgToolIntegration:
 
         # use the outdir from the command if present, else fallback to default outdir
         outdir_in_cmd = self._extract_outdir(config.command)
-        self.output_dir = Path(outdir_in_cmd) if outdir_in_cmd else Path("out/")
+        vid_pid_str = self._extract_vid_pid_str(config.command)
+        self.output_dir = Path(outdir_in_cmd) if outdir_in_cmd else Path(f"out/{vid_pid_str}")
 
         # Run the command
         result = run_command(config.command)
@@ -193,3 +214,18 @@ class TestEspMatterMfgToolIntegration:
         for test_num, config in enumerate(test_configs, 1):
             self._run_single_test(test_num, config)
             self.teardown_method()
+
+    def _validate_csv_quoting(self, command: str):
+        import csv
+
+        outdir_in_cmd = self._extract_outdir(command)
+        vid_pid_str = self._extract_vid_pid_str(command)
+        out_dir = Path(outdir_in_cmd) if outdir_in_cmd else Path(f"out/{vid_pid_str}")
+
+        master_csv = Path(out_dir) / "staging" / "master.csv"
+        assert master_csv.exists(), "master.csv not found"
+
+        with open(master_csv, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                assert "Test Vendor,LLC" == row['vendor-name'], "Vendor name should be quoted"

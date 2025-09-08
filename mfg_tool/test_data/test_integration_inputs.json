@@ -159,6 +159,12 @@
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
+    },
+    {
+      "description": "factory partition with vendor name containing comma (CSV quoting test)",
+      "command": "esp-matter-mfg-tool -v 0xFFF1 --vendor-name \"Test Vendor,LLC\" -p 0x8001 --product-name \"Test Product\"",
+      "expected_output": "Generating Config CSV...",
+      "validate_csv_quoting": true
     }
   ]
 }

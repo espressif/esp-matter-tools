@@ -22,6 +22,7 @@ This file contains the CHIP specific key along with the data type and encoding f
 # Additionally to add more keys to chip-factory, use chip_factory_append() API
 
 import csv
+from io import StringIO
 
 CHIP_NVS_MAP = {
     'chip-factory': {
@@ -104,7 +105,11 @@ def chip_get_keys_as_csv():
     keys = list()
     for ns in CHIP_NVS_MAP:
         keys.extend(list(CHIP_NVS_MAP[ns]))
-    return ','.join(keys)
+    
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(keys)
+    return output.getvalue().strip()
 
 
 def chip_get_values_as_csv():
@@ -112,4 +117,8 @@ def chip_get_values_as_csv():
     for ns in CHIP_NVS_MAP:
         for k in CHIP_NVS_MAP[ns]:
             values.append(str(CHIP_NVS_MAP[ns][k]['value']))
-    return ','.join(values)
+    
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(values)
+    return output.getvalue().strip()
