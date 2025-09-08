@@ -1,0 +1,1548 @@
+{
+  "endpoints": [
+    {
+      "id": 0,
+      "clusters": {
+        "0x001D": {
+          "attributes": {
+            "0x0000": {
+              "DeviceTypeList": [
+                {
+                  "DeviceType": {
+                    "id": "0x0016",
+                    "name": "root_node"
+                  },
+                  "Revision": 3
+                },
+                {
+                  "DeviceType": {
+                    "id": "0x0012",
+                    "name": "ota_requestor"
+                  },
+                  "Revision": 1
+                }
+              ]
+            },
+            "0x0001": {
+              "ServerList": [
+                {
+                  "id": "0x003C",
+                  "name": "administrator_commissioning"
+                },
+                {
+                  "id": "0x0031",
+                  "name": "network_commissioning"
+                },
+                {
+                  "id": "0x001D",
+                  "name": "descriptor"
+                },
+                {
+                  "id": "0x001F",
+                  "name": "access_control"
+                },
+                {
+                  "id": "0x0028",
+                  "name": "basic_information"
+                },
+                {
+                  "id": "0x0030",
+                  "name": "general_commissioning"
+                },
+                {
+                  "id": "0x0033",
+                  "name": "general_diagnostics"
+                },
+                {
+                  "id": "0x003E",
+                  "name": "operational_credentials"
+                },
+                {
+                  "id": "0x003F",
+                  "name": "group_key_management"
+                },
+                {
+                  "id": "0x002A",
+                  "name": "ota_software_update_requestor"
+                }
+              ]
+            },
+            "0x0002": {
+              "ClientList": [
+                {
+                  "id": "0x0029",
+                  "name": "ota_software_update_provider"
+                }
+              ]
+            },
+            "0x0003": {
+              "PartsList": [
+                1
+              ]
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "device_type_list"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "server_list"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "client_list"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "parts_list"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": []
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 3
+            }
+          }
+        },
+        "0x001F": {
+          "attributes": {
+            "0x0000": {
+              "ACL": [
+                {
+                  "Privilege": 5,
+                  "AuthMode": 2,
+                  "Subjects": [
+                    112233
+                  ],
+                  "Targets": null,
+                  "FabricIndex": 1
+                }
+              ]
+            },
+            "0x0002": {
+              "SubjectsPerAccessControlEntry": 4
+            },
+            "0x0004": {
+              "AccessControlEntriesPerFabric": 4
+            },
+            "0x0003": {
+              "TargetsPerAccessControlEntry": 3
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "acl"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "subjects_per_access_control_entry"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "access_control_entries_per_fabric"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "targets_per_access_control_entry"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": []
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        },
+        "0x0028": {
+          "attributes": {
+            "0x0000": {
+              "DataModelRevision": 19
+            },
+            "0x0006": {
+              "Location": "XX"
+            },
+            "0x0001": {
+              "VendorName": "TEST_VENDOR"
+            },
+            "0x0002": {
+              "VendorID": 65521
+            },
+            "0x0003": {
+              "ProductName": "TEST_PRODUCT"
+            },
+            "0x0004": {
+              "ProductID": 32768
+            },
+            "0x0007": {
+              "HardwareVersion": 0
+            },
+            "0x0008": {
+              "HardwareVersionString": "TEST_VERSION"
+            },
+            "0x0009": {
+              "SoftwareVersion": 1
+            },
+            "0x000A": {
+              "SoftwareVersionString": "1.0"
+            },
+            "0x0012": {
+              "UniqueID": "B8BB887EE100A30C"
+            },
+            "0x0013": {
+              "CapabilityMinima": {
+                "CaseSessionsPerFabric": 3,
+                "SubscriptionsPerFabric": 3
+              }
+            },
+            "0x0015": {
+              "SpecificationVersion": 17039872
+            },
+            "0x0016": {
+              "MaxPathsPerInvoke": 1
+            },
+            "0x0005": {},
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "data_model_revision"
+                },
+                {
+                  "id": "0x0006",
+                  "name": "location"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "vendor_name"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "vendor_id"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "product_name"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "product_id"
+                },
+                {
+                  "id": "0x0007",
+                  "name": "hardware_version"
+                },
+                {
+                  "id": "0x0008",
+                  "name": "hardware_version_string"
+                },
+                {
+                  "id": "0x0009",
+                  "name": "software_version"
+                },
+                {
+                  "id": "0x000A",
+                  "name": "software_version_string"
+                },
+                {
+                  "id": "0x0012",
+                  "name": "unique_id"
+                },
+                {
+                  "id": "0x0013",
+                  "name": "capability_minima"
+                },
+                {
+                  "id": "0x0015",
+                  "name": "specification_version"
+                },
+                {
+                  "id": "0x0016",
+                  "name": "max_paths_per_invoke"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "node_label"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": []
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 5
+            }
+          }
+        },
+        "0x002A": {
+          "attributes": {
+            "0x0000": {
+              "DefaultOTAProviders": []
+            },
+            "0x0001": {
+              "UpdatePossible": true
+            },
+            "0x0002": {
+              "UpdateState": 1
+            },
+            "0x0003": {
+              "UpdateStateProgress": null
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "default_ota_providers"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "update_possible"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "update_state"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "update_state_progress"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "announce_ota_provider"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 1
+            }
+          }
+        },
+        "0x0030": {
+          "attributes": {
+            "0x0002": {
+              "RegulatoryConfig": 0
+            },
+            "0x0003": {
+              "LocationCapability": 0
+            },
+            "0x0001": {
+              "BasicCommissioningInfo": {
+                "FailSafeExpiryLengthSeconds": 60,
+                "MaxCumulativeFailsafeSeconds": 900
+              }
+            },
+            "0x0004": {
+              "SupportsConcurrentConnection": true
+            },
+            "0x0000": {
+              "Breadcrumb": 0
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "regulatory_config"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "location_capability"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "basic_commissioning_info"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "supports_concurrent_connection"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "breadcrumb"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x0001",
+                  "name": "arm_fail_safe_response"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "set_regulatory_config_response"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "commissioning_complete_response"
+                }
+              ]
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "arm_fail_safe"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "set_regulatory_config"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "commissioning_complete"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        },
+        "0x0031": {
+          "attributes": {
+            "0x0000": {
+              "MaxNetworks": 1
+            },
+            "0x0001": {
+              "Networks": [
+                {
+                  "NetworkID": "4D65726375737973",
+                  "Connected": true
+                }
+              ]
+            },
+            "0x0004": {
+              "InterfaceEnabled": true
+            },
+            "0x0005": {
+              "LastNetworkingStatus": 0
+            },
+            "0x0006": {
+              "LastNetworkID": "4D65726375737973"
+            },
+            "0x0007": {
+              "LastConnectErrorValue": null
+            },
+            "0x0002": {
+              "ScanMaxTimeSeconds": 10
+            },
+            "0x0003": {
+              "ConnectMaxTimeSeconds": 30
+            },
+            "0x0008": {
+              "SupportedWiFiBands": [
+                0
+              ]
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "max_networks"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "networks"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "interface_enabled"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "last_networking_status"
+                },
+                {
+                  "id": "0x0006",
+                  "name": "last_network_id"
+                },
+                {
+                  "id": "0x0007",
+                  "name": "last_connect_error_value"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "scan_max_time_seconds"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "connect_max_time_seconds"
+                },
+                {
+                  "id": "0x0008",
+                  "name": "supported_wi_fi_bands"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "scan_networks"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "add_or_update_wi_fi_network"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "remove_network"
+                },
+                {
+                  "id": "0x0006",
+                  "name": "connect_network"
+                },
+                {
+                  "id": "0x0008",
+                  "name": "reorder_network"
+                }
+              ]
+            },
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x0001",
+                  "name": "scan_networks_response"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "network_config_response"
+                },
+                {
+                  "id": "0x0007",
+                  "name": "connect_network_response"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 1
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        },
+        "0x0033": {
+          "attributes": {
+            "0x0000": {
+              "NetworkInterfaces": [
+                {
+                  "Name": "WIFI_STA_DEF",
+                  "IsOperational": true,
+                  "OffPremiseServicesReachableIPv4": null,
+                  "OffPremiseServicesReachableIPv6": null,
+                  "HardwareAddress": "7CDFA1C219FC",
+                  "IPv4Addresses": [
+                    "C0A80124"
+                  ],
+                  "IPv6Addresses": [
+                    "FE800000000000007EDFA1FFFEC219FC"
+                  ],
+                  "Type": 1
+                }
+              ]
+            },
+            "0x0001": {
+              "RebootCount": 1
+            },
+            "0x0002": {
+              "UpTime": 112
+            },
+            "0x0008": {
+              "TestEventTriggersEnabled": false
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "network_interfaces"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "reboot_count"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "up_time"
+                },
+                {
+                  "id": "0x0008",
+                  "name": "test_event_triggers_enabled"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x0002",
+                  "name": "time_snapshot_response"
+                }
+              ]
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "test_event_trigger"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "time_snapshot"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        },
+        "0x003C": {
+          "attributes": {
+            "0x0000": {
+              "WindowStatus": 0
+            },
+            "0x0001": {
+              "AdminFabricIndex": null
+            },
+            "0x0002": {
+              "AdminVendorId": null
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "window_status"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "admin_fabric_index"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "admin_vendor_id"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "open_commissioning_window"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "revoke_commissioning"
+                }
+              ]
+            },
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 1
+            }
+          }
+        },
+        "0x003E": {
+          "attributes": {
+            "0x0000": {
+              "NOCs": [
+                {
+                  "Noc": "1530010101240201370324130218260480228127260580254D3A37062415012411021824070124080130094104B400677EDF874139011836D028D11A05D0F801EE719609202EC1BAEFECDA0B8A042DDF0F2AA3AB4542977BF3CCE642848B2B3E2DB19E4F6A4078E49505A107FA370A35012801182402013603040204011830041416DA17DB6F8CFD08BD85468961FE680B90A641C230051472E0D1F566EF31C16991DF2586773E0680EF62BF18300B4092C0A32A4F30E7925C14790690384C44CD6E101D7B5F79BC12548C6E661E10711A47A27371D94B6A3793724E0D50AD29932FF4B2A6C264ED574A21796ADDD86318",
+                  "Icac": "1530010101240201370324140118260480228127260580254D3A370624130218240701240801300941043C534A149EFD145B5C25143E27CED724D9C04091B1769243E024767BA1F2B06E13205622A2B7342D3A5B1919318A5131BE29CF08E8E90F1A9DDC58BFF3F91171370A350129011824026030041472E0D1F566EF31C16991DF2586773E0680EF62BF3005146D0CD11CB4FA2DED7CCF37B9EDDAA099A2904EDD18300B4017323BC57AEEC3B2E7EF8DB51D8D749BD2FC1B8B01F994505D617AD134461C57F6BF88A1F630300F3111AE05ADB46F152366A84C0197D2B532994C593B3152EE18",
+                  "FabricIndex": 1
+                }
+              ]
+            },
+            "0x0002": {
+              "SupportedFabrics": 5
+            },
+            "0x0003": {
+              "CommissionedFabrics": 1
+            },
+            "0x0001": {
+              "Fabrics": [
+                {
+                  "RootPublicKey": "0493BAA86C25F9D7876118000E8963C6DB811A0144D0FEDB9476EA8D881C75F6A5E3C4EE5D0D779478CED40926CAADBBFD7F631F0F4A133FFA0BEA2970C0F29362",
+                  "VendorID": 65521,
+                  "FabricID": 1,
+                  "NodeID": 2,
+                  "FabricIndex": 1
+                }
+              ]
+            },
+            "0x0004": {
+              "TrustedRootCertificates": [
+                "1530010101240201370324140118260480228127260580254D3A3706241401182407012408013009410493BAA86C25F9D7876118000E8963C6DB811A0144D0FEDB9476EA8D881C75F6A5E3C4EE5D0D779478CED40926CAADBBFD7F631F0F4A133FFA0BEA2970C0F29362370A35012901182402603004146D0CD11CB4FA2DED7CCF37B9EDDAA099A2904EDD3005146D0CD11CB4FA2DED7CCF37B9EDDAA099A2904EDD18300B407C2851F93B9E51FB0223C37A5111F155440B40F6332DC98E09359470880DA39B03C5BCB5EE6F278B05C35CCB08674B9BD5D11260771F0D0CA0502103791EB78118"
+              ]
+            },
+            "0x0005": {
+              "CurrentFabricIndex": 1
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "no_cs"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "supported_fabrics"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "commissioned_fabrics"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "fabrics"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "trusted_root_certificates"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "current_fabric_index"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x0001",
+                  "name": "attestation_response"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "certificate_chain_response"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "csr_response"
+                },
+                {
+                  "id": "0x0008",
+                  "name": "noc_response"
+                },
+                {
+                  "id": "0x000E",
+                  "name": "sign_vid_verification_response"
+                }
+              ]
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "attestation_request"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "certificate_chain_request"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "csr_request"
+                },
+                {
+                  "id": "0x0006",
+                  "name": "add_noc"
+                },
+                {
+                  "id": "0x0007",
+                  "name": "update_noc"
+                },
+                {
+                  "id": "0x0009",
+                  "name": "update_fabric_label"
+                },
+                {
+                  "id": "0x000A",
+                  "name": "remove_fabric"
+                },
+                {
+                  "id": "0x000B",
+                  "name": "add_trusted_root_certificate"
+                },
+                {
+                  "id": "0x000C",
+                  "name": "set_vid_verification_statement"
+                },
+                {
+                  "id": "0x000D",
+                  "name": "sign_vid_verification_request"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        },
+        "0x003F": {
+          "attributes": {
+            "0x0000": {
+              "GroupKeyMap": []
+            },
+            "0x0001": {
+              "GroupTable": []
+            },
+            "0x0002": {
+              "MaxGroupsPerFabric": 4
+            },
+            "0x0003": {
+              "MaxGroupKeysPerFabric": 3
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "group_key_map"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "group_table"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "max_groups_per_fabric"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "max_group_keys_per_fabric"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x0002",
+                  "name": "key_set_read_response"
+                },
+                {
+                  "id": "0x0005",
+                  "name": "key_set_read_all_indices_response"
+                }
+              ]
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "key_set_write"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "key_set_read"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "key_set_remove"
+                },
+                {
+                  "id": "0x0004",
+                  "name": "key_set_read_all_indices"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": 1,
+      "clusters": {
+        "0x0003": {
+          "attributes": {
+            "0x0000": {
+              "IdentifyTime": 0
+            },
+            "0x0001": {
+              "IdentifyType": 3
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "identify_time"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "identify_type"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "identify"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 6
+            }
+          }
+        },
+        "0x001D": {
+          "attributes": {
+            "0x0000": {
+              "DeviceTypeList": [
+                {
+                  "DeviceType": {
+                    "id": "0x000A",
+                    "name": "door_lock"
+                  },
+                  "Revision": 3
+                }
+              ]
+            },
+            "0x0001": {
+              "ServerList": [
+                {
+                  "id": "0x001D",
+                  "name": "descriptor"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "identify"
+                },
+                {
+                  "id": "0x0101",
+                  "name": "door_lock"
+                }
+              ]
+            },
+            "0x0002": {
+              "ClientList": []
+            },
+            "0x0003": {
+              "PartsList": []
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0x0000",
+                  "name": "device_type_list"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "server_list"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "client_list"
+                },
+                {
+                  "id": "0x0003",
+                  "name": "parts_list"
+                },
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": []
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": []
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 0
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 3
+            }
+          }
+        },
+        "0x0101": {
+          "attributes": {
+            "0x0000": {
+              "LockState": null
+            },
+            "0x0001": {
+              "LockType": 0
+            },
+            "0x0002": {
+              "ActuatorEnabled": true
+            },
+            "0x0025": {
+              "OperatingMode": 0
+            },
+            "0x0026": {
+              "SupportedOperatingModes": 65526
+            },
+            "0x0012": {
+              "NumberOfPINUsersSupported": 5
+            },
+            "0x0017": {
+              "MaxPINCodeLength": 16
+            },
+            "0x0018": {
+              "MinPINCodeLength": 4
+            },
+            "0x0030": {
+              "WrongCodeEntryLimit": 5
+            },
+            "0x0031": {
+              "UserCodeTemporaryDisableTime": 5
+            },
+            "0x0033": {
+              "RequirePINforRemoteOperation": true
+            },
+            "0x0011": {
+              "NumberOfTotalUsersSupported": 5
+            },
+            "0x001B": {
+              "CredentialRulesSupport": 0
+            },
+            "0x001C": {
+              "NumberOfCredentialsSupportedPerUser": 3
+            },
+            "0x0035": {
+              "ExpiringUserTimeout": 5
+            },
+            "0x0023": {
+              "AutoRelockTime": 5
+            },
+            "AttributeList": {
+              "AttributeList": [
+                {
+                  "id": "0xFFFC",
+                  "name": "feature_map"
+                },
+                {
+                  "id": "0xFFFD",
+                  "name": "cluster_revision"
+                },
+                {
+                  "id": "0x0000",
+                  "name": "lock_state"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "lock_type"
+                },
+                {
+                  "id": "0x0002",
+                  "name": "actuator_enabled"
+                },
+                {
+                  "id": "0x0025",
+                  "name": "operating_mode"
+                },
+                {
+                  "id": "0x0026",
+                  "name": "supported_operating_modes"
+                },
+                {
+                  "id": "0x0012",
+                  "name": "number_of_pin_users_supported"
+                },
+                {
+                  "id": "0x0017",
+                  "name": "max_pin_code_length"
+                },
+                {
+                  "id": "0x0018",
+                  "name": "min_pin_code_length"
+                },
+                {
+                  "id": "0x0030",
+                  "name": "wrong_code_entry_limit"
+                },
+                {
+                  "id": "0x0031",
+                  "name": "user_code_temporary_disable_time"
+                },
+                {
+                  "id": "0x0033",
+                  "name": "require_pi_nfor_remote_operation"
+                },
+                {
+                  "id": "0x0011",
+                  "name": "number_of_total_users_supported"
+                },
+                {
+                  "id": "0x001B",
+                  "name": "credential_rules_support"
+                },
+                {
+                  "id": "0x001C",
+                  "name": "number_of_credentials_supported_per_user"
+                },
+                {
+                  "id": "0x0035",
+                  "name": "expiring_user_timeout"
+                },
+                {
+                  "id": "0x0023",
+                  "name": "auto_relock_time"
+                },
+                {
+                  "id": "0xFFF8",
+                  "name": "generated_command_list"
+                },
+                {
+                  "id": "0xFFF9",
+                  "name": "accepted_command_list"
+                },
+                {
+                  "id": "0xFFFB",
+                  "name": "attribute_list"
+                }
+              ]
+            }
+          },
+          "events": {},
+          "commands": {
+            "GeneratedCommandList": {
+              "GeneratedCommandList": [
+                {
+                  "id": "0x001C",
+                  "name": "get_user_response"
+                },
+                {
+                  "id": "0x0023",
+                  "name": "set_credential_response"
+                },
+                {
+                  "id": "0x0025",
+                  "name": "get_credential_status_response"
+                }
+              ]
+            },
+            "AcceptedCommandList": {
+              "AcceptedCommandList": [
+                {
+                  "id": "0x0000",
+                  "name": "lock_door"
+                },
+                {
+                  "id": "0x0001",
+                  "name": "unlock_door"
+                },
+                {
+                  "id": "0x001A",
+                  "name": "set_user"
+                },
+                {
+                  "id": "0x001B",
+                  "name": "get_user"
+                },
+                {
+                  "id": "0x001D",
+                  "name": "clear_user"
+                },
+                {
+                  "id": "0x0022",
+                  "name": "set_credential"
+                },
+                {
+                  "id": "0x0024",
+                  "name": "get_credential_status"
+                },
+                {
+                  "id": "0x0026",
+                  "name": "clear_credential"
+                }
+              ]
+            }
+          },
+          "features": {
+            "FeatureMap": {
+              "FeatureMap": 385
+            }
+          },
+          "revisions": {
+            "ClusterRevision": {
+              "ClusterRevision": 9
+            }
+          }
+        }
+      }
+    }
+  ]
+}
