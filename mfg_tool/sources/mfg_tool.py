@@ -156,17 +156,17 @@ def write_chip_mcsv_header():
     logging.info('Writing chip manifest CSV header...')
     mcsv_header = chip_get_keys_as_csv()
     with open(OUT_FILE['mcsv'], 'w', newline='') as f:
-        header_values = mcsv_header.split(',')
-        writer = csv.writer(f)
-        writer.writerow(header_values)
+        # mcsv_header is already CSV formatted from chip_get_keys_as_csv()
+        # so we just write it directly without splitting
+        f.write(mcsv_header + '\n')
 
 
 def append_chip_mcsv_row(row_data):
     logging.info('Appending chip master CSV row...')
     with open(OUT_FILE['mcsv'], 'a', newline='') as f:
-        row_values = row_data.split(',')
-        writer = csv.writer(f)
-        writer.writerow(row_values)
+        # row_data is already CSV formatted from chip_get_values_as_csv()
+        # so we just write it directly without splitting
+        f.write(row_data + '\n')
 
 def generate_pai(args, ca_key, ca_cert, out_key, out_cert):
     vendor_id = hex(args.vendor_id)[2:].upper()
