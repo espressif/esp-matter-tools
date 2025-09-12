@@ -1,3 +1,9 @@
+# [1.0.14] - (15-September-2025)
+
+* Fix the deprecated warnings from datetime module.
+* Bump the cryptography version to 45.0.1 to fix the fancy Python version parsing.
+* Update the dependency, mfg-gen, which now supports Python 3.12.
+
 # [1.0.8] - (17-March-2025)
 
 * Added `--no-bin` option to skip generating factory partition binary.

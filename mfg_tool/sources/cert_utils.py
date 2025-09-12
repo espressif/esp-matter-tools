@@ -20,7 +20,7 @@ contains utility functions for generating csr, build certificates, certs/keys co
 import logging
 from typing import Optional
 from cryptography import x509
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
@@ -200,12 +200,12 @@ def generate_cert_validity(valid_from, lifetime):
         valid_from (str): Start date for the certificate validity period in ISO 8601 format ("YYYY-MM-DDTHH:MM:SS").
         lifetime (int): Lifetime of the certificate in days.
     Returns:
-        tuple: Tuple containing the start and end dates of the certificate validity period.
+        tuple: Tuple containing the start and end dates of the certificate validity period as UTC-aware datetime objects.
     """
-    nvb_time = datetime.utcnow()
+    nvb_time = datetime.now(timezone.utc)
     nva_time = nvb_time + timedelta(days=VALID_DAYS)
     if valid_from:
-        nvb_time = datetime.strptime(str(valid_from), "%Y-%m-%dT%H:%M:%S")
+        nvb_time = datetime.strptime(str(valid_from), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
     if lifetime:
         nva_time = nvb_time + timedelta(days=lifetime)
     return nvb_time, nva_time
@@ -321,10 +321,10 @@ def validate_certificate_validity(valid_from: str, lifetime: int, cert_file: str
     try:
         cert = load_cert_from_file(cert_file)
         nvb_time, nva_time = generate_cert_validity(valid_from, lifetime)
-        VERIFY_OR_RAISE(cert.not_valid_before <= nvb_time <= cert.not_valid_after,
-                       f"Specified start date ({nvb_time}) is outside certificate's validity period ({cert.not_valid_before} to {cert.not_valid_after})")
-        VERIFY_OR_RAISE(cert.not_valid_before <= nva_time <= cert.not_valid_after,
-                        f"Specified end date based on lifetime ({nva_time}) is outside certificate's validity period ({cert.not_valid_before} to {cert.not_valid_after})")
+        VERIFY_OR_RAISE(cert.not_valid_before_utc <= nvb_time <= cert.not_valid_after_utc,
+                       f"Specified start date ({nvb_time}) is outside certificate's validity period ({cert.not_valid_before_utc} to {cert.not_valid_after_utc})")
+        VERIFY_OR_RAISE(cert.not_valid_before_utc <= nva_time <= cert.not_valid_after_utc,
+                        f"Specified end date based on lifetime ({nva_time}) is outside certificate's validity period ({cert.not_valid_before_utc} to {cert.not_valid_after_utc})")
         return True
     except Exception as e:
         logging.error(f"Certificate validity validation failed for {cert_file}: {str(e)}")

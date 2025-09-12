@@ -1,5 +1,5 @@
 diff --git a/mfg_tool/deps/mfg_gen.py b/mfg_tool/deps/mfg_gen.py
-index b3a9e0b..9a88a01 100644
+index b3a9e0b..31dce67 100644
 --- a/mfg_tool/deps/mfg_gen.py
 +++ b/mfg_tool/deps/mfg_gen.py
 @@ -4,14 +4,25 @@
@@ -12,10 +12,11 @@ index b3a9e0b..9a88a01 100644
 +
  import argparse
  import csv
- import distutils.dir_util
+-import distutils.dir_util
 +import logging
  import os
  from itertools import zip_longest
++from pathlib import Path
 
  import esp_idf_nvs_partition_gen.nvs_partition_gen as nvs_partition_gen
 
@@ -28,7 +29,7 @@ index b3a9e0b..9a88a01 100644
 
  def create_temp_files(args):
      new_filenames = []
-@@ -64,8 +75,7 @@ def verify_keys_exist(values_file_keys, input_config_file):
+@@ -64,15 +75,14 @@ def verify_keys_exist(values_file_keys, input_config_file):
 
          if keys_missing:
              for line_num, key in keys_missing:
@@ -38,6 +39,14 @@ index b3a9e0b..9a88a01 100644
              raise SystemExit(1)
 
 
+ def verify_datatype_encoding(input_config_file):
+     """ Verify datatype and encodings from config file is valid
+     """
+-    valid_encodings = {'string', 'binary', 'hex2bin','u8', 'i8', 'u16', 'u32', 'i32','base64'}
++    valid_encodings = {'string', 'binary', 'hex2bin','u8', 'i8', 'u16', 'u32', 'i32', 'u64', 'i64','base64'}
+     valid_datatypes = {'file','data','namespace'}
+
+     with open(input_config_file,'r') as config_file:
 @@ -120,7 +130,7 @@ def verify_data_in_file(input_config_file, input_values_file, config_file_keys,
          verify_values_exist(input_values_file, keys_in_values_file)
 
@@ -46,6 +55,15 @@ index b3a9e0b..9a88a01 100644
 +        logging.error(err)
          exit(1)
 
+
+@@ -209,7 +219,7 @@ def create_dir(filetype, output_dir_path):
+     """
+     output_target_dir = os.path.join(output_dir_path,filetype,'')
+     if not os.path.isdir(output_target_dir):
+-        distutils.dir_util.mkpath(output_target_dir)
++        Path(output_target_dir).mkdir(parents=True)
+
+     return output_target_dir
 
 @@ -284,7 +294,11 @@ def create_intermediate_csv(args, keys_in_values_file, keys_repeat, is_encr=Fals
 

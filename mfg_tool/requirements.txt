@@ -1,5 +1,5 @@
 bitarray>=2.6.0
-cryptography==44.0.1
+cryptography>=45.0.4
 cffi==1.15.0; python_version < "3.13"
 cffi==1.17.1; python_version >= "3.13"
 future==0.18.3
