@@ -1,3 +1,7 @@
+# [1.0.15] - (17-September-2025)
+
+* Downgrade cryptography to v44.x to align with esp-idf dependency.
+
 # [1.0.14] - (15-September-2025)
 
 * Fix the deprecated warnings from datetime module.
