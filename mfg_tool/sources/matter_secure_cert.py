@@ -31,11 +31,14 @@ Below is the data that may be stored in secure cert partition:
     - Unique Id for Rotating Device ID
 """
 
+import sys
+import io
 import os
-import click
-import logging
-import base64
 import enum
+import click
+import base64
+import logging
+import contextlib
 from typing import Optional
 from dataclasses import dataclass
 from esp_secure_cert.tlv_format_construct import EspSecureCert, TlvType
@@ -197,7 +200,16 @@ class MatterSecureCert:
 
         # at the moment we only support esp32h2 for ds-peripheral
         target_chip = "esp32h2" if self.ds_peripheral else None
-        return secure_cert.generate_esp_secure_cert(target_chip, port)
+
+        output_buf = io.StringIO()
+        output_stream = sys.stderr if logging.getLogger().level <= logging.DEBUG else output_buf
+        try:
+            with contextlib.redirect_stdout(output_stream), contextlib.redirect_stderr(output_stream):
+                return secure_cert.generate_esp_secure_cert(target_chip, port)
+        except SystemExit as e:
+            logging.error(f"ERROR: esp-secure-cert-tool exited with error:{e.code}")
+            logging.error(output_buf.getvalue())
+            raise RuntimeError(f"ERROR: esp-secure-cert-tool exited with error:{e.code}")
 
 
 # here onwards, cli functionality to test this script in a standalone manner

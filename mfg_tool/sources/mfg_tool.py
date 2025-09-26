@@ -18,6 +18,7 @@
 Script to generate Matter factory NVS partition image, Onboarding codes, and QR codes.
 """
 
+import io
 import os
 import sys
 import csv
@@ -29,6 +30,7 @@ import logging
 import binascii
 import argparse
 import pyqrcode
+import contextlib
 from datetime import datetime
 from types import SimpleNamespace
 from cryptography.hazmat.primitives import serialization
@@ -81,6 +83,7 @@ OUT_FILE = {
 # Supported log levels, mapping string values required for argument
 # parsing into logging constants
 __LOG_LEVELS__ = {
+    'debug': logging.DEBUG,
     'info': logging.INFO,
     'error': logging.ERROR,
 }
@@ -143,7 +146,7 @@ def append_discriminator(discriminator):
 
 # Generates the csv file containing chip specific keys and keys provided by user in csv file
 def generate_config_csv():
-    logging.info("Generating Config CSV...")
+    logging.debug("Generating Config CSV...")
     csv_data = chip_nvs_get_config_csv()
 
     with open(OUT_FILE['config_csv'], 'w') as f:
@@ -151,7 +154,7 @@ def generate_config_csv():
 
 
 def write_chip_mcsv_header():
-    logging.info('Writing chip manifest CSV header...')
+    logging.debug('Writing chip manifest CSV header...')
     mcsv_header = chip_get_keys_as_csv()
     with open(OUT_FILE['mcsv'], 'w', newline='') as f:
         # mcsv_header is already CSV formatted from chip_get_keys_as_csv()
@@ -160,7 +163,7 @@ def write_chip_mcsv_header():
 
 
 def append_chip_mcsv_row(row_data):
-    logging.info('Appending chip master CSV row...')
+    logging.debug('Appending chip master CSV row...')
     with open(OUT_FILE['mcsv'], 'a', newline='') as f:
         # row_data is already CSV formatted from chip_get_values_as_csv()
         # so we just write it directly without splitting
@@ -183,8 +186,8 @@ def generate_pai(args, ca_key, ca_cert, out_key, out_cert):
         valid_from=args.valid_from,
         lifetime=args.lifetime)
 
-    logging.info('Generated PAI certificate: {}'.format(out_cert))
-    logging.info('Generated PAI private key: {}'.format(out_key))
+    logging.debug('Generated PAI certificate: {}'.format(out_cert))
+    logging.debug('Generated PAI private key: {}'.format(out_key))
 
 
 def generate_dac(iteration, args, ca_key, ca_cert):
@@ -211,23 +214,23 @@ def generate_dac(iteration, args, ca_key, ca_cert):
         valid_from=args.valid_from,
         lifetime=args.lifetime)
 
-    logging.info('Generated DAC certificate: {}'.format(out_cert_pem))
-    logging.info('Generated DAC private key: {}'.format(out_key_pem))
+    logging.debug('Generated DAC certificate: {}'.format(out_cert_pem))
+    logging.debug('Generated DAC private key: {}'.format(out_key_pem))
 
     convert_x509_cert_from_pem_to_der(out_cert_pem, out_cert_der)
-    logging.info('Generated DAC certificate in DER format: {}'.format(out_cert_der))
+    logging.debug('Generated DAC certificate in DER format: {}'.format(out_cert_der))
 
     store_keypair_as_raw(out_key_pem, out_private_key_bin, out_public_key_bin)
-    logging.info('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
-    logging.info('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
+    logging.debug('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
+    logging.debug('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
     convert_private_key_from_pem_to_der(out_key_pem, out_private_key_der)
     return out_cert_der, out_private_key_bin, out_public_key_bin, out_private_key_der
 
 
 def use_dac_from_args(args):
-    logging.info('Using DAC from command line arguments...')
-    logging.info('DAC Certificate: {}'.format(args.dac_cert))
-    logging.info('DAC Private Key: {}'.format(args.dac_key))
+    logging.debug('Using DAC from command line arguments...')
+    logging.debug('DAC Certificate: {}'.format(args.dac_cert))
+    logging.debug('DAC Private Key: {}'.format(args.dac_key))
 
     # There should be only one UUID in the UUIDs list if DAC is specified
     out_cert_der = os.sep.join([OUT_DIR['top'], UUIDs[0], 'internal', 'DAC_cert.der'])
@@ -236,11 +239,11 @@ def use_dac_from_args(args):
     out_private_key_der = out_cert_der.replace('cert.der', 'key.der')
 
     convert_x509_cert_from_pem_to_der(args.dac_cert, out_cert_der)
-    logging.info('Generated DAC certificate in DER format: {}'.format(out_cert_der))
+    logging.debug('Generated DAC certificate in DER format: {}'.format(out_cert_der))
 
     store_keypair_as_raw(args.dac_key, out_private_key_bin, out_public_key_bin)
-    logging.info('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
-    logging.info('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
+    logging.debug('Generated DAC private key in binary format: {}'.format(out_private_key_bin))
+    logging.debug('Generated DAC public key in binary format: {}'.format(out_public_key_bin))
     convert_private_key_from_pem_to_der(args.dac_key, out_private_key_der)
 
     return out_cert_der, out_private_key_bin, out_public_key_bin, out_private_key_der
@@ -314,7 +317,7 @@ def setup_root_certs(args):
 
         generate_pai(args, args.key, args.cert, PAI['key_pem'], PAI['cert_pem'])
         convert_x509_cert_from_pem_to_der(PAI['cert_pem'], PAI['cert_der'])
-        logging.info('Generated PAI certificate in DER format: {}'.format(PAI['cert_der']))
+        logging.debug('Generated PAI certificate in DER format: {}'.format(PAI['cert_der']))
 
     # If PAI is passed as input, generate DACs
     elif args.pai:
@@ -323,7 +326,7 @@ def setup_root_certs(args):
         PAI['cert_der'] = os.sep.join([OUT_DIR['stage'], 'pai_cert.der'])
 
         convert_x509_cert_from_pem_to_der(PAI['cert_pem'], PAI['cert_der'])
-        logging.info('Generated PAI certificate in DER format: {}'.format(PAI['cert_der']))
+        logging.debug('Generated PAI certificate in DER format: {}'.format(PAI['cert_der']))
 
 
 def overwrite_values_in_mcsv(args, index):
@@ -365,7 +368,7 @@ def generate_matter_secure_cert_partition(args, device_index, row_data, dacs):
     """
     Generate secure cert partition using the new MatterSecureCert class
     """
-    logging.info(f'Generating secure cert partition for device {device_index}...')
+    logging.debug(f'Generating secure cert partition for device {device_index}...')
 
     if not should_generate_secure_cert(args):
         return None
@@ -494,9 +497,6 @@ def write_per_device_unique_data(args):
             if not args.enable_dynamic_passcode:
                 generate_onboarding_data(args, int(row['Index']), int(row['Discriminator']), int(row['PIN Code']))
 
-        if args.paa or args.pai:
-            logging.info("Generated CSV of Common Name and DAC: {}".format(OUT_FILE['cn_dac_csv']))
-
 
 def organize_output_files(suffix, args):
     for i in range(len(UUIDs)):
@@ -586,6 +586,13 @@ def generate_summary(args):
 
                         summary_writer.writerow(output_row)
 
+    logging.info('Generated summary CSV: {}'.format(summary_csv))
+
+    # Also log the CN,DAC csv file path, This is useful when registering the device certificates with cloud services
+    if args.paa or args.pai:
+        logging.info("Generated CSV of Common Name and DAC: {}".format(OUT_FILE['cn_dac_csv']))
+
+
 def generate_partitions(suffix, size, encrypt, generate_partition_bin):
     partition_args = SimpleNamespace(fileid = None,
                                      version = 2,
@@ -601,7 +608,17 @@ def generate_partitions(suffix, size, encrypt, generate_partition_bin):
     else:
         partition_args.keygen = False
     partition_args.key_protect_hmac = False
-    generate(partition_args)
+
+    output_buf = io.StringIO()
+    output_stream = sys.stderr if logging.getLogger().level <= logging.DEBUG else output_buf
+    try:
+        with contextlib.redirect_stdout(output_stream), contextlib.redirect_stderr(output_stream):
+            generate(partition_args)
+    except SystemExit as e:
+        logging.error(f"ERROR: mfg-gen exited with error:{e.code}")
+        logging.error(output_buf.getvalue())
+        sys.exit(1)
+
 
 
 def generate_onboarding_data(args, index, discriminator, passcode):
@@ -615,8 +632,8 @@ def generate_onboarding_data(args, index, discriminator, passcode):
     else:
         chip_manualcode = '"' + chip_manualcode[:4] + '-' + chip_manualcode[4:7] + '-' + chip_manualcode[7:11] + '\n' + chip_manualcode[11:15] + '-' + chip_manualcode[15:18] + '-' + chip_manualcode[18:20] + '-' + chip_manualcode[20:21] + '"'
 
-    logging.info('Generated QR code: ' + chip_qrcode)
-    logging.info('Generated manual code: ' + chip_manualcode)
+    logging.debug('Generated QR code: ' + chip_qrcode)
+    logging.debug('Generated manual code: ' + chip_manualcode)
 
     csv_data = 'qrcode,manualcode,discriminator,passcode\n'
     csv_data += chip_qrcode + ',' + chip_manualcode + ',' + str(discriminator) + ',' + str(passcode) + '\n'
@@ -630,7 +647,7 @@ def generate_onboarding_data(args, index, discriminator, passcode):
     chip_qr = pyqrcode.create(chip_qrcode, version=2, error='M')
     chip_qr.png(qrcode_file, scale=6)
 
-    logging.info('Generated onboarding data and QR Code')
+    logging.debug('Generated onboarding data and QR Code')
 
 
 def get_args():

@@ -2,7 +2,7 @@
   "tests": [
     {
       "description": "factory partition with generated DAC",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
@@ -16,14 +16,14 @@
     },
     {
       "description": "factory partition with generated DAC and dac-in-secure-cert",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --target esp32",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --target esp32",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
     },
     {
       "description": "factory partition with generated DAC for 5 devices",
-      "command": "esp-matter-mfg-tool -n 5 -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "command": "esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
@@ -37,14 +37,14 @@
     },
     {
       "description": "factory partition with rotating device id",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --passcode 20202021 --discriminator 3840 --enable-rotating-device-id --rd-id-uid d2f351f57bb9387445a5f92a601d1c14",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --passcode 20202021 --discriminator 3840 --enable-rotating-device-id --rd-id-uid d2f351f57bb9387445a5f92a601d1c14",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
     },
     {
       "description": "factory partition with extra nvs key config and value",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_key_config.csv --mcsv test_data/extra_nvs_key_value.csv",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_key_config.csv --mcsv test_data/extra_nvs_key_value.csv",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
@@ -56,20 +56,20 @@
     },
     {
       "description": "store artefacts in /tmp/out directory",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --outdir /tmp/out",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --outdir /tmp/out",
       "expected_output": "Generated output files at: /tmp/out/fff2_8001",
       "validate_cn_in_path": true,
       "validate_cert": true
     },
     {
       "description": "Test the no-bin option",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --no-bin",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --no-bin",
       "expected_output": "Generated output files at:",
       "validate_no_bin": true
     },
     {
       "description": "factory partition with extra nvs key config and multiline values",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_keys_for_multiline_items.csv --mcsv test_data/extra_nvs_values_for_multiline_items.csv",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_keys_for_multiline_items.csv --mcsv test_data/extra_nvs_values_for_multiline_items.csv",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
@@ -82,19 +82,19 @@
     },
     {
       "description": "Validate dac-cert, dac-key, pai-cert and chain validation",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC_key.pem --dac-cert test_data/DAC_cert.pem",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC_key.pem --dac-cert test_data/DAC_cert.pem",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
     },
     {
       "description": "Invalid dac_cert and dac_key (Provided PAA-cert as dac-cert) with valid pai_cert",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/Chip-Test-PAA-NoVID-Cert.pem",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/Chip-Test-PAA-NoVID-Cert.pem",
       "expected_output": "[  ERROR] - DAC certificate is not valid"
     },
     {
       "description": "Valid dac-cert and dac-key but different pai certificate",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/DAC-FFF1-8000-Cert.pem",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/DAC-FFF1-8000-Cert.pem",
       "expected_output": "[  ERROR] - DAC certificate chain is not valid"
     },
     {
@@ -116,12 +116,12 @@
     },
     {
       "description": "VID, PID mismatch with pai-cert",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "command": "esp-matter-mfg-tool -v 0x1001 -p 0x1001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "[  ERROR] - PAI certificate VID and PID do not match input VID and PID"
     },
     {
       "description": "Certificate validity period outside parent certificate",
-      "command": "esp-matter-mfg-tool -cn \"Test Device\" -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -vf \"2001-01-01T00:00:00\" --lifetime 1000",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -vf \"2001-01-01T00:00:00\" --lifetime 1000",
       "expected_output": "[  ERROR] - PAI Certificate validity period is outside the specified parameters"
     },
     {
@@ -163,7 +163,6 @@
     {
       "description": "factory partition with vendor name containing comma (CSV quoting test)",
       "command": "esp-matter-mfg-tool -v 0xFFF1 --vendor-name \"Test Vendor,LLC\" -p 0x8001 --product-name \"Test Product\"",
-      "expected_output": "Generating Config CSV...",
       "validate_csv_quoting": true
     },
     {
@@ -210,7 +209,7 @@
     {
       "description": "Secure cert with DS peripheral and all options",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert --ds --target esp32h2 --efuse-key-id 1",
-      "expected_output": "ERROR: Failed to process ESP Secure Cert CSV: Port is required"
+      "expected_output": "[  ERROR] - ERROR: esp-secure-cert-tool exited with error"
     },
     {
       "description": "Factory partition with no-secure-cert-bin option",
