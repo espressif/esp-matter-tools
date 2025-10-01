@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2022 Espressif Systems (Shanghai) PTE LTD
+# Copyright 2022-2025 Espressif Systems (Shanghai) PTE LTD
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,24 +36,20 @@ from cryptography.hazmat.primitives import serialization
 from chip_nvs import (
     chip_nvs_get_config_csv, chip_get_keys_as_csv, chip_nvs_map_update,
     chip_factory_update, chip_factory_append, chip_get_values_as_csv,
-    chip_factory_get_val, chip_nvs_map_append_config_csv
+    chip_nvs_map_append_config_csv, chip_factory_delete
 )
 from utils import (
     INVALID_PASSCODES, vid_pid_str, SERIAL_NUMBER_LEN,
-    ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS, ProductFinish, ProductColor,
+    get_random_rd_id_uid_b64, get_random_rd_id_uid_hex_str, ProductFinish, ProductColor,
     validate_args, calendar_types_to_uint32, get_fixed_label_dict,
-    get_supported_modes_dict
+    get_supported_modes_dict, hex_to_b64, b64_to_hex
 )
 from cert_utils import (
     build_certificate, convert_x509_cert_from_pem_to_der, store_keypair_as_raw,
     convert_private_key_from_pem_to_der, extract_common_name, load_cert_from_file,
     validate_certificates
 )
-from esp_secure_cert import configure_ds
-from esp_secure_cert.tlv_format import (
-    tlv_priv_key_t, tlv_priv_key_type_t, generate_partition_ds,
-    generate_partition_no_ds
-)
+from matter_secure_cert import MatterSecureCert
 
 # In order to made the esp-matter-mfg-tool standalone we copied few dependencies from esp-idf
 # and connectedhomeip to deps/ directory.
@@ -90,6 +86,8 @@ __LOG_LEVELS__ = {
 }
 
 UUIDs = list()
+# This is needed for summary generation
+SECURE_CERT_INFO = list() # list of dicts, one for each device
 
 def generate_passcodes(args):
     iter_count_max = 10000
@@ -347,6 +345,96 @@ def append_cn_dac_to_csv(common_name, cert_path):
         writer = csv.writer(csv_file)
         writer.writerow([common_name, device_cert_contents])
 
+
+# TODO: may be we can move this to add optional kvs's function
+def remove_secure_cert_data_from_nvs(args):
+    if args.commissionable_data_in_secure_cert:
+        chip_factory_delete('discriminator')
+        chip_factory_delete('iteration-count')
+        chip_factory_delete('salt')
+        chip_factory_delete('verifier')
+    if args.rd_id_uid_in_secure_cert:
+        chip_factory_delete('rd-id-uid')
+
+
+def should_generate_secure_cert(args):
+    return (args.dac_in_secure_cert or args.commissionable_data_in_secure_cert or args.rd_id_uid_in_secure_cert) and not args.no_secure_cert_bin
+
+
+def generate_matter_secure_cert_partition(args, device_index, row_data, dacs):
+    """
+    Generate secure cert partition using the new MatterSecureCert class
+    """
+    logging.info(f'Generating secure cert partition for device {device_index}...')
+
+    if not should_generate_secure_cert(args):
+        return None
+
+    # Read certificates and private key
+    with open(dacs[0], 'rb') as f:
+        dac_cert = f.read()
+    with open(dacs[3], 'rb') as f:  # dacs[3] is the DER private key
+        dac_private_key = f.read()
+    with open(PAI['cert_der'], 'rb') as f:
+        pai_cert = f.read()
+
+    discriminator = None
+    iteration_count = None
+    salt = None
+    verifier = None
+    rd_id_uid = None
+
+    if args.commissionable_data_in_secure_cert:
+        discriminator = int(row_data['Discriminator'])
+        iteration_count = int(row_data['Iteration Count'])
+        # already base64 encoded
+        salt = row_data['Salt']
+        # already base64 encoded
+        verifier = row_data['Verifier']
+    if args.rd_id_uid_in_secure_cert:
+        # use if provided in the command line args else generate a random one
+        if args.rd_id_uid:
+            rd_id_uid = hex_to_b64(args.rd_id_uid)
+        else:
+            rd_id_uid = get_random_rd_id_uid_b64()
+
+    # Create MatterSecureCert instance
+    matter_secure_cert = MatterSecureCert(
+        dac_cert=dac_cert,
+        dac_private_key=dac_private_key,
+        pai_cert=pai_cert,
+        ds_peripheral=args.ds_peripheral,
+        efuse_key_id=args.efuse_key_id if args.efuse_key_id != -1 else None,
+        discriminator=discriminator,
+        iteration_count=iteration_count,
+        salt=salt,
+        verifier=verifier,
+        rd_id_uid=rd_id_uid
+    )
+
+    # generate the secure cert data directory
+    os.makedirs('esp_secure_cert_data', exist_ok=True)
+
+    secure_cert_bin_path = matter_secure_cert.generate_partition(args.port)
+    if not secure_cert_bin_path or not os.path.exists(secure_cert_bin_path):
+        logging.warning(f'Secure cert partition generation failed for device {device_index}')
+        return
+
+    dest_path = os.sep.join([OUT_DIR['top'], UUIDs[device_index], f'{UUIDs[device_index]}_esp_secure_cert.bin'])
+    shutil.move(secure_cert_bin_path, dest_path)
+    logging.info(f'Generated secure cert partition: {dest_path}')
+
+    # cleanup, remove the directory if created
+    shutil.rmtree('esp_secure_cert_data', ignore_errors=True)
+
+    # return the information needed for summary generation
+    return {
+        'discriminator': discriminator,
+        'iteration-count': iteration_count,
+        'salt': salt,
+        'rd-id-uid': rd_id_uid
+    }
+
 # This function generates the DACs, picks the commissionable data from the already present csv file,
 # and generates the onboarding payloads, and writes everything to the master csv
 def write_per_device_unique_data(args):
@@ -354,11 +442,13 @@ def write_per_device_unique_data(args):
         pin_disc_dict = csv.DictReader(csvf)
 
         for row in pin_disc_dict:
-            chip_factory_update('discriminator', row['Discriminator'])
-            chip_factory_update('iteration-count', row['Iteration Count'])
-            chip_factory_update('salt', row['Salt'])
-            if not args.enable_dynamic_passcode:
-                chip_factory_update('verifier', row['Verifier'])
+            if not args.commissionable_data_in_secure_cert:
+                chip_factory_update('discriminator', row['Discriminator'])
+                chip_factory_update('iteration-count', row['Iteration Count'])
+                chip_factory_update('salt', row['Salt'])
+                if not args.enable_dynamic_passcode:
+                    chip_factory_update('verifier', row['Verifier'])
+
             if args.paa or args.pai:
                 if args.dac_key is not None and args.dac_cert is not None:
                     dacs = use_dac_from_args(args)
@@ -370,32 +460,10 @@ def write_per_device_unique_data(args):
                     chip_factory_update('dac-key', os.path.abspath(dacs[1]))
                     chip_factory_update('dac-pub-key', os.path.abspath(dacs[2]))
                     chip_factory_update('pai-cert', os.path.abspath(PAI['cert_der']))
-                else:
-                # esp secure cert partition
-                    secure_cert_partition_file_path = os.sep.join([OUT_DIR['top'], UUIDs[int(row['Index'])], UUIDs[int(row['Index'])] + '_esp_secure_cert.bin'])
-                    if args.ds_peripheral:
-                        if args.port and args.count == 1:
-                            esp_secure_cert_data_dir = 'esp_secure_cert_data'
-                            if (os.path.exists(esp_secure_cert_data_dir) is False):
-                                os.makedirs(esp_secure_cert_data_dir)
-                            ecdsa_key_file = os.path.join(esp_secure_cert_data_dir, 'ecdsa_key.bin')
 
-                            ecdsa_key_size = '256'
-                            configure_ds.configure_efuse_for_ecdsa(args.target, args.port, ecdsa_key_file, None, esp_secure_cert_data_dir, ecdsa_key_size, os.path.abspath(dacs[3]), args.priv_key_pass, args.efuse_key_id)
-
-                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_ECDSA_PERIPHERAL_KEY,
-                                                  key_path = os.path.abspath(dacs[3]), key_pass = None)
-                        priv_key.priv_key_len = 256
-                        priv_key.efuse_key_id = args.efuse_key_id
-                        generate_partition_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]),
-                                              ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target,
-                                              op_file = secure_cert_partition_file_path)
-                    else:
-                        priv_key = tlv_priv_key_t(key_type = tlv_priv_key_type_t.ESP_SECURE_CERT_DEFAULT_FORMAT_KEY,
-                                                  key_path = os.path.abspath(dacs[3]), key_pass = None)
-                        generate_partition_no_ds(priv_key = priv_key, device_cert = os.path.abspath(dacs[0]),
-                                                 ca_cert = os.path.abspath(PAI['cert_der']), idf_target = args.target,
-                                                 op_file = secure_cert_partition_file_path)
+                # Generate secure cert partition using new MatterSecureCert class
+                # its a no-op if none of the secure cert related options are provided
+                SECURE_CERT_INFO.append(generate_matter_secure_cert_partition(args, int(row['Index']), row, dacs))
 
                 # appends the subject's common name and DAC certificate encoded as PEM to the csv file
                 file_name = os.sep.join([OUT_DIR['top'], UUIDs[int(row['Index'])], "internal", "DAC_cert.pem"])
@@ -413,8 +481,8 @@ def write_per_device_unique_data(args):
             if (args.serial_num is None):
                 chip_factory_update('serial-num', binascii.b2a_hex(os.urandom(SERIAL_NUMBER_LEN)).decode('utf-8'))
 
-            if (args.enable_rotating_device_id is True) and (args.rd_id_uid is None):
-                chip_factory_update('rd-id-uid', binascii.b2a_hex(os.urandom(int(ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS / 8))).decode('utf-8'))
+            if (args.enable_rotating_device_id is True) and (args.rd_id_uid is None) and (args.rd_id_uid_in_secure_cert is False):
+                chip_factory_update('rd-id-uid', get_random_rd_id_uid_hex_str())
 
             if (args.csv is not None and args.mcsv is not None):
                 overwrite_values_in_mcsv(args, int(row['Index']))
@@ -424,7 +492,8 @@ def write_per_device_unique_data(args):
 
             # Generate onboarding data
             if not args.enable_dynamic_passcode:
-                generate_onboarding_data(args, int(row['Index']), int(chip_factory_get_val('discriminator')), int(row['PIN Code']))
+                generate_onboarding_data(args, int(row['Index']), int(row['Discriminator']), int(row['PIN Code']))
+
         if args.paa or args.pai:
             logging.info("Generated CSV of Common Name and DAC: {}".format(OUT_FILE['cn_dac_csv']))
 
@@ -486,6 +555,11 @@ def generate_summary(args):
                 if not args.enable_dynamic_passcode:
                     header_row.extend(['pincode', 'qrcode', 'manualcode'])
 
+                if args.commissionable_data_in_secure_cert:
+                    header_row.extend(['discriminator', 'iteration-count', 'salt'])
+                if args.rd_id_uid_in_secure_cert:
+                    header_row.extend(['rd-id-uid'])
+
                 summary_writer.writerow(header_row)
 
                 # Write each row
@@ -504,6 +578,11 @@ def generate_summary(args):
                             manualcode = format_manual_code(payloads.generate_manualcode(), args.commissioning_flow)
 
                             output_row.extend([pincode, qrcode, manualcode])
+
+                        if args.commissionable_data_in_secure_cert:
+                            output_row.extend([SECURE_CERT_INFO[i]['discriminator'], SECURE_CERT_INFO[i]['iteration-count'], SECURE_CERT_INFO[i]['salt']])
+                        if args.rd_id_uid_in_secure_cert:
+                            output_row.extend([b64_to_hex(SECURE_CERT_INFO[i]['rd-id-uid'])])
 
                         summary_writer.writerow(output_row)
 
@@ -577,6 +656,9 @@ def get_args():
                       help='The output directory for the generated files (default: %(default)s)')
     g_gen.add_argument('--no-bin', action='store_false', dest='generate_bin',
                         help='Do not generate the factory partition binary')
+    g_gen.add_argument('--no-secure-cert-bin', action="store_true", required=False,
+                        help='If provided, secure cert partition binary will not be generated. \
+                            All the options related to secure cert partition will be ignored.')
 
     g_commissioning = parser.add_argument_group('Commisioning options')
     g_commissioning.add_argument('--passcode', type=any_base_int,
@@ -594,6 +676,10 @@ def get_args():
                                          not include the spake2p verifier. so this option should work with a custom \
                                          CommissionableDataProvider which can generate random passcode and \
                                          corresponding verifier')
+    g_commissioning.add_argument('--commissionable-data-in-secure-cert', action="store_true", required=False,
+                                 help='Store commissionable data in secure cert partition. \
+                                        By default, commissionable data is stored in nvs factory partition. \
+                                        This option is only valid when --no-secure-cert-bin is not provided.')
 
     g_dac = parser.add_argument_group('Device attestation credential options')
     g_dac.add_argument('--dac-in-secure-cert', action="store_true", required=False,
@@ -639,13 +725,16 @@ def get_args():
     product_finish_choices = [finish.name for finish in ProductFinish]
     g_dev_inst_info.add_argument("--product-finish", type=str, choices=product_finish_choices,
                         help='Product finishes choices for product appearance')
+    g_dev_inst_info.add_argument('--rd-id-uid-in-secure-cert', action="store_true", required=False,
+                        help='Enable Rotating device id in the secure cert partition. \
+                            By default, rotating device id is stored in nvs factory partition. \
+                            This option is only valid when --commissionable-data-in-secure-cert is provided.')
 
     product_color_choices = [color.name for color in ProductColor]
     g_dev_inst_info.add_argument("--product-color", type=str, choices=product_color_choices,
                         help='Product colors choices for product appearance')
 
     g_dev_inst_info.add_argument("--part-number", type=str, help='human readable product number')
-
 
     g_dev_inst = parser.add_argument_group('Device instance options')
     g_dev_inst.add_argument('--calendar-types', nargs='+',
@@ -776,6 +865,9 @@ def add_optional_KVs(args):
         chip_factory_append('product-label', 'data', 'string', args.product_label)
     if args.product_url is not None:
         chip_factory_append('product-url', 'data', 'string', args.product_url)
+
+    # remove the secure cert data from nvs
+    remove_secure_cert_data_from_nvs(args)
 
 def main_internal(args):
     logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])

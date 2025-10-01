@@ -35,6 +35,8 @@ class Config:
         validate_cert: Whether to validate the certificates generated from the test case output
         validate_path: Whether to validate the output paths generated from the test case output
         validate_no_bin: Whether to validate that no binary partition files are generated from the test case output
+        validate_secure_cert: Whether to validate that secure cert partition files are generated from the test case output
+        validate_no_secure_cert_bin: Whether to validate that no secure cert partition files are generated from the test case output
     """
 
     description: str
@@ -45,6 +47,8 @@ class Config:
     validate_cn_not_in_path: bool = False
     validate_no_bin: bool = False
     validate_csv_quoting: bool = False
+    validate_secure_cert: bool = False
+    validate_no_secure_cert_bin: bool = False
 
     @classmethod
     def from_dict(cls, data: dict) -> "Config":
@@ -68,6 +72,8 @@ class Config:
             validate_cn_not_in_path=data.get("validate_cn_not_in_path", False),
             validate_no_bin=data.get("validate_no_bin", False),
             validate_csv_quoting=data.get("validate_csv_quoting", False),
+            validate_secure_cert=data.get("validate_secure_cert", False),
+            validate_no_secure_cert_bin=data.get("validate_no_secure_cert_bin", False),
         )
 
 
@@ -78,6 +84,7 @@ class ParsedOutput:
     out_path: str = ""
     dac_cert: str = ""
     pai_cert: str = ""
+    secure_cert_bin: str = ""
 
 
 def run_command(command):
@@ -92,16 +99,28 @@ def run_command(command):
 
 def parse_mfg_tool_output(output: str) -> List[ParsedOutput]:
     """Parse the output of the esp-matter-mfg-tool command"""
+
+    def get_uuid_from_path(path: str) -> str:
+        import os
+
+        return os.path.basename(path)
+
     parsed_output = []
 
     for line in output.split("\n"):
         if "Generated output files at:" in line:
             out_path = line.split("Generated output files at: ")[1].strip()
+
+            # Extract UUID from the path for secure cert partition file name
+            uuid_dir = get_uuid_from_path(out_path)
+            secure_cert_bin_path = f"{out_path}/{uuid_dir}_esp_secure_cert.bin"
+
             parsed_output.append(
                 ParsedOutput(
                     out_path=out_path,
                     dac_cert=f"{out_path}/internal/DAC_cert.der",
                     pai_cert=f"{out_path}/internal/PAI_cert.der",
+                    secure_cert_bin=secure_cert_bin_path,
                 )
             )
 

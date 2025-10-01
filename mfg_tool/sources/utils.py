@@ -18,11 +18,14 @@
 Contains utilitiy functions for validating argument.
 """
 
+import os
 import re
 import sys
-import enum
-import logging
 import csv
+import enum
+import base64
+import logging
+import binascii
 from bitarray import bitarray
 from bitarray.util import ba2int
 
@@ -246,6 +249,14 @@ def validate_args(args):
             or args.rd_id_uid is not None):
         VERIFY_OR_EXIT(args.count == 1, 'Number of partitions should be 1 when discriminator or passcode or DAC or serial number or rotating device id is present')
 
+    # either --dac-in-secure-cert is acceptable or all in secure cert
+    if args.commissionable_data_in_secure_cert or args.rd_id_uid_in_secure_cert:
+        all_in_secure_cert = args.dac_in_secure_cert and args.commissionable_data_in_secure_cert and args.rd_id_uid_in_secure_cert
+        VERIFY_OR_EXIT(
+            all_in_secure_cert,
+            "If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory",
+        )
+
     logging.info('Number of manufacturing NVS images to generate: {}'.format(args.count))
 
 
@@ -311,3 +322,15 @@ def get_supported_modes_dict(supported_modes):
             output_dict[ep] = [mode_dict]
 
     return output_dict
+
+def get_random_rd_id_uid_b64():
+    return base64.b64encode(os.urandom(int(ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS / 8))).decode('utf-8')
+
+def get_random_rd_id_uid_hex_str():
+    return binascii.b2a_hex(os.urandom(int(ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS / 8))).decode('utf-8')
+
+def b64_to_hex(b64_str):
+    return binascii.hexlify(binascii.a2b_base64(b64_str)).decode()
+
+def hex_to_b64(hex_str):
+    return binascii.b2a_base64(bytes.fromhex(hex_str)).decode().strip()

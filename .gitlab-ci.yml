@@ -16,9 +16,15 @@ ruff_check:
   script:
     - python3 -m pip install --upgrade pip ruff
     - cd mfg_tool
-    # TODO: perform format check later
-    # - ruff format --check sources/ || echo "Warning: Formatting issues found, can be fixed by running 'ruff format sources/'"
     - ruff check sources tests
+    # adding only newly added files to the format check
+    # TODO: perform format check on other source files later
+    - ruff format --check --diff --line-length 132 tests/ sources/matter_secure_cert.py
+    - |
+      if [ $? -ne 0 ]; then
+        echo "Warning: Formatting issues found, can be fixed by running 'ruff format --line-length 132 <filename>'"
+        exit 1
+      fi
 
 build_mfg_tool:
   stage: build
@@ -40,7 +46,7 @@ build_mfg_tool:
 
 test_mfg_tool:
   stage: test
-  image: python:3.9-bullseye  # Reliable for evolving test dependencies
+  image: python:3.10-bullseye  # Reliable for evolving test dependencies
 
   tags:
     - build
