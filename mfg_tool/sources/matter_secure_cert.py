@@ -31,14 +31,21 @@ Below is the data that may be stored in secure cert partition:
     - Unique Id for Rotating Device ID
 """
 
+import sys
+import io
 import os
-import click
-import logging
-import base64
 import enum
+import click
+import base64
+import logging
+import contextlib
 from typing import Optional
 from dataclasses import dataclass
-from esp_secure_cert.tlv_format_construct import EspSecureCert, TlvType
+from esp_secure_cert.tlv_format_construct import EspSecureCert
+from esp_secure_cert.tlv_format import tlv_type_t
+
+# Temporary workaround until esp-secure-cert-tool defines Matter-specific TLV values in tlv_format.py
+MATTER_TLV_TYPE_1 = 201
 
 
 @dataclass
@@ -84,7 +91,7 @@ class MatterSecureCert:
     @staticmethod
     def get_cert_entry_as_json(cert: bytes, is_pai: bool = False) -> dict:
         return {
-            "tlv_type": TlvType.CA_CERT if is_pai else TlvType.DEV_CERT,
+            "tlv_type": tlv_type_t.ESP_SECURE_CERT_CA_CERT_TLV if is_pai else tlv_type_t.ESP_SECURE_CERT_DEV_CERT_TLV,
             "tlv_subtype": 0,
             "data_value": base64.b64encode(cert).decode("utf-8"),
             "data_type": "base64",
@@ -93,7 +100,7 @@ class MatterSecureCert:
     @staticmethod
     def get_private_key_entry_as_json(private_key: bytes, ds_peripheral: bool = False, efuse_key_id: Optional[int] = None) -> dict:
         entry = {
-            "tlv_type": TlvType.PRIV_KEY,
+            "tlv_type": tlv_type_t.ESP_SECURE_CERT_PRIV_KEY_TLV,
             "tlv_subtype": 0,
             "data_value": base64.b64encode(private_key).decode("utf-8"),
             "data_type": "base64",
@@ -112,7 +119,7 @@ class MatterSecureCert:
     @staticmethod
     def get_discriminator_entry_as_json(discriminator: int) -> dict:
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": MatterSecureCert.MatterTLVSubType.DISCRIMINATOR,
             "data_value": base64.b64encode(discriminator.to_bytes(2, "little")).decode("utf-8"),
             "data_type": "base64",
@@ -121,7 +128,7 @@ class MatterSecureCert:
     @staticmethod
     def get_spake2p_verifier_entry_as_json(verifier_b64: str) -> dict:
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": MatterSecureCert.MatterTLVSubType.SPAKE2P_VERIFIER,
             "data_value": verifier_b64,
             "data_type": "base64",
@@ -130,7 +137,7 @@ class MatterSecureCert:
     @staticmethod
     def get_spake2p_salt_entry_as_json(salt_b64: str) -> dict:
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": MatterSecureCert.MatterTLVSubType.SPAKE2P_SALT,
             "data_value": salt_b64,
             "data_type": "base64",
@@ -139,7 +146,7 @@ class MatterSecureCert:
     @staticmethod
     def get_spake2p_iteration_count_entry_as_json(iteration_count: int) -> dict:
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": MatterSecureCert.MatterTLVSubType.SPAKE2P_ITERATION_COUNT,
             "data_value": base64.b64encode(iteration_count.to_bytes(4, "little")).decode("utf-8"),
             "data_type": "base64",
@@ -148,7 +155,7 @@ class MatterSecureCert:
     @staticmethod
     def get_rd_id_uid_entry_as_json(rd_id_uid_b64: str) -> dict:
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": MatterSecureCert.MatterTLVSubType.RD_ID_UID,
             "data_value": rd_id_uid_b64,
             "data_type": "base64",
@@ -158,7 +165,7 @@ class MatterSecureCert:
     def get_random_entry_as_json(tlv_subtype: int) -> dict:
         random_len = 32
         return {
-            "tlv_type": TlvType.MATTER_TLV_1,
+            "tlv_type": MATTER_TLV_TYPE_1,
             "tlv_subtype": tlv_subtype,
             "data_value": base64.b64encode(os.urandom(random_len)).decode("utf-8"),
             "data_type": "base64",
@@ -197,7 +204,15 @@ class MatterSecureCert:
 
         # at the moment we only support esp32h2 for ds-peripheral
         target_chip = "esp32h2" if self.ds_peripheral else None
-        return secure_cert.generate_esp_secure_cert(target_chip, port)
+
+        output_buf = io.StringIO()
+        output_stream = sys.stderr if logging.getLogger().level <= logging.DEBUG else output_buf
+        try:
+            with contextlib.redirect_stdout(output_stream), contextlib.redirect_stderr(output_stream):
+                return secure_cert.generate_esp_secure_cert(target_chip, port)
+        except SystemExit as e:
+            logging.error(output_buf.getvalue())
+            raise RuntimeError(f"ERROR: esp-secure-cert-tool exited with error:{e.code}")
 
 
 # here onwards, cli functionality to test this script in a standalone manner

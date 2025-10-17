@@ -106,7 +106,7 @@ export MATTER_SDK_PATH=$ESP_MATTER_PATH/connectedhomeip/connectedhomeip
 
 ### Generate a factory partition
 ```
-esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
@@ -114,7 +114,7 @@ esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate a factory partition and store DAC certificate and private key in secure cert partition [Optional argument : `--dac-in-secure-cert` and `--target`]
 ```
-esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -124,7 +124,7 @@ esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate a factory partition and store DAC certificate and private key in secure cert partition using DS Peripheral
 ```
-esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -134,7 +134,7 @@ esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate 5 factory partitions [Optional argument : `-n`]
 ```
-esp-matter-mfg-tool -n 5 -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
@@ -142,7 +142,7 @@ esp-matter-mfg-tool -n 5 -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partition using existing DAC certificate and private key [Optional arguments : `--dac-cert` and `--dac-key`]
 ```
-esp-matter-mfg-tool -cn "My Bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-key DAC_key.pem --dac-cert DAC_cert.pem
@@ -150,7 +150,7 @@ esp-matter-mfg-tool -cn "My Bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partitions using existing Passcode, Discriminator, and rotating device ID [Optional arguments : `--passcode`, `--discriminator`, and `--rd-id-uid`]
 ```
-esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -161,7 +161,7 @@ esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partitions with extra NVS key-values specified using csv and mcsv file [Optional arguments : `--csv` and `--mcsv`]
 ```
-esp-matter-mfg-tool -cn "My bulb" -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \

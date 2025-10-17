@@ -1,3 +1,17 @@
+# [1.0.17] - (15-October-2025)
+
+* Added debug log level and made the output less chatty.
+
+# [1.0.16] - (1-October-2025)
+
+* Support to add the Matter unique data in the esp-secure-cert partition.
+* Newly added options:
+    * `--commissionable-data-in-secure-cert`
+    * `--rd-id-uid-in-secure-cert`
+
+With this change, commissionable-data: discriminator, iteration-count, salt, verifier, and the unique identifier for
+rotating device identifier can be stored in the esp-secure-cert partition.
+
 # [1.0.15] - (17-September-2025)
 
 * Downgrade cryptography to v44.x to align with esp-idf dependency.
