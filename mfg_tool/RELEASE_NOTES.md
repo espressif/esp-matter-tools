@@ -1,3 +1,8 @@
+# [1.0.18] - (17-November-2025)
+
+* ci: Added Support for Python versions 3.8, 3.9, 3.10, 3.11, 3.12, and 3.13.
+- dependencies: Updated esp-secure-cert-tool to v2.3.6.
+
 # [1.0.17] - (15-October-2025)
 
 * Added debug log level and made the output less chatty.

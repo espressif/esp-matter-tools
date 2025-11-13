@@ -28,36 +28,45 @@ ruff_check:
 
 build_mfg_tool:
   stage: build
-  image: python:3.9-alpine
+  image: python:${PYTHON_VERSION}-alpine
 
   tags:
     - build
 
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
   artifacts:
     paths:
-      - mfg_tool/dist/
+      - mfg_tool/dist/${PYTHON_VERSION}
     expire_in: 1 week
 
   script:
     - apk add --no-cache patch
     - cd mfg_tool
+    - mkdir -p dist/${PYTHON_VERSION}
     - python3 -m pip install --upgrade pip build setuptools
-    - python3 -m build
+    - python3 -m build -o dist/${PYTHON_VERSION}
 
 test_mfg_tool:
   stage: test
-  image: python:3.10-bullseye  # Reliable for evolving test dependencies
+  image: python:${PYTHON_VERSION}-bullseye # Reliable for evolving test dependencies
 
   tags:
     - build
 
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"] # TODO - 3.14 will be added after python:3.14-bullseye will be available
+
   needs:
-    - build_mfg_tool
+    - job: build_mfg_tool
+      artifacts: true
 
   script:
     - cd mfg_tool
-    - python3 -m pip install --upgrade pip build setuptools
-    - python3 -m build
-    - python3 -m pip install dist/esp_matter_mfg_tool*.whl
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install dist/${PYTHON_VERSION}/esp_matter_mfg_tool*.whl
     - python3 -m pip install -r requirements-test.txt
-    - python -m pytest tests/ -v -s --log-cli-level=INFO
+    - python3 -m pytest tests/ -v -s --log-cli-level=INFO
