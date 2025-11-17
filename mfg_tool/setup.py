@@ -63,7 +63,7 @@ except ImportError:
     )
     exit(1)
 
-VERSION = "1.0.17"
+VERSION = "1.0.18"
 
 long_description = """
 ====================
@@ -109,10 +109,6 @@ setup(
         "Operating System :: POSIX",
         "Operating System :: MacOS :: MacOS X",
         "Topic :: Software Development :: Embedded Systems",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
     ],
 
     python_requires = ">=3.8",
