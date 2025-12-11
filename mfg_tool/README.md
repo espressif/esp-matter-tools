@@ -17,7 +17,7 @@ python3 -m pip install esp-matter-mfg-tool
 ```
 
 ## Configure your app
-Open the project configuration menu using - 
+Open the project configuration menu using -
 
 ```
 cd <your_app>
@@ -54,6 +54,7 @@ out
     │   └── internal
     │       ├── DAC_cert.der
     │       ├── DAC_cert.pem
+    |       ├── DAC_key.der
     │       ├── DAC_key.pem
     │       ├── DAC_private_key.bin
     │       ├── DAC_public_key.bin
@@ -66,16 +67,21 @@ out
     │   └── internal
     │       ├── DAC_cert.der
     │       ├── DAC_cert.pem
+    |       ├── DAC_key.der
     │       ├── DAC_key.pem
     │       ├── DAC_private_key.bin
     │       ├── DAC_public_key.bin
     │       ├── PAI_cert.der
     │       └── partition.csv
-    └── staging
-        ├── config.csv
-        ├── master.csv
-        ├── pai_cert.der
-        └── pin_disc.csv
+    ├── staging
+    │   ├── config.csv
+    │   ├── master.csv
+    │   ├── pai_cert.der
+    │   ├── pai_cert.pem
+    │   ├── pai_key.pem
+    │   └── pin_disc.csv
+    ├── cn_dacs-2025-12-11-15-55-45-078185.csv
+    └── summary-2025-12-11-15-55-45.csv
 ```
 
 Tool generates following output files:
@@ -87,12 +93,17 @@ Other intermediate files are stored in `internal/` directory:
 - Partition CSV    : `partition.csv`
 - PAI Certificate  : `PAI_cert.der`
 - DAC Certificates : `DAC_cert.der`, `DAC_cert.pem`
+- DAC key          : `DAC_key.der` , `DAC_key.pem`
 - DAC Private Key  : `DAC_private_key.bin`
 - DAC Public Key   : `DAC_public_key.bin`
 
 Above files are stored at `out/<vid_pid>/<UUID>`. Each device is identified with an unique UUID.
 
 Common intermediate files are stored at `out/<vid_pid>/staging`.
+
+DAC cert list are stored in `cn_dacs-<date>-<time>.csv`.
+
+Summary informations are stored in `summary-<date>-<time>.csv`.
 
 ## Usage examples
 `esp-matter-mfg-tool -h` lists the options.
@@ -106,7 +117,8 @@ export MATTER_SDK_PATH=$ESP_MATTER_PATH/connectedhomeip/connectedhomeip
 
 ### Generate a factory partition
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
@@ -114,27 +126,30 @@ esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate a factory partition and store DAC certificate and private key in secure cert partition [Optional argument : `--dac-in-secure-cert` and `--target`]
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-in-secure-cert --target esp32
 ```
-*NOTE*: By default, DAC certificates and private key is stored in the NVS factory partition. 
+*NOTE*: By default, DAC certificates and private key is stored in the NVS factory partition.
 
 #### Generate a factory partition and store DAC certificate and private key in secure cert partition using DS Peripheral
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-in-secure-cert --ds-peripheral --target esp32h2 --efuse-key-id 1
 ```
-*NOTE*: Currently, only esp32h2 supports DS peripheral. 
+*NOTE*: Currently, only esp32h2 supports DS peripheral.
 
 #### Generate 5 factory partitions [Optional argument : `-n`]
 ```
-esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
@@ -142,7 +157,8 @@ esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partition using existing DAC certificate and private key [Optional arguments : `--dac-cert` and `--dac-key`]
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-key DAC_key.pem --dac-cert DAC_cert.pem
@@ -150,7 +166,8 @@ esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partitions using existing Passcode, Discriminator, and rotating device ID [Optional arguments : `--passcode`, `--discriminator`, and `--rd-id-uid`]
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -161,7 +178,8 @@ esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
 
 #### Generate factory partitions with extra NVS key-values specified using csv and mcsv file [Optional arguments : `--csv` and `--mcsv`]
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -173,7 +191,8 @@ Output binary contains all the chip specific key/value and key/values specified 
 
 #### Generate factory partitions without device attestation certificates and keys
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der
 ```
 
@@ -185,7 +204,8 @@ Below command will store attestation, commissionable data, and rotating device I
 and other data in factory partition.
 
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -198,7 +218,8 @@ Below command will store attestation, commissionable data, and rotating device I
 and other data in factory partition. It will also program the DS peripheral with the private key.
 
 ```
-esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai \
+esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
+    --product-name "test product" --hw-ver 1 --hw-ver-str "harware version" --pai \
     -k $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Key.pem \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
@@ -220,7 +241,7 @@ Please flash the manufacturing binary at the corresponding address of the config
 which by default is `nvs`.
 
 ## Commissioning the device
-You can commission the device by using either - 
+You can commission the device by using either -
 1. The QR code for Matter commissioners is generated at `out/<vid_pid>/<uuid>/<uuid>-qrcode.png`.
 If QR code is not visible, paste the below link into the browser replacing `<qr_code>` with the **QR code string**
 (eg. `MT:Y.K9042C00KA0648G00` - this is also the default test QR code) and scan the QR code.
@@ -237,7 +258,7 @@ Code String, Manual Pairing Code, Passcode and Discriminator`.
 
 Below are the steps for encrypting the application and factory partition but before proceeding further please READ THE DOCS FIRST. Documentation References:
 
-- [Flash and NVS encryption](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/esp32/flash_nvs_encryption.md#flash-and-nvs-encryption)
+- [Flash and NVS encryption](https://github.com/project-chip/connectedhomeip/blob/master/docs/platforms/esp32/flash_nvs_encryption.md#flash-and-nvs-encryption)
 
 Provide `-e` option along with other options to generate the encrypted NVS partition binary.
 
