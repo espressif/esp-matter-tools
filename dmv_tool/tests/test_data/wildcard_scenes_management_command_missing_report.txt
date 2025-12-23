@@ -1,0 +1,138 @@
+
+================================================================================
+MATTER DEVICE CONFORMANCE REPORT
+================================================================================
+
+VERSION DETECTION
+==============================
+Using specified spec version: 1.4.2
+Validation against Matter 1.4.2 specification
+
+OVERALL CONFORMANCE SUMMARY
+===========================
+Metric                   | Value        
+----------------------------------------
+Total Endpoints          | 2            
+Compliant Endpoints      | 0            
+Non-Compliant Endpoints  | 2            
+Conformance Rate         | 0.0%         
+Total Duplicate Elements | 27           
+Total Revision Issues    | 1            
+Total Event Warnings     | 6            
+Overall Status           | NON-COMPLIANT
+
+
+================================================================================
+📋 PER-ENDPOINT DETAILED CONFORMANCE ANALYSIS
+================================================================================
+
+📋 Endpoint 0 Device Types
+=========================
+Device Type ID | Device Type Name | Status        | Clusters
+------------------------------------------------------------
+22             | root_node        | Non-Compliant | 12      
+
+
+🔧 Endpoint 0 Complete Cluster Conformance
+=========================================
+Cluster ID | Cluster Name                | Type   | Device Type Name | Status        | Revisions
+------------------------------------------------------------------------------------------------
+0x001F     | access_control              | Server | root_node        | Compliant     | OK       
+0x0028     | basic_information           | Server | root_node        | Compliant     | OK       
+0x002B     | localization_configuration  | Server | root_node        | Compliant     | OK       
+0x002C     | time_format_localization    | Server | root_node        | Compliant     | OK       
+0x002D     | unit_localization           | Server | root_node        | Compliant     | OK       
+0x0030     | general_commissioning       | Server | root_node        | Non-Compliant | OK       
+0x0031     | network_commissioning       | Server | root_node        | Compliant     | OK       
+0x0033     | general_diagnostics         | Server | root_node        | Non-Compliant | OK       
+0x003C     | administrator_commissioning | Server | root_node        | Compliant     | OK       
+0x003E     | operational_credentials     | Server | root_node        | Non-Compliant | OK       
+0x003F     | group_key_management        | Server | root_node        | Non-Compliant | OK       
+0x0046     | icd_management              | Server | root_node        | Compliant     | OK       
+
+
+Endpoint 0 Recommendations:
+
+   • Remove 27 duplicate element(s) listed below
+	   • arm_fail_safe (0x0000) appears 2 times in general_commissioning cluster
+	   • set_regulatory_config (0x0002) appears 2 times in general_commissioning cluster
+	   • commissioning_complete (0x0004) appears 2 times in general_commissioning cluster
+	   • arm_fail_safe_response (0x0001) appears 2 times in general_commissioning cluster
+	   • set_regulatory_config_response (0x0003) appears 2 times in general_commissioning cluster
+	   • commissioning_complete_response (0x0005) appears 2 times in general_commissioning cluster
+	   • test_event_trigger (0x0000) appears 2 times in general_diagnostics cluster
+	   • time_snapshot (0x0001) appears 2 times in general_diagnostics cluster
+	   • time_snapshot_response (0x0002) appears 2 times in general_diagnostics cluster
+	   • attestation_request (0x0000) appears 2 times in operational_credentials cluster
+	   • certificate_chain_request (0x0002) appears 2 times in operational_credentials cluster
+	   • csr_request (0x0004) appears 2 times in operational_credentials cluster
+	   • add_noc (0x0006) appears 2 times in operational_credentials cluster
+	   • update_noc (0x0007) appears 2 times in operational_credentials cluster
+	   • update_fabric_label (0x0009) appears 2 times in operational_credentials cluster
+	   • remove_fabric (0x000A) appears 2 times in operational_credentials cluster
+	   • add_trusted_root_certificate (0x000B) appears 2 times in operational_credentials cluster
+	   • attestation_response (0x0001) appears 2 times in operational_credentials cluster
+	   • certificate_chain_response (0x0003) appears 2 times in operational_credentials cluster
+	   • csr_response (0x0005) appears 2 times in operational_credentials cluster
+	   • noc_response (0x0008) appears 2 times in operational_credentials cluster
+	   • key_set_write (0x0000) appears 2 times in group_key_management cluster
+	   • key_set_read (0x0001) appears 2 times in group_key_management cluster
+	   • key_set_remove (0x0003) appears 2 times in group_key_management cluster
+	   • key_set_read_all_indices (0x0004) appears 2 times in group_key_management cluster
+	   • key_set_read_response (0x0002) appears 2 times in group_key_management cluster
+	   • key_set_read_all_indices_response (0x0005) appears 2 times in group_key_management cluster
+
+   • Make sure the below events are present on the device (informational only)
+	   •access_control_entry_changed event is present on access_control cluster
+	   •start_up event is present on basic_information cluster
+	   •boot_reason event is present on general_diagnostics cluster
+
+📋 Endpoint 1 Device Types
+=========================
+Device Type ID | Device Type Name      | Status        | Clusters
+-----------------------------------------------------------------
+267            | dimmable_plug_in_unit | Non-Compliant | 5       
+
+
+🔧 Endpoint 1 Complete Cluster Conformance
+=========================================
+Cluster ID | Cluster Name      | Type   | Device Type Name      | Status        | Revisions
+-------------------------------------------------------------------------------------------
+0x0003     | identify          | Server | dimmable_plug_in_unit | Compliant     | OK       
+0x0004     | groups            | Server | dimmable_plug_in_unit | Compliant     | OK       
+0x0006     | on_off            | Server | dimmable_plug_in_unit | Compliant     | OK       
+0x0008     | level_control     | Server | dimmable_plug_in_unit | Compliant     | OK       
+0x0062     | scenes_management | Server | dimmable_plug_in_unit | Non-Compliant | OK       
+
+
+Endpoint 1 Recommendations:
+
+   • Fix 1 revision issue(s) listed below
+	   • For dimmable_plug_in_unit, revision on device is 1 but the required revision is 5
+
+   • Fix 8 missing element(s) listed below
+   • Make sure to add the missing elements to the respective clusters
+	   • add_scene command is missing on scenes_management cluster. Required command add_scene (0x0000) is missing
+	   • view_scene command is missing on scenes_management cluster. Required command view_scene (0x0001) is missing
+	   • remove_scene command is missing on scenes_management cluster. Required command remove_scene (0x0002) is missing
+	   • remove_all_scenes command is missing on scenes_management cluster. Required command remove_all_scenes (0x0003) is missing
+	   • store_scene command is missing on scenes_management cluster. Required command store_scene (0x0004) is missing
+	   • recall_scene command is missing on scenes_management cluster. Required command recall_scene (0x0005) is missing
+	   • get_scene_membership command is missing on scenes_management cluster. Required command get_scene_membership (0x0006) is missing
+	   • copy_scene command is missing on scenes_management cluster. Required command copy_scene (0x0040) is missing
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+• Fix conformance issues in 2 endpoint(s)
+• Focus on endpoints marked as Non-Compliant above
+• Check per-endpoint missing elements and revision issues
+• Update all cluster and device type revisions to meet required revisions
+• Remove 27 duplicate element(s) from device clusters
+• Remove 27 duplicate element(s) from device clusters
+• Review 6 event warnings (don't affect conformance)
+
+Detailed results saved in:
+   • output/parsed_data.json - Raw parsed device data
+   • output/validation_results.json - Complete validation results
+================================================================================
