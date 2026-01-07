@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-Contains utilitiy functions for validating argument.
+Contains utility functions for validating argument.
 """
 
 import os
@@ -272,7 +272,7 @@ def calendar_types_to_uint32(calendar_types):
 
 # get_fixed_label_dict() converts the list of strings to per endpoint dictionaries.
 # example input  : ['0/orientation/up', '1/orientation/down', '2/orientation/down']
-# example outout : {'0': [{'orientation': 'up'}], '1': [{'orientation': 'down'}], '2': [{'orientation': 'down'}]}
+# example output : {'0': [{'orientation': 'up'}], '1': [{'orientation': 'down'}], '2': [{'orientation': 'down'}]}
 def get_fixed_label_dict(fixed_labels):
     fl_dict = {}
     for fl in fixed_labels:
@@ -294,11 +294,11 @@ def get_fixed_label_dict(fixed_labels):
 # get_supported_modes_dict() converts the list of strings to per endpoint dictionaries.
 # example with semantic tags
 # input  : ['0/label1/1/"1\0x8000, 2\0x8000" 1/label2/1/"1\0x8000, 2\0x8000"']
-# outout : {'1': [{'Label': 'label1', 'Mode': 0, 'Semantic_Tag': [{'value': 1, 'mfgCode': 32768}, {'value': 2, 'mfgCode': 32768}]}, {'Label': 'label2', 'Mode': 1, 'Semantic_Tag': [{'value': 1, 'mfgCode': 32768}, {'value': 2, 'mfgCode': 32768}]}]}
+# output : {'1': [{'Label': 'label1', 'Mode': 0, 'Semantic_Tag': [{'value': 1, 'mfgCode': 32768}, {'value': 2, 'mfgCode': 32768}]}, {'Label': 'label2', 'Mode': 1, 'Semantic_Tag': [{'value': 1, 'mfgCode': 32768}, {'value': 2, 'mfgCode': 32768}]}]}
 
 # example without semantic tags
 # input  : ['0/label1/1 1/label2/1']
-# outout : {'1': [{'Label': 'label1', 'Mode': 0, 'Semantic_Tag': []}, {'Label': 'label2', 'Mode': 1, 'Semantic_Tag': []}]}
+# output : {'1': [{'Label': 'label1', 'Mode': 0, 'Semantic_Tag': []}, {'Label': 'label2', 'Mode': 1, 'Semantic_Tag': []}]}
 
 def get_supported_modes_dict(supported_modes):
     output_dict = {}
