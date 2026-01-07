@@ -772,7 +772,7 @@ def get_args():
     g_extra_info = parser.add_argument_group('Extra information options using csv files')
     g_extra_info.add_argument('--csv', help='CSV file containing the partition schema for extra options. \
             [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#csv-configuration-file]')
-    g_extra_info.add_argument('--mcsv', help='Master CSV file containig optional/extra values specified by the user. \
+    g_extra_info.add_argument('--mcsv', help='Master CSV file containing optional/extra values specified by the user. \
             [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#master-value-csv-file]')
 
     if len(sys.argv) == 1:
@@ -838,7 +838,7 @@ def add_optional_KVs(args):
         for i in range(len(args.locales)):
             chip_factory_append('locale/{:x}'.format(i), 'data', 'string', args.locales[i])
 
-    # Each endpoint can contains the fixed lables
+    # Each endpoint can contains the fixed labels
     #  - fl-sz/<index>     : number of fixed labels for the endpoint
     #  - fl-k/<ep>/<index> : fixed label key for the endpoint and index
     #  - fl-v/<ep>/<index> : fixed label value for the endpoint and index
