@@ -102,18 +102,27 @@ def generate_passcodes(args):
         else:
             writer.writerow(["Index", "PIN Code", "Iteration Count", "Salt", "Verifier"])
         for i in range(0, args.count):
-            salt = os.urandom(salt_len_max)
-            if args.enable_dynamic_passcode:
-                writer.writerow([i, iter_count_max, base64.b64encode(salt).decode('utf-8')])
-            else:
-                if args.passcode:
-                    passcode = args.passcode
+            # If user provided both salt and verifier, use them directly
+            # Note: validate_args() has already verified that passcode is provided when salt and verifier are set
+            if args.salt and args.verifier:
+                if args.enable_dynamic_passcode:
+                    writer.writerow([i, iter_count_max, args.salt])
                 else:
-                    passcode = random.randint(1, 99999998)
-                    if passcode in INVALID_PASSCODES:
-                        passcode -= 1
-                verifier = generate_verifier(passcode, salt, iter_count_max)
-                writer.writerow([i, passcode, iter_count_max, base64.b64encode(salt).decode('utf-8'), base64.b64encode(verifier).decode('utf-8')])
+                    writer.writerow([i, args.passcode, iter_count_max, args.salt, args.verifier])
+            else:
+                # Generate salt and verifier automatically
+                salt = os.urandom(salt_len_max)
+                if args.enable_dynamic_passcode:
+                    writer.writerow([i, iter_count_max, base64.b64encode(salt).decode('utf-8')])
+                else:
+                    if args.passcode:
+                        passcode = args.passcode
+                    else:
+                        passcode = random.randint(1, 99999998)
+                        if passcode in INVALID_PASSCODES:
+                            passcode -= 1
+                    verifier = generate_verifier(passcode, salt, iter_count_max)
+                    writer.writerow([i, passcode, iter_count_max, base64.b64encode(salt).decode('utf-8'), base64.b64encode(verifier).decode('utf-8')])
 
 
 def generate_discriminators(args):
@@ -693,6 +702,12 @@ def get_args():
                                          not include the spake2p verifier. so this option should work with a custom \
                                          CommissionableDataProvider which can generate random passcode and \
                                          corresponding verifier')
+    g_commissioning.add_argument('--salt', type=str,
+                                 help='The salt for SPAKE2+ verifier generation, provided as base64 encoded string. \
+                                         Must be used together with --verifier and --passcode.')
+    g_commissioning.add_argument('--verifier', type=str,
+                                 help='The SPAKE2+ verifier, provided as base64 encoded string. \
+                                         Must be used together with --salt and --passcode.')
     g_commissioning.add_argument('--commissionable-data-in-secure-cert', action="store_true", required=False,
                                  help='Store commissionable data in secure cert partition. \
                                         By default, commissionable data is stored in nvs factory partition. \
