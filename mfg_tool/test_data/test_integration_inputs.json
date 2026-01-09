@@ -222,6 +222,48 @@
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert --no-secure-cert-bin",
       "expected_output": "Generated output files at:",
       "validate_no_secure_cert_bin": true
+    },
+    {
+      "description": "Error: salt provided without verifier",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\"",
+      "expected_output": "[  ERROR] - --salt and --verifier must be provided together"
+    },
+    {
+      "description": "Error: verifier provided without salt",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
+      "expected_output": "[  ERROR] - --salt and --verifier must be provided together"
+    },
+    {
+      "description": "Error: salt and verifier provided without passcode",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
+      "expected_output": "[  ERROR] - --passcode is required when --salt and --verifier are provided"
+    },
+    {
+      "description": "Error: salt and verifier with enable-dynamic-passcode",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\" --enable-dynamic-passcode",
+      "expected_output": "[  ERROR] - --salt and --verifier cannot be used with --enable-dynamic-passcode"
+    },
+    {
+      "description": "Error: verifier does not match passcode and salt",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202022 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
+      "expected_output": "[  ERROR] - Verifier validation failed: the provided verifier does not match the computed verifier from passcode and salt"
+    },
+    {
+      "description": "Error: iteration-count below minimum (999)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --iteration-count 999",
+      "expected_output": "[  ERROR] - --iteration-count must be between 1000 and 100000"
+    },
+    {
+      "description": "Error: iteration-count above maximum (100001)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --iteration-count 100001",
+      "expected_output": "[  ERROR] - --iteration-count must be between 1000 and 100000"
+    },
+    {
+      "description": "factory partition with specified spake2p salt, iteration count and verifier",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --passcode 20202021 --discriminator 3840 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\" --iteration-count 20000",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
     }
   ]
 }
