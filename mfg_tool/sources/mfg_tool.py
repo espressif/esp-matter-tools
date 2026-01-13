@@ -93,7 +93,7 @@ UUIDs = list()
 SECURE_CERT_INFO = list() # list of dicts, one for each device
 
 def generate_passcodes(args):
-    iter_count_max = 10000
+    iteration_count = args.iteration_count
     salt_len_max = 32
     with open(OUT_FILE['pin_csv'], 'w', newline='') as f:
         writer = csv.writer(f)
@@ -102,18 +102,27 @@ def generate_passcodes(args):
         else:
             writer.writerow(["Index", "PIN Code", "Iteration Count", "Salt", "Verifier"])
         for i in range(0, args.count):
-            salt = os.urandom(salt_len_max)
-            if args.enable_dynamic_passcode:
-                writer.writerow([i, iter_count_max, base64.b64encode(salt).decode('utf-8')])
-            else:
-                if args.passcode:
-                    passcode = args.passcode
+            # If user provided both salt and verifier, use them directly
+            # Note: validate_args() has already verified that passcode is provided when salt and verifier are set
+            if args.salt and args.verifier:
+                if args.enable_dynamic_passcode:
+                    writer.writerow([i, iteration_count, args.salt])
                 else:
-                    passcode = random.randint(1, 99999998)
-                    if passcode in INVALID_PASSCODES:
-                        passcode -= 1
-                verifier = generate_verifier(passcode, salt, iter_count_max)
-                writer.writerow([i, passcode, iter_count_max, base64.b64encode(salt).decode('utf-8'), base64.b64encode(verifier).decode('utf-8')])
+                    writer.writerow([i, args.passcode, iteration_count, args.salt, args.verifier])
+            else:
+                # Generate salt and verifier automatically
+                salt = os.urandom(salt_len_max)
+                if args.enable_dynamic_passcode:
+                    writer.writerow([i, iteration_count, base64.b64encode(salt).decode('utf-8')])
+                else:
+                    if args.passcode:
+                        passcode = args.passcode
+                    else:
+                        passcode = random.randint(1, 99999998)
+                        if passcode in INVALID_PASSCODES:
+                            passcode -= 1
+                    verifier = generate_verifier(passcode, salt, iteration_count)
+                    writer.writerow([i, passcode, iteration_count, base64.b64encode(salt).decode('utf-8'), base64.b64encode(verifier).decode('utf-8')])
 
 
 def generate_discriminators(args):
@@ -693,6 +702,15 @@ def get_args():
                                          not include the spake2p verifier. so this option should work with a custom \
                                          CommissionableDataProvider which can generate random passcode and \
                                          corresponding verifier')
+    g_commissioning.add_argument('--salt', type=str,
+                                 help='The salt for SPAKE2+ verifier generation, provided as base64 encoded string. \
+                                         Must be used together with --verifier and --passcode.')
+    g_commissioning.add_argument('--verifier', type=str,
+                                 help='The SPAKE2+ verifier, provided as base64 encoded string. \
+                                         Must be used together with --salt and --passcode.')
+    g_commissioning.add_argument('--iteration-count', type=any_base_int, default=10000,
+                                 help='The iteration count for SPAKE2+ verifier generation. \
+                                         Valid range: 1000 to 100000. Default is 10000.')
     g_commissioning.add_argument('--commissionable-data-in-secure-cert', action="store_true", required=False,
                                  help='Store commissionable data in secure cert partition. \
                                         By default, commissionable data is stored in nvs factory partition. \

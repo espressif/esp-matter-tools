@@ -1,3 +1,10 @@
+# [1.0.20] - (12-January-2026)
+
+* Added support for specifying custom SPAKE2+ parameters:
+    * `--salt`: Specify the salt for SPAKE2+ verifier generation.
+    * `--verifier`: Specify the SPAKE2+ verifier.
+    * `--iteration-count`: Specify the iteration count for SPAKE2+ verifier generation.
+
 # [1.0.18] - (17-November-2025)
 
 * ci: Added Support for Python versions 3.8, 3.9, 3.10, 3.11, 3.12, and 3.13.

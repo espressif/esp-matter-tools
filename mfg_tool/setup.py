@@ -63,7 +63,7 @@ except ImportError:
     )
     exit(1)
 
-VERSION = "1.0.19"
+VERSION = "1.0.20"
 
 long_description = """
 ====================

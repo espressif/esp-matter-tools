@@ -29,6 +29,8 @@ import binascii
 from bitarray import bitarray
 from bitarray.util import ba2int
 
+from deps.spake2p import generate_verifier
+
 ROTATING_DEVICE_ID_UNIQUE_ID_LEN_BITS = 128
 SERIAL_NUMBER_LEN = 16
 
@@ -219,6 +221,36 @@ def validate_basic_cluster_info(args):
     check_str_range(args.product_label, 1, 64, 'Product Label')
     check_str_range(args.product_url, 1, 256, 'Product URL')
 
+
+# Validates that the passcode, salt, and verifier are consistent.
+# Re-compute the verifier using passcode and salt, then compare with the provided verifier.
+def validate_spake2p_params(passcode, salt_b64, verifier_b64, iteration_count):
+    try:
+        salt = base64.b64decode(salt_b64)
+    except Exception as e:
+        logging.error(f'Failed to decode salt from base64: {e}')
+        sys.exit(1)
+
+    try:
+        provided_verifier = base64.b64decode(verifier_b64)
+    except Exception as e:
+        logging.error(f'Failed to decode verifier from base64: {e}')
+        sys.exit(1)
+
+    computed_verifier = generate_verifier(passcode, salt, iteration_count)
+
+    if computed_verifier != provided_verifier:
+        logging.error('Verifier validation failed: the provided verifier does not match the computed verifier from passcode and salt')
+        logging.error(f'  Provided passcode: {passcode}')
+        logging.error(f'  Provided salt (base64): {salt_b64}')
+        logging.error(f'  Provided verifier (base64): {verifier_b64}')
+        logging.error(f'  Provided iteration-count: {iteration_count}')
+        logging.error(f'  Computed verifier (base64): {base64.b64encode(computed_verifier).decode("utf-8")}')
+        sys.exit(1)
+
+    logging.info('Verifier validation successful: passcode, salt, and verifier are consistent')
+
+
 # Validates the input arguments, this calls the above functions
 def validate_args(args):
     # csv and mcsv both should present or none
@@ -240,14 +272,32 @@ def validate_args(args):
     validate_ds_peripheral_info(args)
     validate_basic_cluster_info(args)
 
-    # If discriminator/passcode/DAC/serial_number/rotating_device_id is present
+    # Validate iteration count range
+    VERIFY_OR_EXIT(1000 <= args.iteration_count <= 100000,
+                   '--iteration-count must be between 1000 and 100000')
+
+    # Validate salt and verifier arguments
+    # Both must be provided together, and passcode is required when they are provided
+    if args.salt is not None or args.verifier is not None:
+        VERIFY_OR_EXIT(args.salt is not None and args.verifier is not None,
+                       '--salt and --verifier must be provided together')
+        VERIFY_OR_EXIT(args.passcode is not None,
+                       '--passcode is required when --salt and --verifier are provided')
+        VERIFY_OR_EXIT(not args.enable_dynamic_passcode,
+                       '--salt and --verifier cannot be used with --enable-dynamic-passcode')
+        # Verify that passcode, salt and verifier are consistent
+        validate_spake2p_params(args.passcode, args.salt, args.verifier, args.iteration_count)
+
+    # If discriminator/passcode/DAC/serial_number/rotating_device_id/salt/verifier is present
     # then we are restricting the number of partitions to 1
     if (args.discriminator is not None
             or args.passcode is not None
             or args.dac_key is not None
             or args.serial_num is not None
-            or args.rd_id_uid is not None):
-        VERIFY_OR_EXIT(args.count == 1, 'Number of partitions should be 1 when discriminator or passcode or DAC or serial number or rotating device id is present')
+            or args.rd_id_uid is not None
+            or args.salt is not None
+            or args.verifier is not None):
+        VERIFY_OR_EXIT(args.count == 1, 'Number of partitions should be 1 when discriminator or passcode or DAC or serial number or rotating device id or salt or verifier is present')
 
     # either --dac-in-secure-cert is acceptable or all in secure cert
     if args.commissionable_data_in_secure_cert or args.rd_id_uid_in_secure_cert:
