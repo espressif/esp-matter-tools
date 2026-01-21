@@ -173,7 +173,7 @@ def write_chip_mcsv_header():
 
 def append_chip_mcsv_row(row_data):
     logging.debug('Appending chip master CSV row...')
-    with open(OUT_FILE['mcsv'], 'a', newline='') as f:
+    with open(OUT_FILE['mcsv'], 'a', encoding='utf-8', newline='') as f:
         # row_data is already CSV formatted from chip_get_values_as_csv()
         # so we just write it directly without splitting
         f.write(row_data + '\n')
