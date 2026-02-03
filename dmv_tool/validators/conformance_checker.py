@@ -1283,7 +1283,6 @@ def validate_device_conformance(
                             endpoint_result["device_types"].append({
                                 "device_type_id": device_type_hex,
                                 "device_type_name": "vendor_specific",
-                                "is_compliant": True,  # Can't validate, assume compliant
                                 "skipped": True,
                                 "reason": "Vendor-specific device type - no requirements in spec"
                             })
@@ -1295,7 +1294,6 @@ def validate_device_conformance(
                             endpoint_result["device_types"].append({
                                 "device_type_id": device_type_hex,
                                 "device_type_name": "unknown",
-                                "is_compliant": False,
                                 "skipped": True,
                                 "reason": f"Device type {device_type_hex} not found in spec"
                             })
