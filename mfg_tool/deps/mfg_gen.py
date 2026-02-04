@@ -6,6 +6,7 @@
 import argparse
 import csv
 import os
+import sys
 import logging
 from itertools import zip_longest
 from pathlib import Path
@@ -126,7 +127,7 @@ def verify_data_in_file(input_config_file, input_values_file, config_file_keys, 
 
     except Exception as err:
         logging.error(err)
-        exit(1)
+        sys.exit(1)
 
 
 def get_keys(keys_in_values_file, config_file_keys):
@@ -315,7 +316,7 @@ def create_intermediate_csv(args, keys_in_values_file, keys_repeat, is_encr=Fals
 
     except Exception as e:
         logging.error(e)
-        exit(1)
+        sys.exit(1)
 
 
 def verify_file_format(args):

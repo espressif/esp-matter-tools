@@ -20,9 +20,9 @@ except ImportError:
         "Please see the installation section in the esp-matter-mfg-tool "
         "documentation for instructions on how to install it."
     )
-    exit(1)
+    sys.exit(1)
 
-VERSION = "1.0.21"
+VERSION = "1.0.22"
 
 long_description = """
 ====================
