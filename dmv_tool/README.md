@@ -16,6 +16,7 @@ dmv_tool/
 ├── data/                       # Pre-generated validation data JSONs
 ├── generators/                 # XML specification parsing and JSON generation
 ├── parsers/                    # Log parsing functionality
+├── ui/                         # Web UI (Device Datamodel Validator)
 ├── utils/                      # utility functions
 ├── validators/                 # Core validation logic
 
@@ -71,6 +72,18 @@ esp-matter-dm-validator generate-reference-json \
   --spec-version-dir 1.4 \
   --output-dir .
 ```
+
+## Web UI
+
+The Device Datamodel Validator is also available as a web app. You can run it locally with Python’s built-in HTTP server.
+
+### Run the Web UI locally
+```bash
+cd dmv_tool/ui
+python3 -m http.server 8000
+```
+
+Then open **http://localhost:8000** in your browser.
 
 ## Use as a Python module
 
