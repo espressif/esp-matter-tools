@@ -256,7 +256,9 @@ class DatamodelParser:
 
             if base_attributes:
                 for base_attribute in base_attributes:
-                    if base_attribute.name not in self.processed_attrs:
+                    if convert_to_snake_case(base_attribute.name) not in [
+                        convert_to_snake_case(name) for name in self.processed_attrs
+                    ]:
                         self.cluster.attributes.add(base_attribute)
 
             logger.debug(
@@ -308,7 +310,9 @@ class DatamodelParser:
 
             if base_commands:
                 for base_command in base_commands:
-                    if base_command.name not in self.processed_commands:
+                    if convert_to_snake_case(base_command.name) not in [
+                        convert_to_snake_case(name) for name in self.processed_commands
+                    ]:
                         self.cluster.commands.add(base_command)
 
             logger.debug(
@@ -316,7 +320,7 @@ class DatamodelParser:
             )
 
     class EventParser:
-        """ """
+        """Class for parsing event data"""
 
         def __init__(self, cluster, feature_map, datamodel):
             self.cluster = cluster
@@ -352,7 +356,9 @@ class DatamodelParser:
 
             if base_events:
                 for base_event in base_events:
-                    if base_event.name not in self.processed_events:
+                    if convert_to_snake_case(base_event.name) not in [
+                        convert_to_snake_case(name) for name in self.processed_events
+                    ]:
                         self.cluster.events.add(base_event)
 
             logger.debug(
