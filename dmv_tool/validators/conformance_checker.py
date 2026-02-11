@@ -670,6 +670,7 @@ def validate_cluster(
         "cluster_name": cluster_name,
         "cluster_type": cluster_type,
         "is_compliant": True,
+        "cluster_present": False,  # Track if cluster actually exists on device
         "missing_elements": [],
         "duplicate_elements": [],
         "revision_issues": [],
@@ -686,6 +687,9 @@ def validate_cluster(
         cluster_exists = cluster_id in endpoint_clusters
         if cluster_exists:
             actual_cluster = endpoint_clusters[cluster_id]
+
+    # Update cluster_present based on whether cluster actually exists
+    result["cluster_present"] = cluster_exists
 
     if cluster_required is True:
         # Cluster is required and must be compliant
@@ -1270,9 +1274,34 @@ def validate_device_conformance(
                         )
 
                     else:
-                        raise ValueError(
-                            f"No requirements found for device type {device_type_id_int}"
-                        )
+                        # Unknown device type - likely vendor-specific
+                        # Log warning and continue instead of crashing
+                        device_type_hex = f"0x{device_type_id_int:08X}"
+                        is_vendor_specific = device_type_id_int >= 0xFFF00000
+
+                        if is_vendor_specific:
+                            logger.warning(
+                                f"Skipping vendor-specific device type {device_type_hex} "
+                                f"(no validation requirements available)"
+                            )
+                            endpoint_result["device_types"].append({
+                                "device_type_id": device_type_hex,
+                                "device_type_name": "vendor_specific",
+                                "skipped": True,
+                                "reason": "Vendor-specific device type - no requirements in spec"
+                            })
+                        else:
+                            logger.warning(
+                                f"Unknown device type {device_type_hex} not found in "
+                                f"Matter specification requirements"
+                            )
+                            endpoint_result["device_types"].append({
+                                "device_type_id": device_type_hex,
+                                "device_type_name": "unknown",
+                                "skipped": True,
+                                "reason": f"Device type {device_type_hex} not found in spec"
+                            })
+                            endpoint_result["is_compliant"] = False
 
             validation_results["endpoints"].append(endpoint_result)
 

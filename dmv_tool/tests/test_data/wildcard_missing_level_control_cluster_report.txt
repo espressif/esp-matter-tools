@@ -40,16 +40,12 @@ Cluster ID | Cluster Name                  | Type   | Device Type Name | Status 
 ----------------------------------------------------------------------------------------------
 0x001F     | access_control                | Server | root_node        | Compliant | OK       
 0x0028     | basic_information             | Server | root_node        | Compliant | OK       
-0x002B     | localization_configuration    | Server | root_node        | Compliant | OK       
-0x002C     | time_format_localization      | Server | root_node        | Compliant | OK       
-0x002D     | unit_localization             | Server | root_node        | Compliant | OK       
 0x0030     | general_commissioning         | Server | root_node        | Compliant | OK       
 0x0031     | network_commissioning         | Server | root_node        | Compliant | OK       
 0x0033     | general_diagnostics           | Server | root_node        | Compliant | OK       
 0x003C     | administrator_commissioning   | Server | root_node        | Compliant | OK       
 0x003E     | operational_credentials       | Server | root_node        | Compliant | OK       
 0x003F     | group_key_management          | Server | root_node        | Compliant | OK       
-0x0046     | icd_management                | Server | root_node        | Compliant | OK       
 0x0029     | ota_software_update_provider  | Client | ota_requestor    | Compliant | OK       
 0x002A     | ota_software_update_requestor | Server | ota_requestor    | Compliant | OK       
 
@@ -74,14 +70,12 @@ Device Type ID | Device Type Name     | Status        | Clusters
 
 🔧 Endpoint 1 Complete Cluster Conformance
 =========================================
-Cluster ID | Cluster Name      | Type   | Device Type Name     | Status        | Revisions
-------------------------------------------------------------------------------------------
-0x0003     | identify          | Server | extended_color_light | Non-Compliant | 1 errors 
-0x0004     | groups            | Server | extended_color_light | Compliant     | OK       
-0x0006     | on_off            | Server | extended_color_light | Compliant     | OK       
-0x0008     | level_control     | Server | extended_color_light | Non-Compliant | OK       
-0x0062     | scenes_management | Server | extended_color_light | Non-Compliant | OK       
-0x0300     | color_control     | Server | extended_color_light | Compliant     | OK       
+Cluster ID | Cluster Name  | Type   | Device Type Name     | Status        | Revisions
+--------------------------------------------------------------------------------------
+0x0003     | identify      | Server | extended_color_light | Non-Compliant | 1 errors 
+0x0004     | groups        | Server | extended_color_light | Compliant     | OK       
+0x0006     | on_off        | Server | extended_color_light | Compliant     | OK       
+0x0300     | color_control | Server | extended_color_light | Compliant     | OK       
 
 
 Endpoint 1 Recommendations:
