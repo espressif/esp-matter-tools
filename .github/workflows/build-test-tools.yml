@@ -1,0 +1,158 @@
+# Copyright 2026 Espressif Systems (Shanghai) PTE LTD
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build and Test esp-matter-tools
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  changes:
+    name: detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      mfg_tool: ${{ steps.filter.outputs.mfg_tool }}
+      dmv_tool: ${{ steps.filter.outputs.dmv_tool }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            mfg_tool:
+              - 'mfg_tool/**'
+            dmv_tool:
+              - 'dmv_tool/**'
+
+  lint:
+    name: ruff check
+    runs-on: ubuntu-latest
+    container: python:3.9-alpine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ruff
+        run: python3 -m pip install --upgrade pip ruff
+      - name: Ruff check
+        run: ruff check .
+
+  build_mfg_tool:
+    name: build mfg_tool (Python ${{ matrix.python_version }})
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.mfg_tool == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    container: python:${{ matrix.python_version }}-alpine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          cd mfg_tool
+          mkdir -p dist/${PYTHON_VERSION}
+          python3 -m pip install --upgrade pip build setuptools
+          python3 -m build -o dist/${PYTHON_VERSION}
+        env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
+      - name: Upload mfg_tool dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfg_tool-${{ matrix.python_version }}
+          path: mfg_tool/dist/${{ matrix.python_version }}
+
+  test_mfg_tool:
+    name: test mfg_tool (Python ${{ matrix.python_version }})
+    runs-on: ubuntu-latest
+    needs: [changes, build_mfg_tool]
+    if: always() && needs.changes.outputs.mfg_tool == 'true' && needs.build_mfg_tool.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    container: python:${{ matrix.python_version }}-bullseye
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download mfg_tool dist
+        uses: actions/download-artifact@v4
+        with:
+          name: mfg_tool-${{ matrix.python_version }}
+          path: mfg_tool/dist/${{ matrix.python_version }}
+      - name: Install wheel and test deps
+        run: |
+          cd mfg_tool
+          python3 -m pip install --upgrade pip
+          python3 -m pip install dist/${PYTHON_VERSION}/esp_matter_mfg_tool*.whl
+          python3 -m pip install -r requirements-test.txt
+        env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
+      - name: Pytest
+        run: python3 -m pytest tests/ -v -s --log-cli-level=INFO
+        working-directory: mfg_tool
+
+  build_dmv_tool:
+    name: build dmv_tool (Python ${{ matrix.python_version }})
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.dmv_tool == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    container: python:${{ matrix.python_version }}-alpine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          cd dmv_tool
+          mkdir -p dist/${PYTHON_VERSION}
+          python3 -m pip install --upgrade pip build setuptools
+          python3 -m build -o dist/${PYTHON_VERSION}
+        env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
+      - name: Upload dmv_tool dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmv_tool-${{ matrix.python_version }}
+          path: dmv_tool/dist/${{ matrix.python_version }}
+
+  test_dmv_tool:
+    name: test dmv_tool (Python ${{ matrix.python_version }})
+    runs-on: ubuntu-latest
+    needs: [changes, build_dmv_tool]
+    if: always() && needs.changes.outputs.dmv_tool == 'true' && needs.build_dmv_tool.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ["3.10", "3.11", "3.12", "3.13"]
+    container: python:${{ matrix.python_version }}-bullseye
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download dmv_tool dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dmv_tool-${{ matrix.python_version }}
+          path: dmv_tool/dist/${{ matrix.python_version }}
+      - name: Install wheel and test deps
+        run: |
+          cd dmv_tool
+          python3 -m pip install --upgrade pip
+          python3 -m pip install dist/${PYTHON_VERSION}/esp_matter_dm_validator*.whl
+          python3 -m pip install -r requirements-test.txt
+        env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
+      - name: Pytest
+        run: python3 -m pytest tests/ -v -s --log-cli-level=INFO
+        working-directory: dmv_tool
