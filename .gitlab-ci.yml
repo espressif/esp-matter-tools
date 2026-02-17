@@ -34,7 +34,7 @@ build_mfg_tool:
     expire_in: 1 week
 
   script:
-    - apk add --no-cache patch
+    - apk add --no-cache
     - cd mfg_tool
     - mkdir -p dist/${PYTHON_VERSION}
     - python3 -m pip install --upgrade pip build setuptools
