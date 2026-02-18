@@ -6,11 +6,19 @@
 import argparse
 import csv
 import os
+import sys
+import logging
 from itertools import zip_longest
 from pathlib import Path
 
 import esp_idf_nvs_partition_gen.nvs_partition_gen as nvs_partition_gen
 
+# Supported log levels, mapping string values required for argument
+# parsing into logging constants
+__LOG_LEVELS__ = {
+    'info': logging.INFO,
+    'error': logging.ERROR,
+}
 
 def create_temp_files(args):
     new_filenames = []
@@ -63,8 +71,7 @@ def verify_keys_exist(values_file_keys, input_config_file):
 
         if keys_missing:
             for line_num, key in keys_missing:
-                print('Key:`', str(key), '` at line no:', str(line_num),
-                      ' in config file is not found in values file.')
+                logging.error(f"Key: `{key}` at line no: {line_num} in config file is not found in values file.")
             raise SystemExit(1)
 
 
@@ -119,8 +126,8 @@ def verify_data_in_file(input_config_file, input_values_file, config_file_keys, 
         verify_values_exist(input_values_file, keys_in_values_file)
 
     except Exception as err:
-        print(err)
-        exit(1)
+        logging.error(err)
+        sys.exit(1)
 
 
 def get_keys(keys_in_values_file, config_file_keys):
@@ -283,7 +290,11 @@ def create_intermediate_csv(args, keys_in_values_file, keys_repeat, is_encr=Fals
 
                 # Add values corresponding to each key to csv intermediate file
                 add_data_to_file(config_data_to_write, key_value_pair, output_csv_file)
-                print('\nCreated CSV file: ===>', output_csv_file)
+                logging.info(f"Created CSV file: ===> {output_csv_file}")
+
+                if not args.generate_bin:
+                    logging.info("Skipping NVS bin generation, generating only CSV files.")
+                    continue
 
                 # Verify if output bin file does not exist
                 bin_filename = args.prefix + '-' + file_identifier_value + '.' + 'bin'
@@ -301,11 +312,11 @@ def create_intermediate_csv(args, keys_in_values_file, keys_repeat, is_encr=Fals
                 else:
                     nvs_partition_gen.generate(args)
 
-            print('\nFiles generated in %s ...' % args.outdir)
+            logging.info('Files generated in %s ...' % args.outdir)
 
     except Exception as e:
-        print(e)
-        exit(1)
+        logging.error(e)
+        sys.exit(1)
 
 
 def verify_file_format(args):
@@ -365,7 +376,7 @@ def generate(args):
     encryption_enabled = False
     if (args.keygen or args.inputkey):
         encryption_enabled = True
-        print('\nGenerating encrypted NVS binary images...')
+        logging.info('Generating encrypted NVS binary images...')
     # Create intermediate csv file
     create_intermediate_csv(args, keys_in_values_file, keys_repeat, is_encr=encryption_enabled)
 
@@ -376,6 +387,7 @@ def generate_key(args):
 
 def main():
     try:
+
         parser = argparse.ArgumentParser(description='\nESP Manufacturing Utility', formatter_class=argparse.RawTextHelpFormatter)
         subparser = parser.add_subparsers(title='Commands',
                                           dest='command',
@@ -443,6 +455,15 @@ def main():
         parser_gen.add_argument('--output',
                                 default=None,
                                 help=argparse.SUPPRESS)
+        parser_gen.add_argument('--no-bin',
+                                action='store_false',
+                                dest='generate_bin',
+                                help='Do not generate the factory partition binary')
+        parser_gen.add_argument('--log-level',
+                                default='info',
+                                choices=__LOG_LEVELS__.keys(),
+                                help='Set the log level (default: %(default)s)')
+
         parser_gen_key = subparser.add_parser('generate-key',
                                               help='Generate keys for encryption',
                                               formatter_class=argparse.RawTextHelpFormatter)
@@ -470,12 +491,14 @@ def main():
                                     help='File having the HMAC key for generating the NVS encryption keys')
 
         args = parser.parse_args()
+        # Configure logging
+        logging.basicConfig(format='[%(asctime)s] [%(levelname)7s] - %(message)s', level=__LOG_LEVELS__[args.log_level])
         args.func(args)
 
     except ValueError as err:
-        print(err)
+        logging.error(err)
     except Exception as e:
-        print(e)
+        logging.error(e)
 
 
 if __name__ == '__main__':

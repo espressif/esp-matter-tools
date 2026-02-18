@@ -1,3 +1,6 @@
+# [1.0.22] - (17-February-2026)
+* Removed pkg_resources dependency
+
 # [1.0.20] - (12-January-2026)
 
 * Added support for specifying custom SPAKE2+ parameters:
