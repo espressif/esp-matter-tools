@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Datamodel Parser & Validator</title>
+
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>
+                <i class="fas fa-microchip"></i>
+                Device Datamodel Parser & Validator
+            </h1>
+            <p>Parse device logs and validate compliance with Matter specifications</p>
+        </header>
+
+        <div id="pyodide-loading" class="loading-overlay"
+            style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+            <div style="text-align: center;">
+                <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                <h3>Loading Python Runtime...</h3>
+                <p>Initializing Pyodide and loading validation modules</p>
+            </div>
+        </div>
+
+        <main class="main-content" id="mainContent"             style="display: none;">
+            <section class="upload-section">
+                <div id="uploadSection">
+                    <h2 class="section-title">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Upload Wildcard File
+                    </h2>
+
+                    <div class="command-instructions">
+                        <h3><i class="fas fa-terminal"></i> Generate Wildcard Logs</h3>
+                        <p><strong>1. Commission the device using the chip-tool</strong></p>
+                        <p><strong>2. Use the following chip-tool command to generate wildcard logs:</strong></p>
+                        <div class="command-box">
+                            <code>./chip-tool any read-by-id 0xFFFFFFFF 0xFFFFFFFF &lt;node-id&gt; 0xFFFF > wildcard_logs.txt</code>
+                            <button class="copy-btn" id="copyCommandBtn" title="Copy command" type="button">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="command-note">
+                            <i class="fas fa-info-circle"></i>
+                            The wildcard_logs.txt file will be created in the <strong>same</strong> directory
+                        </div>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Drop your .txt file here or click to browse</div>
+                            <div class="upload-subtext">Supports .txt files containing device log data</div>
+
+                            <input type="file" name="file" accept=".txt" class="file-input" id="fileInput" required>
+                            <button type="button" class="btn btn-primary" id="uploadBtn">
+                                <i class="fas fa-folder-open"></i> Choose File
+                            </button>
+                        </div>
+
+                        <div id="errorMessage" class="error-message" style="display: none;"></div>
+                    </form>
+                </div>
+
+                <div id="uploadSuccessSection" style="display: none;">
+                    <h2 class="section-title">
+                        <i class="fas fa-check-circle"></i>
+                        File Upload Complete
+                    </h2>
+                    <div class="upload-success-card">
+                        <div class="success-header">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>File processed successfully!</h3>
+                        </div>
+                        <div class="success-content">
+                            <div class="file-info-card">
+                                <i class="fas fa-file-alt"></i>
+                                <div class="file-details">
+                                    <div class="filename" id="uploadedFilename"></div>
+                                    <div class="file-status">Parsed and ready for compliance validation</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="next-steps">
+                            <p>Now select a version to validate compliance against:</p>
+                        </div>
+
+                        <div class="version-selection mt-3">
+                            <h4><i class="fas fa-cogs"></i> Select Version for Compliance Check</h4>
+
+                            <div id="autoDetectedVersion" class="auto-detected-version"
+                                style="display: none; background: #e8f5e9; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #4caf50;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <i class="fas fa-search" style="color: #4caf50;"></i>
+                                    <span id="detectedVersionText"></span>
+                                </div>
+                                <div style="margin-top: 6px; color: #b26a00; font-size: 0.98em;">
+                                    <i class="fas fa-exclamation-circle" style="color: #ff9800;"></i>
+                                    <strong>Note:</strong> The auto-detected version may not always be correct. Please
+                                    review and select the correct version if needed before validating.
+                                </div>
+                            </div>
+
+                            <div class="version-form">
+                                <div class="form-group">
+                                    <label for="complianceVersion">
+                                        <i class="fas fa-code-branch"></i>
+                                        <span id="versionLabel">Data Model Version</span>
+                                    </label>
+                                    <select id="complianceVersion" class="form-control">
+                                        <option value="">Select version to validate against...</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="button" id="validateBtn" class="btn btn-success">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Validate Compliance
+                                    </button>
+                                    <button type="button" id="uploadNewBtn" class="btn btn-secondary">
+                                        <i class="fas fa-upload"></i> Upload New File
+                                    </button>
+                                </div>
+
+                                <div id="validateMessage" class="message-container" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    Validation Results
+                </h2>
+
+                <div class="validation-summary">
+                    <h3><i class="fas fa-chart-bar"></i> Endpoint Summary</h3>
+                    <div class="summary-stats">
+                        <div class="stat-card stat-total">
+                            <div class="stat-value" id="totalEndpoints">0</div>
+                            <div class="stat-label">Total Endpoints</div>
+                        </div>
+                        <div class="stat-card stat-compliant">
+                            <div class="stat-value" id="compliantEndpoints">0</div>
+                            <div class="stat-label">Compliant</div>
+                        </div>
+                        <div class="stat-card stat-non-compliant">
+                            <div class="stat-value" id="nonCompliantEndpoints">0</div>
+                            <div class="stat-label">Non-Compliant</div>
+                        </div>
+                        <div class="stat-card stat-compliance">
+                            <div class="stat-value" id="complianceRate">0%</div>
+                            <div class="stat-label">Compliance Rate</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button id="downloadValidationReportBtn" type="button" class="btn btn-success">
+                            <i class="fas fa-download"></i> Download Validation Report
+                        </button>
+                        <button id="downloadParsedDataBtn" type="button" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Download Parsed Data
+                        </button>
+                    </div>
+
+                    <div class="mt-3"
+                        style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                        <h4 style="margin: 0 0 10px 0; color: #1976d2; font-size: 1em;">
+                            <i class="fas fa-info-circle"></i> Validation Scope
+                        </h4>
+                        <div style="color: #424242; font-size: 0.9em;">
+                            <strong>✅ Mandatory Elements Verified:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Device type and cluster revisions</li>
+                                <li>Clusters marked as mandatory by conformance on the device type</li>
+                                <li>Mandatory attributes, commands, and features of each required cluster on the device
+                                </li>
+                                <li>Optional features added by the application, along with their required attributes and
+                                    commands</li>
+                            </ul>
+
+                            <strong>⚠️ Not Fully Validated (Optional / Provisional / Disallowed / Deprecated):</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Optional clusters present on the device</li>
+                                <li>Optional attributes, commands, and events within clusters</li>
+                                <li>Extra elements present on the device other than mandatory</li>
+                                <li>Events (not present in wildcard logs); warnings shown only for missing mandatory
+                                    events</li>
+                                <li>Attributes and commands dependent on multiple features</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detailed-results-container">
+                    <div class="detailed-results-header" id="detailedResultsHeader"
+                        style="cursor: pointer; background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #e9ecef;">
+                        <h3 style="margin: 0; display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fas fa-info-circle"></i> Detailed Compliance Results</span>
+                            <span class="toggle-icon" style="font-size: 0.8em; color: #666;">
+                                <i class="fas fa-chevron-down"></i> Click to expand
+                            </span>
+                        </h3>
+                    </div>
+
+                    <div class="endpoints-grid" id="detailedResults" style="display: none;"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer" style="text-align: center; padding: 20px; color: var(--text-light); margin-top: 40px;">
+            <p>&copy; 2025 Espressif Systems (Shanghai) Co., Ltd.</p>
+        </footer>
+    </div>
+
+    <div id="clusterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Cluster Details</h2>
+                <button class="modal-close" id="modalCloseBtn" type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay"></div>
+
+    <div id="validationLoader" class="validation-loader" style="display: none;">
+        <div class="loader-content">
+            <div class="loader-spinner">
+                <i class="fas fa-shield-alt fa-3x"></i>
+                <div class="spinner-ring"></div>
+            </div>
+            <h3 id="loaderTitle">Validating Compliance...</h3>
+            <p id="loaderMessage">Please wait while we validate your device against the selected data model version.</p>
+            <div class="loader-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">Initializing...</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="static/js/pyodide-bridge.js"></script>
+    <script type="module" src="static/js/app.js"></script>
+</body>
+
+</html>
