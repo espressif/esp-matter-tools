@@ -33,7 +33,7 @@ except ImportError:
           "documentation for instructions on how to install it.")
     exit(1)
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 long_description = """
 ====================================

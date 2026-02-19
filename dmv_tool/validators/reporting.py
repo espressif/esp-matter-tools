@@ -192,6 +192,11 @@ def print_conformance_summary(
                 if not isinstance(cluster, dict):
                     continue
 
+                # Skip clusters that don't actually exist on the device
+                cluster_present = cluster.get("cluster_present", True)
+                if not cluster_present:
+                    continue
+
                 cluster_id = cluster.get("cluster_id", "Unknown")
                 cluster_name = cluster.get("cluster_name", "Unknown")
                 cluster_type = cluster.get("cluster_type", "server")
