@@ -1247,64 +1247,12 @@
             {
                 "attributes": [
                     {
-                        "id": "0x0000",
-                        "name": "data_model_revision"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "vendor_name"
-                    },
-                    {
-                        "id": "0x0002",
-                        "name": "vendor_id"
-                    },
-                    {
-                        "id": "0x0003",
-                        "name": "product_name"
-                    },
-                    {
-                        "id": "0x0004",
-                        "name": "product_id"
-                    },
-                    {
-                        "id": "0x0005",
-                        "name": "node_label"
-                    },
-                    {
-                        "id": "0x0006",
-                        "name": "location"
-                    },
-                    {
-                        "id": "0x0007",
-                        "name": "hardware_version"
-                    },
-                    {
-                        "id": "0x0008",
-                        "name": "hardware_version_string"
-                    },
-                    {
-                        "id": "0x0009",
-                        "name": "software_version"
-                    },
-                    {
-                        "id": "0x000A",
-                        "name": "software_version_string"
-                    },
-                    {
                         "id": "0x0011",
                         "name": "reachable"
-                    },
-                    {
-                        "id": "0x0013",
-                        "name": "capability_minima"
                     }
                 ],
                 "commands": [],
                 "events": [
-                    {
-                        "id": "0x0000",
-                        "name": "start_up"
-                    },
                     {
                         "id": "0x0003",
                         "name": "reachable_changed"

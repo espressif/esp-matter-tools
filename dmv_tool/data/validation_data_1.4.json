@@ -1240,76 +1240,16 @@
             {
                 "attributes": [
                     {
-                        "id": "0x0000",
-                        "name": "data_model_revision"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "vendor_name"
-                    },
-                    {
-                        "id": "0x0002",
-                        "name": "vendor_id"
-                    },
-                    {
-                        "id": "0x0003",
-                        "name": "product_name"
-                    },
-                    {
-                        "id": "0x0004",
-                        "name": "product_id"
-                    },
-                    {
-                        "id": "0x0005",
-                        "name": "node_label"
-                    },
-                    {
-                        "id": "0x0006",
-                        "name": "location"
-                    },
-                    {
-                        "id": "0x0007",
-                        "name": "hardware_version"
-                    },
-                    {
-                        "id": "0x0008",
-                        "name": "hardware_version_string"
-                    },
-                    {
-                        "id": "0x0009",
-                        "name": "software_version"
-                    },
-                    {
-                        "id": "0x000A",
-                        "name": "software_version_string"
-                    },
-                    {
                         "id": "0x0011",
                         "name": "reachable"
                     },
                     {
                         "id": "0x0012",
                         "name": "unique_id"
-                    },
-                    {
-                        "id": "0x0013",
-                        "name": "capability_minima"
-                    },
-                    {
-                        "id": "0x0015",
-                        "name": "specification_version"
-                    },
-                    {
-                        "id": "0x0016",
-                        "name": "max_paths_per_invoke"
                     }
                 ],
                 "commands": [],
                 "events": [
-                    {
-                        "id": "0x0000",
-                        "name": "start_up"
-                    },
                     {
                         "id": "0x0003",
                         "name": "reachable_changed"
@@ -5244,16 +5184,7 @@
                 "type": "server"
             },
             {
-                "attributes": [
-                    {
-                        "id": "0x0000",
-                        "name": "supported_modes"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "current_mode"
-                    }
-                ],
+                "attributes": [],
                 "commands": [
                     {
                         "id": "0x0000",
@@ -5592,26 +5523,8 @@
     {
         "clusters": [
             {
-                "attributes": [
-                    {
-                        "id": "0x0000",
-                        "name": "supported_modes"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "current_mode"
-                    }
-                ],
-                "commands": [
-                    {
-                        "id": "0x0000",
-                        "name": "change_to_mode"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "change_to_mode_response"
-                    }
-                ],
+                "attributes": [],
+                "commands": [],
                 "events": [],
                 "features": [
                     {
@@ -11090,16 +11003,7 @@
                 "type": "server"
             },
             {
-                "attributes": [
-                    {
-                        "id": "0x0000",
-                        "name": "supported_modes"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "current_mode"
-                    }
-                ],
+                "attributes": [],
                 "commands": [
                     {
                         "id": "0x0000",
@@ -11375,16 +11279,7 @@
                 "type": "server"
             },
             {
-                "attributes": [
-                    {
-                        "id": "0x0000",
-                        "name": "supported_modes"
-                    },
-                    {
-                        "id": "0x0001",
-                        "name": "current_mode"
-                    }
-                ],
+                "attributes": [],
                 "commands": [
                     {
                         "id": "0x0000",
