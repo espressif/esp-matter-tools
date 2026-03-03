@@ -6,8 +6,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    paths:
-      - "dmv_tool/**"
 
 permissions:
   contents: read
@@ -24,13 +22,25 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare Pages content
+        run: |
+          mkdir public
+
+          # Copy index file
+          cp index.html public/index.html
+
+          # Copy DMV Tool
+          mkdir -p public/dmv_tool
+          cp -r dmv_tool/ui/* public/dmv_tool/
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dmv_tool/ui
+          path: public
 
       - name: Deploy to GitHub Pages
         id: deployment
