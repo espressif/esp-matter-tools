@@ -429,6 +429,52 @@
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
+    },
+    {
+      "test_num": 61,
+      "description": "Invalid efuse-key-id (6)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --efuse-key-id 6",
+      "expected_output": "Invalid value for '--efuse-key-id': 6 is not in the range -1<=x<=5"
+    },
+    {
+      "test_num": 62,
+      "description": "Valid efuse-key-id (1)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --efuse-key-id 1",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 63,
+      "description": "factory partition with multiple calendar types",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem --calendar-types Indian Gregorian -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 64,
+      "description": "factory partition with multiple fixed labels",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --fixed-labels 0/orientation/up 0/orientation/down",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 65,
+      "description": "factory partition with multiple supported modes",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --supported-modes 0/label1/1 1/label2/1",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 66,
+      "description": "factory partition with multiple locales",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --locales en-US en-GB",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
     }
   ]
 }

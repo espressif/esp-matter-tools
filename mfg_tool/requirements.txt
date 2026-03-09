@@ -10,4 +10,5 @@ python_stdnum==1.18
 esp-secure-cert-tool==2.3.6
 ecdsa==0.19.0
 esp_idf_nvs_partition_gen==0.1.9
-click
+click==8.1.7
+click-option-group == 0.5.7

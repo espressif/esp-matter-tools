@@ -28,7 +28,6 @@ import base64
 import random
 import logging
 import binascii
-import argparse
 import pyqrcode
 import contextlib
 from datetime import datetime
@@ -658,148 +657,6 @@ def generate_onboarding_data(args, index, discriminator, passcode):
 
     logging.debug('Generated onboarding data and QR Code')
 
-
-def get_args():
-    def any_base_int(s): return int(s, 0)
-
-    parser = argparse.ArgumentParser(description='Manufacuring partition generator tool',
-                                     formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
-
-    g_gen = parser.add_argument_group('General options')
-    g_gen.add_argument('-n', '--count', type=any_base_int, default=1,
-                       help='The number of manufacturing partition binaries to generate. Default is 1. \
-                              If --csv and --mcsv are present, the number of lines in the mcsv file is used.')
-
-    g_gen.add_argument('--target', default='esp32',
-                       help='The platform type of device. eg: one of esp32, esp32c3, etc.')
-    g_gen.add_argument('-s', '--size', type=any_base_int, default=0x6000,
-                       help='The size of manufacturing partition binaries to generate. Default is 0x6000.')
-    g_gen.add_argument('-e', '--encrypt', action='store_true', required=False,
-                      help='Encrypt the factory parititon NVS binary')
-    g_gen.add_argument('--log-level', default='info', choices=__LOG_LEVELS__.keys(),
-                      help='Set the log level (default: %(default)s)')
-    g_gen.add_argument('--outdir', default=os.path.join(os.getcwd(), 'out'),
-                      help='The output directory for the generated files (default: %(default)s)')
-    g_gen.add_argument('--no-bin', action='store_false', dest='generate_bin',
-                        help='Do not generate the factory partition binary')
-    g_gen.add_argument('--no-secure-cert-bin', action="store_true", required=False,
-                        help='If provided, secure cert partition binary will not be generated. \
-                            All the options related to secure cert partition will be ignored.')
-
-    g_commissioning = parser.add_argument_group('Commisioning options')
-    g_commissioning.add_argument('--passcode', type=any_base_int,
-                                 help='The passcode for pairing. Randomly generated if not specified.')
-    g_commissioning.add_argument('--discriminator', type=any_base_int,
-                                 help='The discriminator for pairing. Randomly generated if not specified.')
-    g_commissioning.add_argument('-cf', '--commissioning-flow', type=any_base_int, default=0,
-                                 help='Device commissioning flow, 0:Standard, 1:User-Intent, 2:Custom. \
-                                          Default is 0.', choices=[0, 1, 2])
-    g_commissioning.add_argument('-dm', '--discovery-mode', type=any_base_int, default=2,
-                                 help='The discovery mode for commissionable device discovery. \
-                                        2: BLE, 4: On-network, 6: BLE + On-network. Default is BLE.')
-    g_commissioning.add_argument('--enable-dynamic-passcode', action="store_true", required=False,
-                                 help='Enable dynamic passcode. If enabling this option, the generated binaries will \
-                                         not include the spake2p verifier. so this option should work with a custom \
-                                         CommissionableDataProvider which can generate random passcode and \
-                                         corresponding verifier')
-    g_commissioning.add_argument('--salt', type=str,
-                                 help='The salt for SPAKE2+ verifier generation, provided as base64 encoded string. \
-                                         Must be used together with --verifier and --passcode.')
-    g_commissioning.add_argument('--verifier', type=str,
-                                 help='The SPAKE2+ verifier, provided as base64 encoded string. \
-                                         Must be used together with --salt and --passcode.')
-    g_commissioning.add_argument('--iteration-count', type=any_base_int, default=10000,
-                                 help='The iteration count for SPAKE2+ verifier generation. \
-                                         Valid range: 1000 to 100000. Default is 10000.')
-    g_commissioning.add_argument('--commissionable-data-in-secure-cert', action="store_true", required=False,
-                                 help='Store commissionable data in secure cert partition. \
-                                        By default, commissionable data is stored in nvs factory partition. \
-                                        This option is only valid when --no-secure-cert-bin is not provided.')
-
-    g_dac = parser.add_argument_group('Device attestation credential options')
-    g_dac.add_argument('--dac-in-secure-cert', action="store_true", required=False,
-                        help='Store DAC in secure cert partition. By default, DAC is stored in nvs factory partition.')
-    g_dac.add_argument('-lt', '--lifetime', default=36500, type=any_base_int,
-                       help='Lifetime of the generated certificate. Default is 100 years if not specified, \
-                              this indicate that certificate does not have well defined expiration date.')
-    g_dac.add_argument('-vf', '--valid-from',
-                       help='The start date for the certificate validity period in format <YYYY>-<MM>-<DD> [ <HH>:<MM>:<SS> ]. \
-                              Default is current date.')
-    g_dac.add_argument('-cn', '--cn-prefix', default='ESP32',
-                       help='The common name prefix of the subject of the PAI certificate.')
-    # If DAC is present then PAI key is not required, so it is marked as not required here
-    # but, if DAC is not present then PAI key is required and that case is validated in validate_args()
-    g_dac.add_argument('-c', '--cert', help='The input certificate file in PEM format.')
-    g_dac.add_argument('-k', '--key', help='The input key file in PEM format.')
-    g_dac.add_argument('-cd', '--cert-dclrn', help='The certificate declaration file in DER format.')
-    g_dac.add_argument('--dac-cert', help='The input DAC certificate file in PEM format.')
-    g_dac.add_argument('--dac-key', help='The input DAC private key file in PEM format.')
-    g_dac.add_argument('-ds', '--ds-peripheral', action="store_true",
-                       help='Use DS Peripheral in generating secure cert partition.')
-    g_dac.add_argument('--efuse-key-id', type=int, choices=range(0, 6), default=-1,
-                        help='Provide the efuse key_id which contains/will contain HMAC_KEY, default is 1')
-    g_dac.add_argument('--port', dest='port', help='UART com port to which the ESP device is connected')
-    g_dac.add_argument('--pwd', '--password', dest='priv_key_pass', help='The password associated with the private key')
-
-    input_cert_group = g_dac.add_mutually_exclusive_group(required=False)
-    input_cert_group.add_argument('--paa', action='store_true', help='Use input certificate as PAA certificate.')
-    input_cert_group.add_argument('--pai', action='store_true', help='Use input certificate as PAI certificate.')
-
-    g_dev_inst_info = parser.add_argument_group('Device instance information options')
-    g_dev_inst_info.add_argument('-v', '--vendor-id', type=any_base_int, help='Vendor id', required=True)
-    g_dev_inst_info.add_argument('--vendor-name', help='Vendor name')
-    g_dev_inst_info.add_argument('-p', '--product-id', type=any_base_int, help='Product id', required=True)
-    g_dev_inst_info.add_argument('--product-name', help='Product name')
-    g_dev_inst_info.add_argument('--hw-ver', type=any_base_int, help='Hardware version')
-    g_dev_inst_info.add_argument('--hw-ver-str', help='Hardware version string')
-    g_dev_inst_info.add_argument('--mfg-date', help='Manufacturing date in format YYYY-MM-DD')
-    g_dev_inst_info.add_argument('--serial-num', help='Serial number')
-    g_dev_inst_info.add_argument('--enable-rotating-device-id', action='store_true', help='Enable Rotating device id in the generated binaries')
-    g_dev_inst_info.add_argument('--rd-id-uid',
-                        help='128-bit unique identifier for generating rotating device identifier, provide 32-byte hex string, e.g. "1234567890abcdef1234567890abcdef"')
-    product_finish_choices = [finish.name for finish in ProductFinish]
-    g_dev_inst_info.add_argument("--product-finish", type=str, choices=product_finish_choices,
-                        help='Product finishes choices for product appearance')
-    g_dev_inst_info.add_argument('--rd-id-uid-in-secure-cert', action="store_true", required=False,
-                        help='Enable Rotating device id in the secure cert partition. \
-                            By default, rotating device id is stored in nvs factory partition. \
-                            This option is only valid when --commissionable-data-in-secure-cert is provided.')
-
-    product_color_choices = [color.name for color in ProductColor]
-    g_dev_inst_info.add_argument("--product-color", type=str, choices=product_color_choices,
-                        help='Product colors choices for product appearance')
-
-    g_dev_inst_info.add_argument("--part-number", type=str, help='human readable product number')
-
-    g_dev_inst = parser.add_argument_group('Device instance options')
-    g_dev_inst.add_argument('--calendar-types', nargs='+',
-                            help='List of supported calendar types. Supported Calendar Types: Buddhist, Chinese, Coptic, \
-                                Ethiopian, Gregorian, Hebrew, Indian, Islamic, Japanese, Korean, Persian, Taiwanese')
-    g_dev_inst.add_argument('--locales', nargs='+',
-                            help='List of supported locales, Language Tag as defined by BCP47, eg. en-US en-GB')
-    g_dev_inst.add_argument('--fixed-labels', nargs='+',
-                            help='List of fixed labels, eg: "0/orientation/up" "1/orientation/down" "2/orientation/down"')
-
-    g_dev_inst.add_argument('--supported-modes', type=str, nargs='+', required=False,
-                        help='List of supported modes, eg: mode1/label1/ep/"tagValue1\\mfgCode, tagValue2\\mfgCode"  mode2/label2/ep/"tagValue1\\mfgCode, tagValue2\\mfgCode"  mode3/label3/ep/"tagValue1\\mfgCode, tagValue2\\mfgCode"')
-
-    g_basic = parser.add_argument_group('Few more Basic clusters options')
-    g_basic.add_argument('--product-label', help='Product label')
-    g_basic.add_argument('--product-url', help='Product URL')
-
-    g_extra_info = parser.add_argument_group('Extra information options using csv files')
-    g_extra_info.add_argument('--csv', help='CSV file containing the partition schema for extra options. \
-            [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#csv-configuration-file]')
-    g_extra_info.add_argument('--mcsv', help='Master CSV file containing optional/extra values specified by the user. \
-            [REF: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/mass_mfg.html#master-value-csv-file]')
-
-    if len(sys.argv) == 1:
-        parser.print_help(sys.stderr)
-        sys.exit(1)
-
-    return parser.parse_args()
-
-
 def add_optional_KVs(args):
     # Device instance information
     if args.vendor_id is not None:
@@ -918,10 +775,3 @@ def main_internal(args):
     generate_partitions('matter_partition', args.size, args.encrypt, args.generate_bin)
     organize_output_files('matter_partition', args)
     generate_summary(args)
-
-def main():
-    args = get_args()
-    main_internal(args)
-
-if __name__ == "__main__":
-    main()
