@@ -224,7 +224,7 @@ esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name "test vendor" \
     -c $MATTER_SDK_PATH/credentials/test/attestation/Chip-Test-PAI-FFF2-8001-Cert.pem \
     -cd $MATTER_SDK_PATH/credentials/test/certification-declaration/Chip-Test-CD-FFF2-8001.der \
     --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert \
-    --ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0
+    -ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0
 ```
 
 ## Flashing the manufacturing binary

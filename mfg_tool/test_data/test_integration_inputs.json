@@ -126,17 +126,17 @@
     },
     {
       "description": "DS peripheral with c3 target",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --ds --target esp32c3",
+      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32c3",
       "expected_output": "[  ERROR] - DS peripheral is only supported for esp32h2 target"
     },
     {
       "description": "DS peripheral with esp32h2 target but without efuse-key",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --ds --target esp32h2",
+      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32h2",
       "expected_output": "[  ERROR] - --efuse-key-id <value> is required when -ds or --ds-peripheral option is used"
     },
     {
       "description": "DS peripheral, esp32h2, efuse-key-id 1",
-      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --ds --target esp32h2 --efuse-key-id 1",
+      "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32h2 --efuse-key-id 1",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
@@ -208,7 +208,7 @@
     },
     {
       "description": "Secure cert with DS peripheral and all options",
-      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert --ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert -ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0",
       "expected_output": "ERROR: esp-secure-cert-tool exited with error"
     },
     {
