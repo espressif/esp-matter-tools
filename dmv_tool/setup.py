@@ -33,27 +33,30 @@ except ImportError:
           "documentation for instructions on how to install it.")
     exit(1)
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 long_description = """
 ====================================
 esp-matter-data-model-validator Tool
 ====================================
+
 A command-line utility for validating Matter device data model conformance
 against the official Matter specification.
 
-Source code for `esp-matter-data-model-validator` is
-`hosted on github <https://github.com/espressif/esp-matter-tools/tree/main/dmv_tool>`_.
+Source code for ``esp-matter-data-model-validator`` is hosted on GitHub:
+https://github.com/espressif/esp-matter-tools/tree/main/dmv_tool
 
 Documentation
 -------------
-Visit online `esp-matter-dm-validator documentation <https://github.com/espressif/esp-matter-tools/tree/main/dmv_tool>`_
-or run ``esp-matter-dm-validator -h``.
+Visit the online documentation:
+https://github.com/espressif/esp-matter-tools/tree/main/dmv_tool
+
+Or run ``esp-matter-dm-validator -h``.
 
 License
 -------
-The License for the project can be found
-`here <https://github.com/espressif/esp-matter-tools/tree/main/LICENSE>`_
+The license for the project can be found here:
+https://github.com/espressif/esp-matter-tools/tree/main/LICENSE
 """
 
 setup(
