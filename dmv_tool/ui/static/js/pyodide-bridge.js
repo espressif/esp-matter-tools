@@ -117,7 +117,7 @@ export async function getSupportedVersions() {
     const pythonCode = `from dmv_tool.configs.constants import SUPPORTED_SPEC_VERSIONS
 import json
 
-json.dumps(list(SUPPORTED_SPEC_VERSIONS))`;
+json.dumps(list(reversed(SUPPORTED_SPEC_VERSIONS)))`;
 
     const result = await pyodide.runPythonAsync(pythonCode);
 
