@@ -17,9 +17,14 @@
 import logging
 import pytest
 
+from dmv_tool.utils.helpers import convert_to_int
+
 # Import the module under test
 from dmv_tool.validators.conformance_checker import (
+    collect_extra_clusters,
     detect_spec_version_from_parsed_data,
+    split_required_cluster_ids_from_spec_list,
+    union_required_cluster_ids_for_endpoint,
     find_client_cluster,
     validate_feature_map,
     validate_feature_specific_elements,
@@ -28,6 +33,10 @@ from dmv_tool.validators.conformance_checker import (
     validate_cluster,
     validate_single_device_type,
     validate_device_conformance,
+)
+from dmv_tool.validators.reporting import (
+    _count_clusters_shown_in_conformance_table,
+    generate_conformance_report,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -551,6 +560,290 @@ class TestValidateSingleDeviceType:
         assert result["is_compliant"] is True
         assert len(result["missing_elements"]) == 0
 
+    def test_fully_optional_clusters_omitted_from_cluster_validations(self):
+        """Clusters with required: false are not listed or validated per device type."""
+        endpoint = {
+            "clusters": {
+                "0x001D": {
+                    "name": "descriptor",
+                    "revision": 2,
+                    "attributes": {
+                        "0x0000": {
+                            "DeviceTypeList": [
+                                {
+                                    "DeviceType": {"id": "0x0016", "name": "root_node"},
+                                    "Revision": 3,
+                                },
+                            ]
+                        },
+                    },
+                    "commands": {},
+                    "events": {},
+                },
+                "0x0032": {"name": "diagnostic_logs", "revisions": {}, "attributes": {}},
+            },
+            "client_clusters": [],
+        }
+        device_requirements = {
+            "id": "0x0016",
+            "name": "root_node",
+            "revision": "3",
+            "clusters": [
+                {
+                    "id": "0x001D",
+                    "name": "descriptor",
+                    "revision": "2",
+                    "required": True,
+                    "type": "server",
+                    "attributes": [],
+                    "commands": [],
+                    "events": [],
+                    "features": [],
+                },
+                {
+                    "id": "0x0032",
+                    "name": "diagnostic_logs",
+                    "revision": "1",
+                    "required": False,
+                    "type": "server",
+                    "attributes": [],
+                    "commands": [],
+                    "events": [],
+                    "features": [],
+                },
+            ],
+        }
+        result = validate_single_device_type(endpoint, 0x0016, device_requirements)
+        ids = [c["cluster_id"] for c in result["cluster_validations"]]
+        assert "0x0032" not in ids
+        assert "0x001D" in ids
+        assert len(result["cluster_validations"]) == 1
+
+    def test_extra_clusters_not_in_requirements(self):
+        """Server cluster on endpoint but not in required set is reported as extra."""
+        endpoint_clusters = {
+            "0x001D": {
+                "name": "descriptor",
+                "attributes": {},
+            },
+            "0x0028": {
+                "name": "basic_information",
+                "attributes": {},
+            },
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        assert len(extras) == 1
+        assert extras[0]["cluster_id"] == "0x0028"
+        assert extras[0]["cluster_name"] == "basic_information"
+        assert extras[0]["is_extra_cluster"] is True
+        assert extras[0]["cluster_type"] == "server"
+
+    def test_collect_extra_clusters_empty_when_all_required(self):
+        """collect_extra_clusters returns nothing when device matches requirements only."""
+        endpoint_clusters = {
+            "0x001D": {"name": "descriptor", "attributes": {}},
+        }
+        rs = {convert_to_int("0x001D")}
+        assert (
+            collect_extra_clusters(
+                endpoint_clusters,
+                required_server_ids=rs,
+                required_client_ids=set(),
+            )
+            == []
+        )
+
+    def test_extra_cluster_name_from_descriptor_server_list(self):
+        """Names come from Descriptor ServerList when the cluster blob has no name."""
+        endpoint_clusters = {
+            "0x001D": {
+                "attributes": {
+                    "0x0001": {
+                        "ServerList": [
+                            {"id": "0x0036", "name": "wi_fi_network_diagnostics"},
+                        ]
+                    }
+                }
+            },
+            "0x0036": {"attributes": {}},
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        assert len(extras) == 1
+        assert extras[0]["cluster_name"] == "wi_fi_network_diagnostics"
+
+    def test_union_required_cluster_ids_merges_device_types(self):
+        """Union includes Descriptor and clusters from every device type on the endpoint."""
+        requirements_lookup = {
+            0x0016: {
+                "clusters": [
+                    {"id": "0x001F", "name": "access_control", "type": "server"},
+                ]
+            },
+            0x0012: {
+                "clusters": [
+                    {"id": "0x002A", "name": "ota_software_update_requestor", "type": "server"},
+                    {"id": "0x0029", "name": "ota_software_update_provider", "type": "client"},
+                ]
+            },
+        }
+        device_type_list = [
+            {"DeviceType": {"id": "0x0016"}, "Revision": 1},
+            {"DeviceType": {"id": "0x0012"}, "Revision": 1},
+        ]
+        rs, rc = union_required_cluster_ids_for_endpoint(
+            device_type_list, requirements_lookup
+        )
+        assert convert_to_int("0x001D") in rs
+        assert convert_to_int("0x001F") in rs
+        assert convert_to_int("0x002A") in rs
+        assert convert_to_int("0x0029") in rc
+
+    def test_split_required_cluster_ids_includes_optional_spec_clusters(self):
+        """Union for extras must include optional/conditional ids from the spec list."""
+        spec_clusters = [
+            {
+                "id": "0x001D",
+                "name": "descriptor",
+                "required": True,
+                "type": "server",
+            },
+            {
+                "id": "0x0032",
+                "name": "diagnostic_logs",
+                "required": False,
+                "type": "server",
+            },
+            {
+                "id": "0x0029",
+                "name": "ota_provider",
+                "required": False,
+                "type": "client",
+            },
+        ]
+        rs, rc = split_required_cluster_ids_from_spec_list(spec_clusters)
+        assert convert_to_int("0x001D") in rs
+        assert convert_to_int("0x0032") in rs
+        assert convert_to_int("0x0029") in rc
+
+    def test_collect_extra_clusters_spec_optional_cluster_not_extra(self):
+        """Optional cluster id in spec union must not be reported as an extra server."""
+        cid = convert_to_int("0x0032")
+        endpoint_clusters = {
+            "0x001D": {"name": "descriptor", "attributes": {}},
+            "0x0032": {"name": "diagnostic_logs", "attributes": {}},
+        }
+        rs = {convert_to_int("0x001D"), cid}
+        assert (
+            collect_extra_clusters(
+                endpoint_clusters,
+                required_server_ids=rs,
+                required_client_ids=set(),
+            )
+            == []
+        )
+
+    def test_collect_extra_clusters_client_in_client_list_not_in_required(self):
+        """Client-only cluster in Descriptor ClientList is extra when not in spec union."""
+        endpoint_clusters = {
+            "0x001D": {
+                "attributes": {
+                    "0x0002": {
+                        "ClientList": [
+                            {"id": "0x0100", "name": "custom_client_cluster"},
+                        ]
+                    }
+                }
+            },
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        assert len(extras) == 1
+        assert extras[0]["cluster_type"] == "client"
+        assert extras[0]["cluster_id"] == "0x0100"
+        assert extras[0]["cluster_name"] == "custom_client_cluster"
+
+    def test_collect_extra_clusters_unknown_server_name_fallback(self):
+        """Extra server with no name and no Descriptor list entry is labeled unknown."""
+        endpoint_clusters = {
+            "0x001D": {"attributes": {}},
+            "0x00AA": {"attributes": {}},
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        assert len(extras) == 1
+        assert extras[0]["cluster_id"] == "0x00AA"
+        assert extras[0]["cluster_name"] == "unknown"
+
+    def test_collect_extra_clusters_sort_order_type_then_id(self):
+        """Extras sort by (cluster_type, cluster_id); type order is lexicographic."""
+        endpoint_clusters = {
+            "0x001D": {
+                "name": "descriptor",
+                "attributes": {
+                    "0x0002": {
+                        "ClientList": [
+                            {"id": "0x0200", "name": "z_client"},
+                        ]
+                    }
+                },
+            },
+            "0x00BB": {"name": "extra_server_b"},
+            "0x00AA": {"name": "extra_server_a"},
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        # "client" < "server" lexicographically, so client extras precede server extras.
+        assert [e["cluster_type"] for e in extras] == ["client", "server", "server"]
+        assert extras[0]["cluster_id"] == "0x0200"
+        assert extras[1]["cluster_id"] == "0x00AA"
+        assert extras[2]["cluster_id"] == "0x00BB"
+
+    def test_collect_extra_clusters_skips_invalid_client_list_entries(self):
+        """Non-dict ClientList entries are ignored without raising."""
+        endpoint_clusters = {
+            "0x001D": {
+                "attributes": {
+                    "0x0002": {
+                        "ClientList": [
+                            None,
+                            "not-a-dict",
+                            {"id": "0x0300", "name": "ok_client"},
+                        ]
+                    }
+                }
+            },
+        }
+        rs = {convert_to_int("0x001D")}
+        extras = collect_extra_clusters(
+            endpoint_clusters,
+            required_server_ids=rs,
+            required_client_ids=set(),
+        )
+        assert len(extras) == 1
+        assert extras[0]["cluster_id"] == "0x0300"
+
     def test_validate_missing_device_type(self):
         """Test validation when device type is not found in requirements."""
         endpoint = {"device_type": {"id": "0x9999", "name": "unknown_device"}}
@@ -566,6 +859,108 @@ class TestValidateSingleDeviceType:
 
         assert result["is_compliant"] is False
         assert len(result["revision_issues"]) > 0
+
+
+class TestConformanceTableClusterCount:
+    """Table cluster counts must ignore absent clusters and optional-only rows."""
+
+    def test_count_skips_optional_only_rows(self):
+        dt = {
+            "cluster_validations": [
+                {
+                    "cluster_present": True,
+                    "cluster_required": True,
+                },
+                {
+                    "cluster_present": True,
+                    "cluster_required": False,
+                },
+            ]
+        }
+        assert _count_clusters_shown_in_conformance_table(dt) == 1
+
+    def test_count_skips_missing_clusters(self):
+        dt = {
+            "cluster_validations": [
+                {"cluster_present": True, "cluster_required": True},
+                {"cluster_present": False, "cluster_required": True},
+            ]
+        }
+        assert _count_clusters_shown_in_conformance_table(dt) == 1
+
+    def test_count_treats_missing_cluster_required_as_shown(self):
+        """Legacy entries without cluster_required still count."""
+        dt = {"cluster_validations": [{"cluster_present": True}]}
+        assert _count_clusters_shown_in_conformance_table(dt) == 1
+
+    def test_count_skips_non_dict_entries(self):
+        dt = {"cluster_validations": [{"cluster_present": True}, None, "bad"]}
+        assert _count_clusters_shown_in_conformance_table(dt) == 1
+
+    def test_report_device_types_row_includes_endpoint_extra_clusters(self):
+        """Per-DT Clusters column = conformance table rows for that DT + endpoint extras (once)."""
+        validation_data = {
+            "summary": {
+                "total_endpoints": 1,
+                "compliant_endpoints": 0,
+                "non_compliant_endpoints": 1,
+                "total_revision_issues": 0,
+                "total_event_warnings": 0,
+                "total_duplicate_elements": 0,
+                "total_extra_clusters": 1,
+            },
+            "endpoints": [
+                {
+                    "endpoint": 0,
+                    "is_compliant": False,
+                    "device_types": [
+                        {
+                            "device_type_id": "22",
+                            "device_type_name": "root_node",
+                            "is_compliant": False,
+                            "cluster_validations": [
+                                {
+                                    "cluster_present": True,
+                                    "cluster_required": True,
+                                    "cluster_id": "0x0001",
+                                    "cluster_name": "a",
+                                    "cluster_type": "server",
+                                    "is_compliant": True,
+                                },
+                                {
+                                    "cluster_present": True,
+                                    "cluster_required": True,
+                                    "cluster_id": "0x0002",
+                                    "cluster_name": "b",
+                                    "cluster_type": "server",
+                                    "is_compliant": True,
+                                },
+                            ],
+                        }
+                    ],
+                    "extra_clusters": [
+                        {
+                            "cluster_id": "0x0099",
+                            "cluster_name": "extra",
+                            "cluster_type": "server",
+                            "is_extra_cluster": True,
+                            "is_compliant": True,
+                            "cluster_present": True,
+                            "missing_elements": [],
+                            "duplicate_elements": [],
+                            "revision_issues": [],
+                            "event_warnings": [],
+                            "message": "x",
+                        }
+                    ],
+                }
+            ],
+        }
+        text = generate_conformance_report(validation_data, "1.4.2")
+        assert (
+            "22             | root_node        | Non-Compliant | 3       "
+            in text
+        )
 
 
 class TestValidateDeviceConformance:
@@ -597,6 +992,83 @@ class TestValidateDeviceConformance:
 
         assert result.get("summary").get("total_endpoints") == 1
         assert result.get("summary").get("non_compliant_endpoints") == 1
+
+    def test_optional_spec_cluster_present_not_counted_as_extra(self):
+        """Fully optional spec cluster on device is allowed (union), not an extra."""
+        parsed_data = {
+            "endpoints": [
+                {
+                    "id": 0,
+                    "clusters": {
+                        "0x001D": {
+                            "name": "descriptor",
+                            "attributes": {
+                                "0x0000": {
+                                    "DeviceTypeList": [
+                                        {
+                                            "DeviceType": {
+                                                "id": "0x0016",
+                                                "name": "root_node",
+                                            },
+                                            "Revision": 4,
+                                        },
+                                    ]
+                                },
+                            },
+                        },
+                        "0x0032": {
+                            "name": "diagnostic_logs",
+                            "attributes": {},
+                        },
+                    },
+                    "client_clusters": [],
+                }
+            ]
+        }
+        result = validate_device_conformance(parsed_data, "1.5")
+        extra_ids = [
+            e["cluster_id"] for e in result["endpoints"][0].get("extra_clusters", [])
+        ]
+        assert "0x0032" not in extra_ids
+
+    def test_cluster_not_in_spec_union_reported_as_extra(self):
+        """Server cluster on endpoint but not in any device-type spec list is extra."""
+        parsed_data = {
+            "endpoints": [
+                {
+                    "id": 0,
+                    "clusters": {
+                        "0x001D": {
+                            "name": "descriptor",
+                            "attributes": {
+                                "0x0000": {
+                                    "DeviceTypeList": [
+                                        {
+                                            "DeviceType": {
+                                                "id": "0x0016",
+                                                "name": "root_node",
+                                            },
+                                            "Revision": 4,
+                                        },
+                                    ]
+                                },
+                            },
+                        },
+                        "0xFFF40001": {
+                            "name": "vendor_cluster",
+                            "attributes": {},
+                        },
+                    },
+                    "client_clusters": [],
+                }
+            ]
+        }
+        result = validate_device_conformance(parsed_data, "1.5")
+        extra_ids = [
+            e["cluster_id"] for e in result["endpoints"][0].get("extra_clusters", [])
+        ]
+        assert "0xFFF40001" in extra_ids
+        assert result["summary"]["total_extra_clusters"] >= 1
 
 
 if __name__ == "__main__":

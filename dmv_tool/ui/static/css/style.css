@@ -6,7 +6,8 @@
     --accent-dark: #2980b9;
     --success-color: #27ae60;
     --error-color: #e74c3c;
-    --warning-color: #f39c12;
+    --warning-color: #e6b422;
+    --warning-color-soft: #fff9c4;
     --info-color: #8e44ad;
     --text-color: #2c3e50;
     --text-light: #7f8c8d;
@@ -15,6 +16,7 @@
     --white: #ffffff;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.15);
+    --extra-cluster-border: #e6c84a;
 }
 
 * {
@@ -438,11 +440,11 @@ body {
 
 .btn-warning {
     background: var(--warning-color);
-    color: var(--white);
+    color: #3e3420;
 }
 
 .btn-warning:hover {
-    background: #e67e22;
+    background: #f0c030;
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
 }
@@ -522,6 +524,71 @@ body {
     color: var(--info-color);
 }
 
+.stat-extra .stat-value {
+    color: var(--extra-cluster-border);
+}
+
+.extra-clusters-section {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.extra-clusters-panel {
+    margin-top: 20px;
+    padding: 16px 16px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(230, 200, 80, 0.45);
+    background: var(--light-gray);
+}
+
+.extra-clusters-section-title {
+    margin: 0 0 6px 0;
+    font-size: 1em;
+    color: var(--primary-color);
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.extra-clusters-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-color);
+    background: rgba(230, 200, 80, 0.35);
+    border: 1px solid rgba(230, 200, 80, 0.55);
+}
+
+.extra-clusters-section-hint {
+    margin: 0 0 12px 0;
+    font-size: 0.85em;
+    color: blue;
+    font-style: italic;
+}
+
+.clusters-grid--extra {
+    margin-top: 8px;
+}
+
+.cluster-card.extra-cluster {
+    position: relative;
+    border-left: 4px solid var(--extra-cluster-border);
+}
+
+.cluster-card.extra-cluster:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.device-type-cluster-grids {
+    display: block;
+}
+
 /* Endpoint Cards */
 .endpoints-grid {
     display: grid;
@@ -557,6 +624,37 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.endpoint-title-row {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    align-items: center;
+}
+
+.endpoint-title-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.endpoint-extra-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+}
+
+.endpoint-card--has-extra-clusters {
+    border-top: 3px solid var(--extra-cluster-border);
 }
 
 .compliance-badge {

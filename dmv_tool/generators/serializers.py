@@ -222,7 +222,7 @@ class DeviceSerializer:
                     "attributes": safe_get_attr(cluster, "attribute_name_list", []),
                 }
                 for cluster in sorted(
-                    device.get_all_mandatory_clusters(),
+                    device.get_clusters(),
                     key=lambda x: (int(x.get_id(), 16), x.name),
                 )
             ],

@@ -30,7 +30,7 @@ Overall Status           | COMPLIANT
 =========================
 Device Type ID | Device Type Name | Status    | Clusters
 --------------------------------------------------------
-22             | root_node        | Compliant | 12      
+22             | root_node        | Compliant | 8       
 18             | ota_requestor    | Compliant | 2       
 
 

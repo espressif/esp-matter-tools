@@ -19,7 +19,7 @@ import logging
 import os
 from dmv_tool.utils.helpers import convert_to_int, convert_to_hex
 from dmv_tool.configs.constants import DEFAULT_OUTPUT_DIR, DEFAULT_REPORT_FILE
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from .utils import (
     find_element_in_list,
@@ -31,6 +31,7 @@ from .utils import (
 from .reporting import generate_conformance_report
 from .constants import (
     DESCRIPTOR_CLUSTER_ID,
+    DESCRIPTOR_SERVER_LIST_ATTRIBUTE_ID,
     DESCRIPTOR_CLIENT_LIST_ATTRIBUTE_ID,
     BASIC_INFORMATION_CLUSTER_ID,
     SPECIFICATION_VERSION_ATTRIBUTE_ID,
@@ -120,6 +121,186 @@ def find_client_cluster(endpoint_clusters: dict, client_cluster_id: str) -> bool
             )
             return True
     return False
+
+
+def cluster_names_from_descriptor_lists(endpoint_clusters: dict) -> dict:
+    """Create lookup table for clusters from Descriptor ServerList / ClientList in parsed wildcard data."""
+    lookup_table = {}
+    desc = endpoint_clusters.get(DESCRIPTOR_CLUSTER_ID, {})
+    attrs = desc.get("attributes", {}) if isinstance(desc, dict) else {}
+    for attr_id, list_key in (
+        (DESCRIPTOR_SERVER_LIST_ATTRIBUTE_ID, "ServerList"),
+        (DESCRIPTOR_CLIENT_LIST_ATTRIBUTE_ID, "ClientList"),
+    ):
+        attr_dict = attrs.get(attr_id, {})
+        if not isinstance(attr_dict, dict):
+            continue
+        attr_list = attr_dict.get(list_key) or []
+        if not isinstance(attr_list, list):
+            continue
+        for entry in attr_list:
+            if not isinstance(entry, dict):
+                continue
+            cid_int = convert_to_int(entry.get("id"))
+            name = entry.get("name")
+            if cid_int is not None and name:
+                lookup_table[cid_int] = name
+    return lookup_table
+
+
+def split_required_cluster_ids_from_spec_list(
+    required_clusters: list,
+) -> tuple[set, set]:
+    """Split a device type ``clusters`` list into server vs client id sets.
+
+    Includes every cluster id listed in the spec (required, conditional, and
+    fully optional).
+    """
+    required_server_ids = set()
+    required_client_ids = set()
+    for required_cluster in required_clusters or []:
+        if not isinstance(required_cluster, dict):
+            continue
+        cid_int = convert_to_int(required_cluster.get("id"))
+        if cid_int is None:
+            continue
+        if required_cluster.get("type", "server") == "client":
+            required_client_ids.add(cid_int)
+        else:
+            required_server_ids.add(cid_int)
+    return required_server_ids, required_client_ids
+
+
+def parse_device_type_id_from_list_entry(device_type_info) -> Optional[int]:
+    """Return device type id int from a DeviceTypeList element, or None."""
+    if isinstance(device_type_info, dict):
+        device_type = device_type_info.get("DeviceType")
+        if device_type is None:
+            return None
+        if isinstance(device_type, dict):
+            dt = device_type.get("id") or device_type.get("DeviceType")
+        elif isinstance(device_type, (int, str)):
+            dt = device_type
+        else:
+            return None
+        return convert_to_int(dt)
+    if isinstance(device_type_info, (int, str)):
+        return convert_to_int(device_type_info)
+    return None
+
+
+def union_required_cluster_ids_for_endpoint(
+    device_type_list: list,
+    requirements_lookup: dict,
+) -> tuple[set, set]:
+    """Union of all server/client cluster ids required by any device type on the endpoint.
+
+    The Descriptor cluster is always included as a required server cluster (it is
+    present on every Matter endpoint and is not reported as extra).
+    """
+    server_ids: set = set()
+    client_ids: set = set()
+    for device_type_info in device_type_list or []:
+        dt_int = parse_device_type_id_from_list_entry(device_type_info)
+        if dt_int is None or dt_int not in requirements_lookup:
+            continue
+        device_req = requirements_lookup[dt_int]
+        required_server_ids, required_client_ids = (
+            split_required_cluster_ids_from_spec_list(device_req.get("clusters", []))
+        )
+        server_ids |= required_server_ids
+        client_ids |= required_client_ids
+    desc_int = convert_to_int(DESCRIPTOR_CLUSTER_ID)
+    if desc_int is not None:
+        server_ids.add(desc_int)
+    return server_ids, client_ids
+
+
+def collect_extra_clusters(
+    endpoint_clusters: dict,
+    *,
+    required_server_ids: set,
+    required_client_ids: set,
+) -> list:
+    """Find clusters on the endpoint not required by any device type on this endpoint.
+
+    Cluster display names come from parsed wildcard data: each cluster's ``name`` field
+    if present, otherwise Descriptor ServerList / ClientList (chip-tool prints e.g.
+    ``54 (WiFiNetworkDiagnostics)`` which the parser stores as id + snake_case name).
+
+    Args:
+        endpoint_clusters: All clusters on the endpoint (server instances by ID).
+        required_server_ids: Union of required server cluster ids for the endpoint.
+        required_client_ids: Union of required client cluster ids for the endpoint.
+
+    Returns:
+        List of dicts suitable for UI and reports (same shape keys as cluster validation).
+    """
+    extras = []
+    names_from_descriptor = cluster_names_from_descriptor_lists(endpoint_clusters)
+
+    for cluster_key, actual_cluster in endpoint_clusters.items():
+        cid_int = convert_to_int(cluster_key)
+        if cid_int is None:
+            continue
+        if cid_int not in required_server_ids:
+            hex_id = convert_to_hex(cluster_key)
+            name = actual_cluster.get("name") or names_from_descriptor.get(
+                cid_int, "unknown"
+            )
+            extras.append(
+                {
+                    "cluster_id": hex_id,
+                    "cluster_name": name,
+                    "cluster_type": "server",
+                    "is_extra_cluster": True,
+                    "is_compliant": True,
+                    "cluster_present": True,
+                    "missing_elements": [],
+                    "duplicate_elements": [],
+                    "revision_issues": [],
+                    "event_warnings": [],
+                    "message": "Present on endpoint but not required by any device type on this endpoint",
+                }
+            )
+
+    descriptor = endpoint_clusters.get(DESCRIPTOR_CLUSTER_ID, {})
+    client_list = []
+    if descriptor:
+        cl_attr = descriptor.get("attributes", {}).get(
+            DESCRIPTOR_CLIENT_LIST_ATTRIBUTE_ID, {}
+        )
+        if isinstance(cl_attr, dict):
+            client_list = cl_attr.get("ClientList") or []
+
+    for client in client_list:
+        if not isinstance(client, dict):
+            continue
+        cid = client.get("id")
+        cid_int = convert_to_int(cid)
+        if cid_int is None:
+            continue
+        if cid_int not in required_client_ids:
+            hex_id = convert_to_hex(cid)
+            name = client.get("name") or names_from_descriptor.get(cid_int, "unknown")
+            extras.append(
+                {
+                    "cluster_id": hex_id,
+                    "cluster_name": name,
+                    "cluster_type": "client",
+                    "is_extra_cluster": True,
+                    "is_compliant": True,
+                    "cluster_present": True,
+                    "missing_elements": [],
+                    "duplicate_elements": [],
+                    "revision_issues": [],
+                    "event_warnings": [],
+                    "message": "Present on endpoint but not required by any device type on this endpoint",
+                }
+            )
+
+    extras.sort(key=lambda x: (x["cluster_type"], x["cluster_id"]))
+    return extras
 
 
 def validate_feature_map(
@@ -855,7 +1036,9 @@ def validate_cluster(
     required_features = required_cluster.get("features", [])
     if required_features:
         feature_map_data = actual_cluster.get("features", {}).get("FeatureMap", {})
-        logger.debug(f"Feature map data: {feature_map_data} have_feature_map: {feature_map_data.get('FeatureMap')}")
+        logger.debug(
+            f"Feature map data: {feature_map_data} have_feature_map: {feature_map_data.get('FeatureMap')}"
+        )
 
         device_type_required_features = []
         conditional_features = []
@@ -1107,6 +1290,12 @@ def validate_single_device_type(
             logger.error(f"Cluster {required_cluster.get('id')} has no name, skipping")
             return result
 
+        # Fully optional clusters (required: false) are not validated or listed in
+        # reports; they still appear in split_required_cluster_ids_from_spec_list
+        # so they are not counted as extra when present on the endpoint.
+        if required_cluster.get("required") is False:
+            continue
+
         try:
             cluster_validation = validate_cluster(endpoint_clusters, required_cluster, device_type_id, device_type_name)
             result["cluster_validations"].append(cluster_validation)
@@ -1136,10 +1325,7 @@ def validate_single_device_type(
     return result
 
 
-def validate_device_conformance(
-    parsed_data: dict,
-    spec_version: str
-) -> dict:
+def validate_device_conformance(parsed_data: dict, spec_version: str) -> dict:
     """Validate if the device meets all requirements for its device types.
 
     Args:
@@ -1171,6 +1357,7 @@ def validate_device_conformance(
             "total_revision_issues": 0,
             "total_event_warnings": 0,
             "total_duplicate_elements": 0,
+            "total_extra_clusters": 0,
         },
     }
 
@@ -1202,6 +1389,7 @@ def validate_device_conformance(
                 "missing_elements": [],
                 "duplicate_elements": [],
                 "extra_elements": [],
+                "extra_clusters": [],
                 "revision_issues": [],
                 "event_warnings": [],
             }
@@ -1222,6 +1410,11 @@ def validate_device_conformance(
                 )
                 endpoint_result["is_compliant"] = False
             else:
+                union_server_ids, union_client_ids = (
+                    union_required_cluster_ids_for_endpoint(
+                        device_type_list, requirements_lookup
+                    )
+                )
                 for device_type_index, device_type_info in enumerate(device_type_list):
                     if isinstance(device_type_info, dict):
                         device_type_id = device_type_info.get("DeviceType")
@@ -1256,7 +1449,9 @@ def validate_device_conformance(
                         logger.debug(f"Validating device type {device_type_id_int}")
 
                         device_validation = validate_single_device_type(
-                            endpoint, device_type_id_int, device_requirements
+                            endpoint,
+                            device_type_id_int,
+                            device_requirements,
                         )
 
                         endpoint_result["device_types"].append(device_validation)
@@ -1297,24 +1492,34 @@ def validate_device_conformance(
                                 f"Skipping vendor-specific device type {device_type_hex} "
                                 f"(no validation requirements available)"
                             )
-                            endpoint_result["device_types"].append({
-                                "device_type_id": device_type_hex,
-                                "device_type_name": "vendor_specific",
-                                "skipped": True,
-                                "reason": "Vendor-specific device type - no requirements in spec"
-                            })
+                            endpoint_result["device_types"].append(
+                                {
+                                    "device_type_id": device_type_hex,
+                                    "device_type_name": "vendor_specific",
+                                    "skipped": True,
+                                    "reason": "Vendor-specific device type - no requirements in spec",
+                                }
+                            )
                         else:
                             logger.warning(
                                 f"Unknown device type {device_type_hex} not found in "
                                 f"Matter specification requirements"
                             )
-                            endpoint_result["device_types"].append({
-                                "device_type_id": device_type_hex,
-                                "device_type_name": "unknown",
-                                "skipped": True,
-                                "reason": f"Device type {device_type_hex} not found in spec"
-                            })
+                            endpoint_result["device_types"].append(
+                                {
+                                    "device_type_id": device_type_hex,
+                                    "device_type_name": "unknown",
+                                    "skipped": True,
+                                    "reason": f"Device type {device_type_hex} not found in spec",
+                                }
+                            )
                             endpoint_result["is_compliant"] = False
+
+                endpoint_result["extra_clusters"] = collect_extra_clusters(
+                    endpoint.get("clusters", {}),
+                    required_server_ids=union_server_ids,
+                    required_client_ids=union_client_ids,
+                )
 
             validation_results["endpoints"].append(endpoint_result)
 
@@ -1333,6 +1538,9 @@ def validate_device_conformance(
         total_event_warnings = sum(
             len(ep.get("event_warnings", [])) for ep in validation_results["endpoints"]
         )
+        total_extra_clusters = sum(
+            len(ep.get("extra_clusters", [])) for ep in validation_results["endpoints"]
+        )
 
         validation_results["summary"].update(
             {
@@ -1342,6 +1550,7 @@ def validate_device_conformance(
                 "total_revision_issues": total_revision_issues,
                 "total_event_warnings": total_event_warnings,
                 "total_duplicate_elements": total_duplicate_elements,
+                "total_extra_clusters": total_extra_clusters,
             }
         )
 
