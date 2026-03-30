@@ -173,6 +173,10 @@
                             <div class="stat-value" id="complianceRate">0%</div>
                             <div class="stat-label">Compliance Rate</div>
                         </div>
+                        <div class="stat-card stat-extra">
+                            <div class="stat-value" id="totalExtraClusters">0</div>
+                            <div class="stat-label">Extra Clusters</div>
+                        </div>
                     </div>
 
                     <div class="text-center mt-3">
@@ -204,7 +208,8 @@
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li>Optional clusters present on the device</li>
                                 <li>Optional attributes, commands, and events within clusters</li>
-                                <li>Extra elements present on the device other than mandatory</li>
+                                <li>Extra clusters: on-device clusters not required by any device type on that
+                                    endpoint (Descriptor is never counted as extra; listed for visibility)</li>
                                 <li>Events (not present in wildcard logs); warnings shown only for missing mandatory
                                     events</li>
                                 <li>Attributes and commands dependent on multiple features</li>

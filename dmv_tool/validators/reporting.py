@@ -17,6 +17,24 @@ import sys
 import io
 
 
+def _count_clusters_shown_in_conformance_table(dt: dict) -> int:
+    """Clusters listed for one device type in the detailed conformance table (present, not optional-only).
+
+    The per-endpoint device-type summary row adds endpoint ``extra_clusters`` once to the
+    first non-skipped device type so the count matches total clusters on that endpoint.
+    """
+    n = 0
+    for c in dt.get("cluster_validations", []) or []:
+        if not isinstance(c, dict):
+            continue
+        if not c.get("cluster_present", True):
+            continue
+        if c.get("cluster_required") is False:
+            continue
+        n += 1
+    return n
+
+
 def generate_conformance_report(
     validation_data, detected_version=None, version_auto_detected=False
 ):
@@ -130,6 +148,7 @@ def print_conformance_summary(
     total_revision_issues = summary.get("total_revision_issues", 0)
     total_event_warnings = summary.get("total_event_warnings", 0)
     total_duplicate_elements = summary.get("total_duplicate_elements", 0)
+    total_extra_clusters = summary.get("total_extra_clusters", 0)
 
     print("\n" + "=" * 80)
     print("MATTER DEVICE CONFORMANCE REPORT")
@@ -157,8 +176,12 @@ def print_conformance_summary(
         ["Total Duplicate Elements", total_duplicate_elements],
         ["Total Revision Issues", total_revision_issues],
         ["Total Event Warnings", total_event_warnings],
-        ["Overall Status", overall_status],
     ]
+
+    if total_extra_clusters > 0:
+        summary_data.append(["Extra Clusters (informational)", total_extra_clusters])
+
+    summary_data.append(["Overall Status", overall_status])
 
     print_table(["Metric", "Value"], summary_data, "OVERALL CONFORMANCE SUMMARY")
 
@@ -175,6 +198,14 @@ def print_conformance_summary(
 
         if device_types:
             device_type_rows = []
+            extra_n = len(
+                [
+                    x
+                    for x in (endpoint.get("extra_clusters") or [])
+                    if isinstance(x, dict)
+                ]
+            )
+            extras_attributed = False
             for dt in device_types:
                 if not isinstance(dt, dict):
                     device_type_rows.append(
@@ -202,7 +233,14 @@ def print_conformance_summary(
                     dt_id = dt.get("device_type_id", "Unknown")
                     dt_name = dt.get("device_type_name", "Unknown")
                     dt_compliant = dt.get("is_compliant", False)
-                    clusters_count = len(dt.get("cluster_validations", []))
+                    clusters_count = _count_clusters_shown_in_conformance_table(dt)
+                    if (
+                        extra_n
+                        and not extras_attributed
+                        and not dt.get("skipped")
+                    ):
+                        clusters_count += extra_n
+                        extras_attributed = True
 
                     status = "Compliant" if dt_compliant else "Non-Compliant"
 
@@ -226,6 +264,11 @@ def print_conformance_summary(
                 # Skip clusters that don't actually exist on the device
                 cluster_present = cluster.get("cluster_present", True)
                 if not cluster_present:
+                    continue
+
+                # Fully optional spec entries are omitted from cluster_validations;
+                # skip if present in older saved JSON
+                if cluster.get("cluster_required") is False:
                     continue
 
                 cluster_id = cluster.get("cluster_id", "Unknown")
@@ -284,6 +327,33 @@ def print_conformance_summary(
                 ],
                 cluster_rows,
                 f"🔧 Endpoint {endpoint_id} Complete Cluster Conformance",
+            )
+
+        extra_cluster_rows = []
+        for extra in endpoint.get("extra_clusters", []):
+            if not isinstance(extra, dict):
+                continue
+            extra_cluster_rows.append(
+                [
+                    extra.get("cluster_id", "Unknown"),
+                    extra.get("cluster_name", "Unknown"),
+                    (extra.get("cluster_type") or "server").title(),
+                    extra.get(
+                        "message",
+                        "Not required by any device type on this endpoint",
+                    ),
+                ]
+            )
+        if extra_cluster_rows:
+            print_table(
+                [
+                    "Cluster ID",
+                    "Cluster Name",
+                    "Type",
+                    "Note",
+                ],
+                extra_cluster_rows,
+                f"Endpoint {endpoint_id} Extra Clusters (not required by any device type)",
             )
 
         endpoint_level_warnings = [
@@ -405,6 +475,12 @@ def print_conformance_summary(
             )
     else:
         print("• All required data model elements are present on the device")
+
+    if total_extra_clusters > 0:
+        print(
+            f"• {total_extra_clusters} extra cluster(s) on device (not required by any "
+            "device type on that endpoint; informational only)"
+        )
 
     if total_event_warnings > 0:
         print(

@@ -10,16 +10,17 @@ Validation against Matter 1.4.2 specification
 
 OVERALL CONFORMANCE SUMMARY
 ===========================
-Metric                   | Value        
-----------------------------------------
-Total Endpoints          | 2            
-Compliant Endpoints      | 0            
-Non-Compliant Endpoints  | 2            
-Conformance Rate         | 0.0%         
-Total Duplicate Elements | 27           
-Total Revision Issues    | 1            
-Total Event Warnings     | 6            
-Overall Status           | NON-COMPLIANT
+Metric                         | Value        
+----------------------------------------------
+Total Endpoints                | 2            
+Compliant Endpoints            | 0            
+Non-Compliant Endpoints        | 2            
+Conformance Rate               | 0.0%         
+Total Duplicate Elements       | 27           
+Total Revision Issues          | 1            
+Total Event Warnings           | 6            
+Extra Clusters (informational) | 1            
+Overall Status                 | NON-COMPLIANT
 
 
 ================================================================================
@@ -30,7 +31,7 @@ Overall Status           | NON-COMPLIANT
 =========================
 Device Type ID | Device Type Name | Status        | Clusters
 ------------------------------------------------------------
-22             | root_node        | Non-Compliant | 12      
+22             | root_node        | Non-Compliant | 9       
 
 
 🔧 Endpoint 0 Complete Cluster Conformance
@@ -45,6 +46,13 @@ Cluster ID | Cluster Name                | Type   | Device Type Name | Status   
 0x003C     | administrator_commissioning | Server | root_node        | Compliant     | OK       
 0x003E     | operational_credentials     | Server | root_node        | Non-Compliant | OK       
 0x003F     | group_key_management        | Server | root_node        | Non-Compliant | OK       
+
+
+Endpoint 0 Extra Clusters (not required by any device type)
+===========================================================
+Cluster ID | Cluster Name                  | Type   | Note                                                                    
+------------------------------------------------------------------------------------------------------------------------------
+0x002A     | ota_software_update_requestor | Server | Present on endpoint but not required by any device type on this endpoint
 
 
 Endpoint 0 Recommendations:
@@ -126,6 +134,7 @@ RECOMMENDATIONS
 • Update all cluster and device type revisions to meet required revisions
 • Remove 27 duplicate element(s) from device clusters
 • Remove 27 duplicate element(s) from device clusters
+• 1 extra cluster(s) on device (not required by any device type on that endpoint; informational only)
 • Review 6 event warnings (don't affect conformance)
 
 Detailed results saved in:

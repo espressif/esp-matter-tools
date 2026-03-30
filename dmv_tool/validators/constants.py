@@ -15,6 +15,7 @@
 # limitations under the License.
 
 DESCRIPTOR_CLUSTER_ID = "0x001D"  # Descriptor cluster ID
+DESCRIPTOR_SERVER_LIST_ATTRIBUTE_ID = "0x0001"  # Descriptor ServerList attribute ID
 DESCRIPTOR_CLIENT_LIST_ATTRIBUTE_ID = "0x0002"  # Descriptor ClientList attribute ID
 BASIC_INFORMATION_CLUSTER_ID = "0x0028"  # Basic Information cluster ID
 SPECIFICATION_VERSION_ATTRIBUTE_ID = "0x0015"  # Specification Version attribute ID
