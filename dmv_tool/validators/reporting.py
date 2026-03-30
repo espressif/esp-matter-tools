@@ -76,6 +76,37 @@ def print_table(headers, rows, title=None):
     print()
 
 
+def format_missing_element(elem: dict) -> str:
+    name = elem.get("name", "Unknown")
+    elem_type = elem.get("type", "Unknown")
+    cluster = elem.get("cluster_name", "Unknown")
+    device_type = elem.get("device_type_name", "Unknown")
+    message = elem.get("message", "")
+
+    if elem_type in (
+        "attribute",
+        "command",
+        "feature",
+        "feature_attribute",
+        "feature_command",
+        "feature_event",
+    ):
+        return f"\t   • {name} {elem_type} is missing on {cluster} cluster. {message}"
+    elif elem_type == "cluster":
+        return f"\t   • {cluster} cluster is missing on {device_type} device type."
+    else:
+        return f"\t   • {name} is missing on {cluster} cluster. {message}"
+
+
+def format_duplicate_element(elem: dict) -> str:
+    name = elem.get("name", "Unknown")
+    elem_id = elem.get("id", "Unknown")
+    count = elem.get("count", 2)
+    cluster = elem.get("cluster_name", "Unknown")
+
+    return f"\t   • {name} ({elem_id}) appears {count} times in {cluster} cluster"
+
+
 def print_conformance_summary(
     validation_data, detected_version=None, version_auto_detected=False
 ):
@@ -309,9 +340,7 @@ def print_conformance_summary(
                 )
                 for missing_element in missing_elements:
                     if isinstance(missing_element, dict):
-                        print(
-                            f"\t   • {missing_element.get('name', 'Unknown')} {missing_element.get('type', 'Unknown')} is missing on {missing_element.get('cluster_name', 'Unknown')} cluster. {missing_element.get('message', '')}"
-                        )
+                        print(format_missing_element(missing_element))
 
             if duplicate_elements:
                 print(
@@ -319,9 +348,7 @@ def print_conformance_summary(
                 )
                 for dup_element in duplicate_elements:
                     if isinstance(dup_element, dict):
-                        print(
-                            f"\t   • {dup_element.get('name', 'Unknown')} ({dup_element.get('id', 'Unknown')}) appears {dup_element.get('count', 0)} times in {dup_element.get('cluster_name', 'Unknown')} cluster"
-                        )
+                        print(format_duplicate_element(dup_element))
 
             total_cluster_revision_errors = 0
             for dt in device_types:

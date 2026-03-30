@@ -85,8 +85,8 @@ Endpoint 1 Recommendations:
 
    • Fix 2 missing element(s) listed below
    • Make sure to add the missing elements to the respective clusters
-	   • level_control cluster is missing on Unknown cluster. Required server cluster level_control is missing
-	   • scenes_management cluster is missing on Unknown cluster. Required server cluster scenes_management is missing
+	   • level_control cluster is missing on extended_color_light device type.
+	   • scenes_management cluster is missing on extended_color_light device type.
 
 ================================================================================
 RECOMMENDATIONS

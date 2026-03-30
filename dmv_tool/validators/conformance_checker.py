@@ -167,20 +167,20 @@ def validate_feature_map(
             feature_name = required_feature.get("name", "unknown")
 
             if not feature_id:
-                logger.error(f"Missing feature ID in cluster {cluster_id}")
+                logger.error(f"Missing feature ID in validation data for cluster {cluster_name} ({cluster_id})")
                 continue
 
             feature_bitmask = convert_to_int(feature_id)
             if feature_bitmask is None:
                 logger.error(
-                    f"Invalid feature ID format '{feature_id}' in cluster {cluster_id}"
+                    f"Invalid feature ID format '{feature_id}' in validation data for cluster {cluster_name} ({cluster_id})"
                 )
                 continue
 
             feature_is_present = bool(feature_map_value & feature_bitmask)
 
             if require_presence and not feature_is_present:
-                logger.error(f"Required feature {feature_name} ({feature_id}) is missing")
+                logger.error(f"Required feature {feature_name} ({feature_id}) is missing on {cluster_name} ({cluster_id}) cluster")
                 missing_features.append(
                     {
                         "type": "feature",
@@ -193,7 +193,7 @@ def validate_feature_map(
                         "check_result": convert_to_hex(
                             feature_map_value & feature_bitmask
                         ),
-                        "message": f"Required feature {feature_name} ({feature_id}) is missing",
+                        "message": f"Required feature {feature_name} ({feature_id}) is missing on {cluster_name} cluster",
                     }
                 )
 
@@ -206,6 +206,10 @@ def validate_feature_map(
 def validate_feature_specific_attributes(
     actual_cluster: dict,
     required_feature: dict,
+    feature_id: str,
+    feature_name: str,
+    cluster_id: str,
+    cluster_name: str,
 ) -> List[dict]:
     """Validate feature-specific attributes.
 
@@ -214,10 +218,6 @@ def validate_feature_specific_attributes(
         required_feature: The required feature
     """
     missing_attributes = []
-    cluster_id = actual_cluster.get("id")
-    cluster_name = actual_cluster.get("name")
-    feature_id = required_feature.get("id")
-    feature_name = required_feature.get("name")
     for required_attr in required_feature.get("attributes", []):
         if not isinstance(required_attr, dict):
             logger.error(
@@ -244,7 +244,7 @@ def validate_feature_specific_attributes(
 
         if not found:
             logger.error(
-                f"Feature '{feature_name}' is present but required attribute '{attr_name}' ({attr_id}) is missing"
+                f"Feature '{feature_name}' is present but required attribute '{attr_name}' ({attr_id}) is missing on {cluster_name} cluster"
             )
             missing_attributes.append(
                 {
@@ -255,7 +255,7 @@ def validate_feature_specific_attributes(
                     "cluster_name": cluster_name,
                     "feature_id": feature_id,
                     "feature_name": feature_name,
-                    "message": f"Feature '{feature_name}' is present but required attribute '{attr_name}' ({attr_id}) is missing",
+                    "message": f"Feature '{feature_name}' is present but required attribute '{attr_name}' ({attr_id}) is missing on {cluster_name} cluster",
                 }
             )
     return missing_attributes
@@ -264,6 +264,10 @@ def validate_feature_specific_attributes(
 def validate_feature_specific_commands(
     actual_cluster: dict,
     required_feature: dict,
+    feature_id: str,
+    feature_name: str,
+    cluster_id: str,
+    cluster_name: str,
 ) -> List[dict]:
     """Validate feature-specific commands.
 
@@ -272,14 +276,10 @@ def validate_feature_specific_commands(
         required_feature: The required feature
     """
     missing_commands = []
-    cluster_id = actual_cluster.get("id")
-    cluster_name = actual_cluster.get("name")
-    feature_id = required_feature.get("id")
-    feature_name = required_feature.get("name")
     for required_cmd in required_feature.get("commands", []):
         if not isinstance(required_cmd, dict):
             logger.error(
-                f"Invalid command format in cluster {cluster_id}: {required_cmd}"
+                f"Invalid command format in validation data for cluster {cluster_name} : {required_cmd}"
             )
             continue
 
@@ -300,7 +300,7 @@ def validate_feature_specific_commands(
 
         if not found:
             logger.error(
-                f"Feature '{feature_name}' is present but required command '{cmd_name}' ({cmd_id}) is missing"
+                f"Feature '{feature_name}' is present but required command '{cmd_name}' ({cmd_id}) is missing on {cluster_name} cluster"
             )
             missing_commands.append(
                 {
@@ -311,7 +311,7 @@ def validate_feature_specific_commands(
                     "cluster_name": cluster_name,
                     "feature_id": feature_id,
                     "feature_name": feature_name,
-                    "message": f"Feature '{feature_name}' is present but required command '{cmd_name}' ({cmd_id}) is missing",
+                    "message": f"Feature '{feature_name}' is present but required command '{cmd_name}' ({cmd_id}) is missing on {cluster_name} cluster",
                 }
             )
 
@@ -321,6 +321,10 @@ def validate_feature_specific_commands(
 def validate_feature_specific_events(
     actual_cluster: dict,
     required_feature: dict,
+    feature_id: str,
+    feature_name: str,
+    cluster_id: str,
+    cluster_name: str,
 ) -> List[dict]:
     """Validate feature-specific events.
 
@@ -329,14 +333,10 @@ def validate_feature_specific_events(
         required_feature: The required feature
     """
     missing_events = []
-    cluster_id = actual_cluster.get("id")
-    cluster_name = actual_cluster.get("name")
-    feature_id = required_feature.get("id")
-    feature_name = required_feature.get("name")
     for required_event in required_feature.get("events", []):
         if not isinstance(required_event, dict):
             logger.error(
-                f"Invalid event format in cluster {cluster_id}: {required_event}"
+                f"Invalid event format in validation data for cluster {cluster_name} : {required_event}"
             )
             continue
 
@@ -405,7 +405,7 @@ def validate_feature_specific_elements(
         for required_feature in required_features:
             feature_id = required_feature.get("id", None)
             if not feature_id:
-                logger.error(f"Missing feature ID in cluster {cluster_id}")
+                logger.error(f"Missing feature ID in validation data for cluster {cluster_name} ({cluster_id})")
                 continue
             feature_name = required_feature.get("name", "unknown")
             # Required feature means that feature is mandatory for the specific device type
@@ -414,7 +414,7 @@ def validate_feature_specific_elements(
             feature_bitmask = convert_to_int(feature_id)
             if feature_bitmask is None:
                 logger.error(
-                    f"Invalid feature ID format '{feature_id}' in cluster {cluster_id}"
+                    f"Invalid feature ID format '{feature_id}' in validation data for cluster {cluster_name} ({cluster_id})"
                 )
                 continue
 
@@ -424,19 +424,19 @@ def validate_feature_specific_elements(
                 if feature_is_present:
                     logger.debug(f"Validating attributes for feature '{feature_name}'")
                     missing_attributes = validate_feature_specific_attributes(
-                        actual_cluster, required_feature
+                        actual_cluster, required_feature, feature_id, feature_name, cluster_id, cluster_name
                     )
                     missing_elements.extend(missing_attributes)
 
                     logger.debug(f"Validating commands for feature '{feature_name}'")
                     missing_commands = validate_feature_specific_commands(
-                        actual_cluster, required_feature
+                        actual_cluster, required_feature, feature_id, feature_name, cluster_id, cluster_name
                     )
                     missing_elements.extend(missing_commands)
 
                     logger.debug(f"Validating events for feature '{feature_name}'")
                     missing_events = validate_feature_specific_events(
-                        actual_cluster, required_feature
+                        actual_cluster, required_feature, feature_id, feature_name, cluster_id, cluster_name
                     )
                     missing_elements.extend(missing_events)
 
@@ -644,6 +644,8 @@ def load_chip_validation_data(spec_version: str) -> List[dict]:
 def validate_cluster(
     endpoint_clusters: dict,
     required_cluster: dict,
+    device_type_id: str,
+    device_type_name: str,
 ) -> dict:
     """Validate a cluster against its requirements.
 
@@ -694,15 +696,17 @@ def validate_cluster(
     if cluster_required is True:
         # Cluster is required and must be compliant
         if not cluster_exists:
-            logger.error(f"Required {cluster_type} cluster {cluster_name} is missing")
+            logger.error(f"Required {cluster_type} cluster {cluster_name} is missing on {device_type_name} device type")
             result["is_compliant"] = False
             result["missing_elements"].append(
                 {
                     "type": "cluster",
                     "id": cluster_id,
-                    "name": cluster_name,
+                    "cluster_name": cluster_name,
                     "cluster_type": cluster_type,
-                    "message": f"Required {cluster_type} cluster {cluster_name} is missing",
+                    "device_type_id": device_type_id,
+                    "device_type_name": device_type_name,
+                    "message": f"Required {cluster_type} cluster {cluster_name} is missing on {device_type_name} device type",
                 }
             )
             return result
@@ -714,8 +718,10 @@ def validate_cluster(
                 {
                     "type": "info",
                     "id": cluster_id,
-                    "name": cluster_name,
+                    "cluster_name": cluster_name,
                     "cluster_type": cluster_type,
+                    "device_type_id": device_type_id,
+                    "device_type_name": device_type_name,
                     "message": f"Conditional {cluster_type} cluster {cluster_name} not present (OK)",
                 }
             )
@@ -728,8 +734,10 @@ def validate_cluster(
                 {
                     "type": "info",
                     "id": cluster_id,
-                    "name": cluster_name,
+                    "cluster_name": cluster_name,
                     "cluster_type": cluster_type,
+                    "device_type_id": device_type_id,
+                    "device_type_name": device_type_name,
                     "message": f"Optional {cluster_type} cluster {cluster_name} not present (OK)",
                 }
             )
@@ -764,7 +772,7 @@ def validate_cluster(
 
     for required_attr in expected_attributes:
         if not isinstance(required_attr, dict):
-            logger.error(f"Attribute {required_attr} is not a dict, skipping")
+            logger.error(f"Attribute format in validation data for cluster {cluster_name} is not a dict: {required_attr}")
             continue
 
         attr_id = required_attr["id"]
@@ -788,6 +796,8 @@ def validate_cluster(
                     "name": attr_name,
                     "cluster_id": cluster_id,
                     "cluster_name": cluster_name,
+                    "device_type_id": device_type_id,
+                    "device_type_name": device_type_name,
                     "message": f"Required attribute {attr_name} ({attr_id}) is missing",
                 }
             )
@@ -802,7 +812,7 @@ def validate_cluster(
 
     for required_cmd in expected_commands:
         if not isinstance(required_cmd, dict):
-            logger.error(f"Command {required_cmd} is not a dict, skipping")
+            logger.error(f"Command format in validation data for cluster {cluster_name} is not a dict: {required_cmd}")
             continue
 
         cmd_id = required_cmd["id"]
@@ -852,7 +862,7 @@ def validate_cluster(
 
         for feature in required_features:
             if not isinstance(feature, dict):
-                logger.error(f"Feature {feature} is not a dict, skipping")
+                logger.error(f"Feature format in validation data for cluster {cluster_name} is not a dict: {feature}")
                 continue
 
             feature_required = feature.get("required", True)
@@ -929,7 +939,7 @@ def validate_cluster(
     duplicate_attrs = find_duplicates_in_element_list(attr_list)
     for dup_attr in duplicate_attrs:
         logger.error(
-            f"Duplicate attribute {dup_attr['name']} ({dup_attr['id']}) found {dup_attr['count']} times"
+            f"Duplicate attribute {dup_attr['name']} ({dup_attr['id']}) found {dup_attr['count']} times on {cluster_name} cluster"
         )
         result["is_compliant"] = False
         result["duplicate_elements"].append(
@@ -940,7 +950,7 @@ def validate_cluster(
                 "count": dup_attr["count"],
                 "cluster_id": cluster_id,
                 "cluster_name": cluster_name,
-                "message": f"Duplicate attribute {dup_attr['name']} ({dup_attr['id']}) found {dup_attr['count']} times",
+                "message": f"Duplicate attribute {dup_attr['name']} ({dup_attr['id']}) found {dup_attr['count']} times on {cluster_name} cluster",
             }
         )
 
@@ -951,7 +961,7 @@ def validate_cluster(
     duplicate_accepted_cmds = find_duplicates_in_element_list(accepted_cmd_list)
     for dup_cmd in duplicate_accepted_cmds:
         logger.error(
-            f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times"
+            f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times on {cluster_name} cluster"
         )
         result["is_compliant"] = False
         result["duplicate_elements"].append(
@@ -963,7 +973,7 @@ def validate_cluster(
                 "cluster_id": cluster_id,
                 "cluster_name": cluster_name,
                 "list_type": "AcceptedCommandList",
-                "message": f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times in AcceptedCommandList",
+                "message": f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times in AcceptedCommandList on {cluster_name} cluster",
             }
         )
 
@@ -973,6 +983,9 @@ def validate_cluster(
     )
     duplicate_generated_cmds = find_duplicates_in_element_list(generated_cmd_list)
     for dup_cmd in duplicate_generated_cmds:
+        logger.error(
+            f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times in GeneratedCommandList on {cluster_name} cluster"
+        )
         result["is_compliant"] = False
         result["duplicate_elements"].append(
             {
@@ -983,7 +996,7 @@ def validate_cluster(
                 "cluster_id": cluster_id,
                 "cluster_name": cluster_name,
                 "list_type": "GeneratedCommandList",
-                "message": f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times in GeneratedCommandList",
+                "message": f"Duplicate command {dup_cmd['name']} ({dup_cmd['id']}) found {dup_cmd['count']} times in GeneratedCommandList on {cluster_name} cluster",
             }
         )
 
@@ -1095,7 +1108,7 @@ def validate_single_device_type(
             return result
 
         try:
-            cluster_validation = validate_cluster(endpoint_clusters, required_cluster)
+            cluster_validation = validate_cluster(endpoint_clusters, required_cluster, device_type_id, device_type_name)
             result["cluster_validations"].append(cluster_validation)
 
             if not cluster_validation["is_compliant"]:
@@ -1372,6 +1385,9 @@ def validate_data_model_conformance(file_path, spec_version, output_path):
             output_path = os.path.join(
                 os.getcwd(), DEFAULT_OUTPUT_DIR, DEFAULT_REPORT_FILE
             )
+
+        if os.path.isdir(output_path):
+            output_path = os.path.join(output_path, DEFAULT_REPORT_FILE)
 
         output_path = os.path.abspath(output_path)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

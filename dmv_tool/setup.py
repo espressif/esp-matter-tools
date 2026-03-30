@@ -33,10 +33,9 @@ except ImportError:
           "documentation for instructions on how to install it.")
     exit(1)
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 long_description = """
-====================================
 esp-matter-data-model-validator Tool
 ====================================
 

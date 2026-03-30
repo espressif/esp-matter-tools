@@ -94,6 +94,21 @@ def convert_feature_name_to_code(
     return feature_name
 
 
+def get_feature_name_from_id(feature_id: str, cluster_features: List[Dict[str, Any]]) -> str:
+    """Get feature name from feature ID.
+
+    Args:
+        feature_id: Feature ID to convert
+        cluster_features: List of cluster feature dictionaries
+
+    Returns:
+    """
+    for feature in cluster_features:
+        if feature.get("id") == feature_id:
+            return feature.get("name", "")
+
+    return feature_id
+
 def merge_device_cluster_with_full_definition(
     device_cluster: Dict[str, Any],
     full_cluster: Dict[str, Any],
@@ -124,12 +139,15 @@ def merge_device_cluster_with_full_definition(
 
     device_feature_names = set()
     for feature in device_features:
-        if feature.get("is_mandatory"):
-            feature_name = feature.get("name", "")
-            if feature_name is not None:
-                device_feature_names.add(clean_string(feature_name).lower())
-            else:
-                device_feature_names.add(clean_string(feature.get("code", "")).lower())
+        if not feature.get("is_mandatory"):
+            continue
+        raw_value = feature.get("id") or feature.get("name")
+        if not raw_value:
+            logger.error(f"Feature ID is None for feature: {feature}")
+            continue
+        feature_name = get_feature_name_from_id(raw_value, full_features)
+        if feature_name:
+            device_feature_names.add(clean_string(feature_name).lower())
 
     enhanced_features = []
     for feature in full_features:
