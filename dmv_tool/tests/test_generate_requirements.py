@@ -28,6 +28,7 @@ from dmv_tool.generators.core import (
     merge_device_cluster_with_full_definition,
     combine_clusters_and_devices_json,
     combine_clusters_devices_json,
+    get_feature_name_from_id,
 )
 from dmv_tool.generators.xml_parser import (
     get_base_and_derived_cluster_files,
@@ -104,6 +105,17 @@ class TestRequirementsBuilder:
         assert convert_feature_name_to_code("color_control", cluster_features) == "CC"
         assert convert_feature_name_to_code("AC", cluster_features) == "AC"
         assert convert_feature_name_to_code("unknown", cluster_features) == "unknown"
+
+    def test_get_feature_name_from_id(self):
+        cluster_features = [
+            {"id": "0x0001", "name": "lighting"},
+            {"id": "0x0002", "name": "color_control"},
+            {"id": "0x0003", "name": "temperature_control"},
+        ]
+        assert get_feature_name_from_id("0x0001", cluster_features) == "lighting"
+        assert get_feature_name_from_id("0x0002", cluster_features) == "color_control"
+        assert get_feature_name_from_id("0x0003", cluster_features) == "temperature_control"
+        assert get_feature_name_from_id("0x0004", cluster_features) == "0x0004"
 
     def test_merge_device_cluster_with_full_definition(self):
         device_cluster = {

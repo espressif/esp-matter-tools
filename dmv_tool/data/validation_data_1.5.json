@@ -2940,7 +2940,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "application_platform",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x050C",
@@ -4827,7 +4827,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "temperature_number",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -4961,7 +4961,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "dead_front_behavior",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -5574,7 +5574,7 @@
                         "events": [],
                         "id": "0x0004",
                         "name": "off_only",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0006",
@@ -6529,7 +6529,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -6798,7 +6798,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -6883,7 +6883,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "on_off",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -6901,7 +6901,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0008",
@@ -8127,7 +8127,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -8396,7 +8396,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -8481,7 +8481,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "on_off",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -8499,7 +8499,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0008",
@@ -8750,7 +8750,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -8835,7 +8835,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "on_off",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -8853,7 +8853,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0008",
@@ -9164,7 +9164,7 @@
                         "events": [],
                         "id": "0x0010",
                         "name": "color_temperature",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0300",
@@ -9328,7 +9328,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -9413,7 +9413,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "on_off",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -9431,7 +9431,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0008",
@@ -9699,7 +9699,7 @@
                         "events": [],
                         "id": "0x0008",
                         "name": "xy",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -9742,7 +9742,7 @@
                         "events": [],
                         "id": "0x0010",
                         "name": "color_temperature",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0300",
@@ -9906,7 +9906,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -10175,7 +10175,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -10260,7 +10260,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "on_off",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -10278,7 +10278,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "lighting",
-                        "required": false
+                        "required": true
                     }
                 ],
                 "id": "0x0008",
@@ -10482,7 +10482,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "audio",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -11066,7 +11066,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "audio",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -11467,7 +11467,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "audio",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -11514,7 +11514,7 @@
                         "events": [],
                         "id": "0x0002",
                         "name": "video",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -11553,7 +11553,7 @@
                         "events": [],
                         "id": "0x0004",
                         "name": "snapshot",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -11937,7 +11937,7 @@
                         "events": [],
                         "id": "0x0004",
                         "name": "snapshot",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [
@@ -12259,7 +12259,7 @@
                         ],
                         "id": "0x0002",
                         "name": "momentary_switch",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [],
@@ -14748,7 +14748,7 @@
                         "events": [],
                         "id": "0x0001",
                         "name": "heating",
-                        "required": false
+                        "required": true
                     },
                     {
                         "attributes": [

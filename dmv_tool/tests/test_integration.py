@@ -110,6 +110,22 @@ class TestDMVIntegration:
             command, wildcard_file_path, expected_report_path, output_path, spec_version
         )
 
+    def test_wildcard_missing_lighting_feature_validation(self):
+        """Test validation of logs with missing lighting features generates expected report."""
+        wildcard_file_path = os.path.join(
+            self.test_data_dir, "1_5_missing_lighting_feature_wildcards.txt"
+        )
+        expected_report_path = os.path.join(
+            self.test_data_dir, "1_5_missing_lighting_feature_report.txt"
+        )
+        output_path = os.path.join(self.temp_dir, "1_5_missing_lighting_feature_wildcards_report_generated.txt")
+        spec_version = "1.5"
+
+        command = f"esp-matter-dm-validator check-conformance {wildcard_file_path} --spec-version {spec_version} --output-path {output_path}"
+        self.validate_wildcard_logs(
+            command, wildcard_file_path, expected_report_path, output_path, spec_version
+        )
+
     def test_wildcard_missing_commands_validation(self):
         """Test validation of logs with missing commands generates expected report."""
         wildcard_file_path = os.path.join(

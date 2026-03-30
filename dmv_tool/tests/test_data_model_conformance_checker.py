@@ -201,7 +201,7 @@ class TestValidateFeatureMap:
 
         assert is_valid is False
         assert len(errors) > 0
-        assert errors[0].get("message") == "Required feature Frequency (2) is missing"
+        assert errors[0].get("message") == "Required feature Frequency (2) is missing on level_control cluster"
 
     def test_validate_extra_features_allowed(self):
         """Test validation with extra features (should be allowed)."""
@@ -283,7 +283,7 @@ class TestValidateFeatureSpecificElements:
         assert len(errors) > 0
         assert (
             errors[0].get("message")
-            == "Feature 'Lighting' is present but required attribute 'global_scene_control' (0x0001) is missing"
+            == "Feature 'Lighting' is present but required attribute 'global_scene_control' (0x0001) is missing on on_off cluster"
         )
 
 
@@ -429,7 +429,7 @@ class TestValidateCluster:
             "features": [],
         }
 
-        result = validate_cluster(endpoint_clusters, required_cluster)
+        result = validate_cluster(endpoint_clusters, required_cluster, "0xFFFF", "Test Device Type")
 
         assert result["is_compliant"] is True
         assert len(result["missing_elements"]) == 0
@@ -445,7 +445,7 @@ class TestValidateCluster:
             "type": "server",
         }
 
-        result = validate_cluster(endpoint_clusters, required_cluster)
+        result = validate_cluster(endpoint_clusters, required_cluster, "0xFFFF", "Test Device Type")
 
         assert result["is_compliant"] is False
         assert len(result["missing_elements"]) > 0
@@ -462,7 +462,7 @@ class TestValidateCluster:
             "type": "server",
         }
 
-        result = validate_cluster(endpoint_clusters, required_cluster)
+        result = validate_cluster(endpoint_clusters, required_cluster, "0xFFFF", "Test Device Type")
 
         assert result["is_compliant"] is True
         assert (
@@ -489,7 +489,7 @@ class TestValidateCluster:
             "type": "client",
         }
 
-        result = validate_cluster(endpoint_clusters, required_cluster)
+        result = validate_cluster(endpoint_clusters, required_cluster, "0xFFFF", "Test Device Type")
 
         assert result["is_compliant"] is True
         assert len(result["missing_elements"]) == 0
