@@ -18,16 +18,27 @@
 Integration test suite for esp-matter-mfg-tool
 """
 
-import json
 import os
 import shutil
 import shlex
 import logging
 from pathlib import Path
 from typing import List, Optional, Tuple
-
-from sources.cert_utils import load_cert_from_file, extract_common_name
-from .utils import run_command, parse_mfg_tool_output, Config, ParsedOutput
+from tests.utils import (
+    run_command,
+    parse_mfg_tool_output,
+    Config,
+    ParsedOutput,
+    parse_command_arguments,
+    parse_partition_bin,
+    validate_single_partition,
+    safe_read_bytes,
+    load_test_data,
+)
+from sources.cert_utils import (
+    load_cert_from_file,
+    extract_common_name,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,7 +54,9 @@ class TestEspMatterMfgToolIntegration:
         cls.output_dir = Path("out/")
 
         # Add test_data directory to PATH for chip-cert command
-        os.environ["PATH"] = f"{os.environ.get('PATH', '')}:{cls.test_data_dir.absolute()}"
+        os.environ["PATH"] = (
+            f"{os.environ.get('PATH', '')}:{cls.test_data_dir.absolute()}"
+        )
 
     def teardown_method(self):
         """Clean up after each test"""
@@ -60,18 +73,26 @@ class TestEspMatterMfgToolIntegration:
         Returns:
             None
         """
-        assert len(parsed_output) > 0, "Could not find output path, Certificates not generated"
+        assert len(parsed_output) > 0, (
+            "Could not find output path, Certificates not generated"
+        )
 
         for output in parsed_output:
             dac_cert = Path(output.dac_cert)
             pai_cert = Path(output.pai_cert)
             paa_cert = Path(f"{self.test_data_dir}/Chip-Test-PAA-NoVID-Cert.pem")
-            assert all([dac_cert.exists(), pai_cert.exists(), paa_cert.exists()]), "Certificate files not generated"
+            assert all([dac_cert.exists(), pai_cert.exists(), paa_cert.exists()]), (
+                "Certificate files not generated"
+            )
 
             # Run chip-cert validation
-            cert_cmd = f"chip-cert validate-att-cert -d {dac_cert} -i {pai_cert} -a {paa_cert}"
+            cert_cmd = (
+                f"chip-cert validate-att-cert -d {dac_cert} -i {pai_cert} -a {paa_cert}"
+            )
             result = run_command(cert_cmd)
-            assert result.returncode == 0, f"Certificate validation failed: {result.stderr}"
+            assert result.returncode == 0, (
+                f"Certificate validation failed: {result.stderr}"
+            )
             logger.info("Certificate chain validated successfully")
 
     def _validate_no_bin_files(self, output: str):
@@ -84,10 +105,14 @@ class TestEspMatterMfgToolIntegration:
         Returns:
             None
         """
-        assert "*-partition.bin" not in output, "partition.bin files generated but expected to be skipped"
+        assert "*-partition.bin" not in output, (
+            "partition.bin files generated but expected to be skipped"
+        )
         logger.info("No partition.bin files generated")
 
-    def _validate_secure_cert_partitions(self, parsed_output: List[ParsedOutput], should_exist: bool = True):
+    def _validate_secure_cert_partitions(
+        self, parsed_output: List[ParsedOutput], should_exist: bool = True
+    ):
         """
         Validate that secure cert partition files are generated when expected
 
@@ -101,13 +126,21 @@ class TestEspMatterMfgToolIntegration:
         for output in parsed_output:
             secure_cert_exists = Path(output.secure_cert_bin).exists()
             if should_exist:
-                assert secure_cert_exists, f"Secure cert partition file not found: {output.secure_cert_bin}"
-                logger.info(f"Secure cert partition file validated: {output.secure_cert_bin}")
+                assert secure_cert_exists, (
+                    f"Secure cert partition file not found: {output.secure_cert_bin}"
+                )
+                logger.info(
+                    f"Secure cert partition file validated: {output.secure_cert_bin}"
+                )
             else:
-                assert not secure_cert_exists, f"Secure cert partition file should not exist: {output.secure_cert_bin}"
+                assert not secure_cert_exists, (
+                    f"Secure cert partition file should not exist: {output.secure_cert_bin}"
+                )
                 logger.info("No secure cert partition files found as expected")
 
-    def _validate_output_paths_with_dac_cert_common_name(self, parsed_output: List[ParsedOutput], present: bool = True):
+    def _validate_output_paths_with_dac_cert_common_name(
+        self, parsed_output: List[ParsedOutput], present: bool = True
+    ):
         """
         Validate that output paths match DAC certificate common names
 
@@ -122,9 +155,13 @@ class TestEspMatterMfgToolIntegration:
             dac_cert = load_cert_from_file(output.dac_cert)
             cn = extract_common_name(dac_cert.subject)
             if present:
-                assert cn in output.out_path, "DAC certificate common name not found in output path"
+                assert cn in output.out_path, (
+                    "DAC certificate common name not found in output path"
+                )
             else:
-                assert cn not in output.out_path, "DAC certificate common name found in output path"
+                assert cn not in output.out_path, (
+                    "DAC certificate common name found in output path"
+                )
         logger.info("Output paths validated successfully")
 
     def _validate_command_output(self, output: str, config: Config):
@@ -138,7 +175,9 @@ class TestEspMatterMfgToolIntegration:
         Returns:
             None
         """
-        assert config.expected_output in output, f"Expected output not found: {config.expected_output}"
+        assert config.expected_output in output, (
+            f"Expected output not found: {config.expected_output}"
+        )
 
         if config.validate_no_bin:
             self._validate_no_bin_files(output)
@@ -148,30 +187,22 @@ class TestEspMatterMfgToolIntegration:
         if config.validate_csv_quoting:
             self._validate_csv_quoting(config.command)
 
+        # Validate generated partition.bin on every successful generation,
+        # regardless of whether cert-chain validation is requested.
+        if parsed_output:
+            self._validate_partition_bin(config.command, parsed_output)
+
         if config.validate_cert:
             self._validate_certificates_with_chip_cert(parsed_output)
+
         if config.validate_cn_in_path or config.validate_cn_not_in_path:
-            self._validate_output_paths_with_dac_cert_common_name(parsed_output, True if config.validate_cn_in_path else False)
+            self._validate_output_paths_with_dac_cert_common_name(
+                parsed_output, True if config.validate_cn_in_path else False
+            )
         if config.validate_secure_cert:
             self._validate_secure_cert_partitions(parsed_output, should_exist=True)
         if config.validate_no_secure_cert_bin:
             self._validate_secure_cert_partitions(parsed_output, should_exist=False)
-
-    def _load_test_data(self) -> List[Config]:
-        """
-        Load test configurations from JSON file
-
-        Args:
-            None
-
-        Returns:
-            List[Config]: List of test configurations
-        """
-        test_data_file = Path(f"{self.test_data_dir}/test_integration_inputs.json")
-        with open(test_data_file, "r") as f:
-            data = json.load(f)
-
-        return [Config.from_dict(test) for test in data.get("tests", [])]
 
     def _extract_outdir(self, cmd: str) -> Optional[str]:
         """
@@ -202,7 +233,7 @@ class TestEspMatterMfgToolIntegration:
         vid, pid = self._extract_vid_pid(cmd)
         return f"{int(vid, 16):04x}_{int(pid, 16):04x}"
 
-    def _run_single_test(self, test_num: int, config: Config):
+    def run_single_test(self, test_num: int, config: Config):
         """
         Run a single test case
 
@@ -220,7 +251,9 @@ class TestEspMatterMfgToolIntegration:
         # use the outdir from the command if present, else fallback to default outdir
         outdir_in_cmd = self._extract_outdir(config.command)
         vid_pid_str = self._extract_vid_pid_str(config.command)
-        self.output_dir = Path(outdir_in_cmd) if outdir_in_cmd else Path(f"out/{vid_pid_str}")
+        self.output_dir = (
+            Path(outdir_in_cmd) if outdir_in_cmd else Path(f"out/{vid_pid_str}")
+        )
 
         # Run the command
         result = run_command(config.command)
@@ -233,10 +266,10 @@ class TestEspMatterMfgToolIntegration:
 
     def test_esp_matter_mfg_tool_parametrized(self):
         """Run all parameterized test cases for esp-matter-mfg-tool"""
-        test_configs = self._load_test_data()
+        test_configs = load_test_data(self.test_data_dir)
 
         for test_num, config in enumerate(test_configs, 1):
-            self._run_single_test(test_num, config)
+            self.run_single_test(test_num, config)
             self.teardown_method()
 
     def _validate_csv_quoting(self, command: str):
@@ -252,4 +285,37 @@ class TestEspMatterMfgToolIntegration:
         with open(master_csv, "r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                assert "Test Vendor,LLC" == row["vendor-name"], "Vendor name should be quoted"
+                assert "Test Vendor,LLC" == row["vendor-name"], (
+                    "Vendor name should be quoted"
+                )
+
+    def _validate_partition_bin(self, command: str, parsed_output: List[ParsedOutput]):
+        """Validate the generated partition.bin matches the input arguments."""
+        cmd_args = parse_command_arguments(command)
+        logger.debug(f"parsed cmd-args: {cmd_args}")
+        should_have_dac = bool(cmd_args.get("paa") or cmd_args.get("pai"))
+        dac_in_partition = should_have_dac and not cmd_args.get("dac-in-secure-cert")
+
+        for output in parsed_output:
+            partition_bin_path = Path(output.partition_bin)
+            if not partition_bin_path.exists():
+                logger.warning(f"Partition file not found: {partition_bin_path}")
+                continue
+
+            dac_files = {
+                "dac-cert": output.dac_cert,
+                "dac-key": output.dac_priv_key_bin,
+                "dac-pub-key": output.dac_pub_key,
+                "pai-cert": output.pai_cert,
+            }
+            if should_have_dac:
+                missing = [p for p in dac_files.values() if not Path(p).exists()]
+                assert not missing, (
+                    f"--paa/--pai set but DAC artifacts missing: {missing}"
+                )
+            if dac_in_partition:
+                cmd_args.update({k: safe_read_bytes(p) for k, p in dac_files.items()})
+
+            partition_data = parse_partition_bin(str(partition_bin_path))
+            logger.debug(f"parsed partition {partition_bin_path}: {partition_data}")
+            validate_single_partition(cmd_args, partition_data)
