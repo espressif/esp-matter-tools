@@ -1,6 +1,7 @@
 {
   "tests": [
     {
+      "test_num": 1,
       "description": "factory partition with generated DAC",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
@@ -8,6 +9,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 2,
       "description": "factory partition with generated PAI and DAC and VID/PID with width less than 4 bytes",
       "command": "esp-matter-mfg-tool -v 0x4d2 -p 0xb --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem",
       "expected_output": "Generated output files at:",
@@ -15,6 +17,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 3,
       "description": "factory partition with generated DAC and dac-in-secure-cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --target esp32",
       "expected_output": "Generated output files at:",
@@ -22,6 +25,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 4,
       "description": "factory partition with generated DAC for 5 devices",
       "command": "esp-matter-mfg-tool -n 5 -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
@@ -29,6 +33,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 5,
       "description": "factory partition with external DAC",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC_key.pem --dac-cert test_data/DAC_cert.pem",
       "expected_output": "Generated output files at:",
@@ -36,6 +41,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 6,
       "description": "factory partition with rotating device id",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --passcode 20202021 --discriminator 3840 --enable-rotating-device-id --rd-id-uid d2f351f57bb9387445a5f92a601d1c14",
       "expected_output": "Generated output files at:",
@@ -43,6 +49,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 7,
       "description": "factory partition with extra nvs key config and value",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_key_config.csv --mcsv test_data/extra_nvs_key_value.csv",
       "expected_output": "Generated output files at:",
@@ -50,11 +57,13 @@
       "validate_cert": true
     },
     {
+      "test_num": 8,
       "description": "factory partition without DAC",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:"
     },
     {
+      "test_num": 9,
       "description": "store artefacts in /tmp/out directory",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --outdir /tmp/out",
       "expected_output": "Generated output files at: /tmp/out/fff2_8001",
@@ -62,12 +71,14 @@
       "validate_cert": true
     },
     {
+      "test_num": 10,
       "description": "Test the no-bin option",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --no-bin",
       "expected_output": "Generated output files at:",
       "validate_no_bin": true
     },
     {
+      "test_num": 11,
       "description": "factory partition with extra nvs key config and multiline values",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --csv test_data/extra_nvs_keys_for_multiline_items.csv --mcsv test_data/extra_nvs_values_for_multiline_items.csv",
       "expected_output": "Generated output files at:",
@@ -75,12 +86,14 @@
       "validate_cert": true
     },
     {
+      "test_num": 12,
       "description": "factory partition with external DAC with no UUID in common name",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC_key_No_UUID.der --dac-cert test_data/DAC_cert_No_UUID.der",
       "expected_output": "Generated output files at:",
       "validate_cert": true
     },
     {
+      "test_num": 13,
       "description": "Validate dac-cert, dac-key, pai-cert and chain validation",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC_key.pem --dac-cert test_data/DAC_cert.pem",
       "expected_output": "Generated output files at:",
@@ -88,16 +101,19 @@
       "validate_cert": true
     },
     {
+      "test_num": 14,
       "description": "Invalid dac_cert and dac_key (Provided PAA-cert as dac-cert) with valid pai_cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/Chip-Test-PAA-NoVID-Cert.pem",
       "expected_output": "[  ERROR] - DAC certificate is not valid"
     },
     {
+      "test_num": 15,
       "description": "Valid dac-cert and dac-key but different pai certificate",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-key test_data/DAC-FFF1-8000-Key.pem --dac-cert test_data/DAC-FFF1-8000-Cert.pem",
       "expected_output": "[  ERROR] - DAC certificate chain is not valid"
     },
     {
+      "test_num": 16,
       "description": "Valid paa-cert and paa-key",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
@@ -105,36 +121,43 @@
       "validate_cert": true
     },
     {
+      "test_num": 17,
       "description": "Invalid date format",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --mfg-date 2002-02-02",
       "expected_output": "[  ERROR] - First 8 bytes should be in ISO 8601 format YYYYMMDD"
     },
     {
+      "test_num": 18,
       "description": "PAA-cert and paa-key mismatch (Provided DAC_key as key and PAA-cert as cert)",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0xFFF2 -p 0x8001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/DAC_key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "[  ERROR] - PAA certificate and private key do not match"
     },
     {
+      "test_num": 19,
       "description": "VID, PID mismatch with pai-cert",
       "command": "esp-matter-mfg-tool -v 0x1001 -p 0x1001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "[  ERROR] - PAI certificate VID and PID do not match input VID and PID"
     },
     {
+      "test_num": 20,
       "description": "Certificate validity period outside parent certificate",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -vf \"2001-01-01T00:00:00\" --lifetime 1000",
       "expected_output": "[  ERROR] - PAI Certificate validity period is outside the specified parameters"
     },
     {
+      "test_num": 21,
       "description": "DS peripheral with c3 target",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32c3",
       "expected_output": "[  ERROR] - DS peripheral is only supported for esp32h2 target"
     },
     {
+      "test_num": 22,
       "description": "DS peripheral with esp32h2 target but without efuse-key",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32h2",
       "expected_output": "[  ERROR] - --efuse-key-id <value> is required when -ds or --ds-peripheral option is used"
     },
     {
+      "test_num": 23,
       "description": "DS peripheral, esp32h2, efuse-key-id 1",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -ds --target esp32h2 --efuse-key-id 1",
       "expected_output": "Generated output files at:",
@@ -142,11 +165,13 @@
       "validate_cert": true
     },
     {
+      "test_num": 24,
       "description": "Partition count greater than 1 with port argument",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --port /dev/ttyUSB0 -n 3",
       "expected_output": "[  ERROR] - Port not specified or number of partitions count is greater than 1"
     },
     {
+      "test_num": 25,
       "description": "No port provided but partition count is greater than 1",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der -n 5",
       "expected_output": "Generated output files at:",
@@ -154,6 +179,7 @@
       "validate_cert": true
     },
     {
+      "test_num": 26,
       "description": "Port provided with partition count 1",
       "command": "esp-matter-mfg-tool -cn \"My bulb\" -v 0x1001 -p 0x1001 --paa -c test_data/Chip-Test-PAA-NoVID-Cert.pem -k test_data/Chip-Test-PAA-NoVID-Key.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --port /dev/ttyUSB0",
       "expected_output": "Generated output files at:",
@@ -161,36 +187,43 @@
       "validate_cert": true
     },
     {
+      "test_num": 27,
       "description": "factory partition with vendor name containing comma (CSV quoting test)",
       "command": "esp-matter-mfg-tool -v 0xFFF1 --vendor-name \"Test Vendor,LLC\" -p 0x8001 --product-name \"Test Product\"",
       "validate_csv_quoting": true
     },
     {
+      "test_num": 28,
       "description": "Error: commissionable-data-in-secure-cert without other required options",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --commissionable-data-in-secure-cert",
       "expected_output": "[  ERROR] - If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory"
     },
     {
+      "test_num": 29,
       "description": "Error: rd-id-uid-in-secure-cert without other required options",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --rd-id-uid-in-secure-cert",
       "expected_output": "[  ERROR] - If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory"
     },
     {
+      "test_num": 30,
       "description": "Error: rd-id-uid-in-secure-cert with only dac-in-secure-cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --dac-in-secure-cert --rd-id-uid-in-secure-cert",
       "expected_output": "[  ERROR] - If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory"
     },
     {
+      "test_num": 31,
       "description": "Error: commissionable-data-in-secure-cert with only dac-in-secure-cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --dac-in-secure-cert --commissionable-data-in-secure-cert",
       "expected_output": "[  ERROR] - If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory"
     },
     {
+      "test_num": 32,
       "description": "Error: commissionable-data-in-secure-cert with only rd-id-uid-in-secure-cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --rd-id-uid-in-secure-cert --commissionable-data-in-secure-cert",
       "expected_output": "[  ERROR] - If --commissionable-data-in-secure-cert or --rd-id-uid-in-secure-cert is provided, then --dac-in-secure-cert, --commissionable-data-in-secure-cert, and --rd-id-uid-in-secure-cert are mandatory"
     },
     {
+      "test_num": 33,
       "description": "Factory partition with only dac-in-secure-cert",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert",
       "expected_output": "Generated output files at:",
@@ -199,6 +232,7 @@
       "validate_secure_cert": true
     },
     {
+      "test_num": 34,
       "description": "Factory partition with all secure cert options enabled",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert",
       "expected_output": "Generated output files at:",
@@ -207,60 +241,191 @@
       "validate_secure_cert": true
     },
     {
+      "test_num": 35,
       "description": "Secure cert with DS peripheral and all options",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert -ds --target esp32h2 --efuse-key-id 1 --port /dev/ttyUSB0",
       "expected_output": "ERROR: esp-secure-cert-tool exited with error"
     },
     {
+      "test_num": 36,
       "description": "Factory partition with no-secure-cert-bin option",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --no-secure-cert-bin",
       "expected_output": "Generated output files at:",
       "validate_no_secure_cert_bin": true
     },
     {
+      "test_num": 37,
       "description": "Factory partition with all secure cert options enabled with --no-secure-cert-bin",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --dac-in-secure-cert --commissionable-data-in-secure-cert --rd-id-uid-in-secure-cert --no-secure-cert-bin",
       "expected_output": "Generated output files at:",
       "validate_no_secure_cert_bin": true
     },
     {
+      "test_num": 38,
       "description": "Error: salt provided without verifier",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\"",
       "expected_output": "[  ERROR] - --salt and --verifier must be provided together"
     },
     {
+      "test_num": 39,
       "description": "Error: verifier provided without salt",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
       "expected_output": "[  ERROR] - --salt and --verifier must be provided together"
     },
     {
+      "test_num": 40,
       "description": "Error: salt and verifier provided without passcode",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
       "expected_output": "[  ERROR] - --passcode is required when --salt and --verifier are provided"
     },
     {
+      "test_num": 41,
       "description": "Error: salt and verifier with enable-dynamic-passcode",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202021 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\" --enable-dynamic-passcode",
       "expected_output": "[  ERROR] - --salt and --verifier cannot be used with --enable-dynamic-passcode"
     },
     {
+      "test_num": 42,
       "description": "Error: verifier does not match passcode and salt",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 20202022 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\"",
       "expected_output": "[  ERROR] - Verifier validation failed: the provided verifier does not match the computed verifier from passcode and salt"
     },
     {
+      "test_num": 43,
       "description": "Error: iteration-count below minimum (999)",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --iteration-count 999",
       "expected_output": "[  ERROR] - --iteration-count must be between 1000 and 100000"
     },
     {
+      "test_num": 44,
       "description": "Error: iteration-count above maximum (100001)",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --iteration-count 100001",
       "expected_output": "[  ERROR] - --iteration-count must be between 1000 and 100000"
     },
     {
+      "test_num": 45,
       "description": "factory partition with specified spake2p salt, iteration count and verifier",
       "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der --passcode 20202021 --discriminator 3840 --salt \"V2QKkHqfnRuSmj1m/1ZcYNwoAfhl5sihnkdYmHQahuM=\" --verifier \"UiGpbqdFJsfa/Q06gfG2gALX3kHZ0vh74obA66HXxoMEYG3ymghhkZccIRNBCyM8dJXM9HqPDF29uybbgC+PSM9qAkdHkB7cYaAkiUe1bCgEj9y9LDtqDq6fYsg12BFq2A==\" --iteration-count 20000",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 46,
+      "description": "factory partition with custom partition size",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -s 0x4000 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 47,
+      "description": "factory partition with NVS encryption enabled",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -e --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 48,
+      "description": "factory partition with log-level debug",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --log-level debug --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 49,
+      "description": "generated factory partition with input arguments",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name 'Espressif Systems' --product-name 'Matter Device' --hw-ver 2 --hw-ver-str 'v2.0' --serial-num 'SN123456789' --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 50,
+      "description": "factory partition with manufacturing date",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --mfg-date 20240115testdata --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 51,
+      "description": "factory partition with all device info fields",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --vendor-name 'Espressif' --product-name 'Matter Device' --hw-ver 3 --hw-ver-str 'v3.0' --serial-num 'ABC123XYZ' --product-label 'Smart Device' --product-url 'https://espressif.com' --part-number 'ESP-MAT-001' --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 52,
+      "description": "factory partition with commissioning parameters",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --passcode 12345679 --discriminator 2048 --iteration-count 20000 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 53,
+      "description": "factory partition with commissioning-flow user-intent",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -cf 1 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 54,
+      "description": "factory partition with discovery-mode BLE+on-network",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -dm 6 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 55,
+      "description": "factory partition with enable-dynamic-passcode",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --enable-dynamic-passcode --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 56,
+      "description": "factory partition with rotating device id",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --rd-id-uid 1234567890abcdef1234567890abcdef --enable-rotating-device-id --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 57,
+      "description": "factory partition with type of arguments as enum values",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --calendar-types Indian Buddhist --product-finish other --product-color black --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 58,
+      "description": "factory partition with locales",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --locales en-US en-GB fr-FR --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 59,
+      "description": "factory partition with fixed labels",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --fixed-labels 0/orientation/up 1/orientation/down --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cn_in_path": true,
+      "validate_cert": true
+    },
+    {
+      "test_num": 60,
+      "description": "factory partition with supported modes with semantic tags",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 --supported-modes '0/RapidCool/1/7\\0, 8\\0' '1/RapidFreeze/1/7\\0' --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
