@@ -22,7 +22,7 @@ except ImportError:
     )
     sys.exit(1)
 
-VERSION = "1.0.22"
+VERSION = "1.0.23"
 
 long_description = """
 ====================
@@ -77,7 +77,7 @@ setup(
     packages = find_packages(),
     entry_points={
         'console_scripts': [
-            'esp-matter-mfg-tool = sources.mfg_tool:main',
+            'esp-matter-mfg-tool = sources.cli:main',
         ],
     },
 )

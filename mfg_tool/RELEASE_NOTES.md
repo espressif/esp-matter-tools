@@ -1,3 +1,13 @@
+# [1.0.23] - (30-April-2026)
+
+### CLI migration from argparse to Click
+
+* The CLI is now decoupled from core mfg-tool logic and implemented using [Click](https://click.palletsprojects.com/) instead of argparse.
+  Existing command-line invocations are compatible.
+
+* **[NOTE]** `--discovery-mode` now strictly validates input to the three values defined by the Matter spec:
+  `2` (BLE), `4` (On-Network), `6` (BLE + On-Network). Previously any integer was accepted.
+
 # [1.0.22] - (17-February-2026)
 * Removed pkg_resources dependency
 

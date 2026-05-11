@@ -16,6 +16,10 @@ ruff_check:
   script:
     - python3 -m pip install --upgrade pip ruff
     - ruff check .
+    - cd mfg_tool
+    # TODO - Enable this to other modules as well
+    - ruff format --check sources/cli.py
+    - ruff format --check tests --exclude tests/deps
 
 build_mfg_tool:
   stage: build
