@@ -19,7 +19,12 @@ import click
 from click_option_group import optgroup, MutuallyExclusiveOptionGroup, GroupedOption
 from types import SimpleNamespace
 from sources.mfg_tool import main_internal, __LOG_LEVELS__
-from sources.utils import CalendarTypes, ProductFinish, ProductColor
+from sources.utils import (
+    CalendarTypes,
+    ProductFinish,
+    ProductColor,
+    format_allowed_bits,
+)
 
 product_finish_choices = [finish.name for finish in ProductFinish]
 product_color_choices = [color.name for color in ProductColor]
@@ -42,6 +47,23 @@ def int_choice(choices):
             raise click.BadParameter(
                 "invalid choice: {}. (choose from {})".format(
                     v, ", ".join(str(c) for c in choices)
+                )
+            )
+        return v
+
+    return callback
+
+
+def int_bitmask(allowed_mask):
+    """Click callback that converts to int then validates the value sets at
+    least one allowed bit and no reserved bits (0 is not allowed)."""
+
+    def callback(ctx, param, value):
+        v = any_base_int(ctx, param, value)
+        if v <= 0 or (v & ~allowed_mask):
+            raise click.BadParameter(
+                "{} is not allowed, use {} or any sum of them (e.g. 6 = 2 + 4)".format(
+                    v, format_allowed_bits(allowed_mask)
                 )
             )
         return v
@@ -179,9 +201,11 @@ class MultiValueOption(GroupedOption):
     "--discovery-mode",
     default=2,
     type=str,
-    callback=int_choice([2, 4, 6]),
+    # 0x3E = bits 1-5 (BLE, On-network, Wi-Fi PAF, NFC, Thread); bit 0 and bits 6-7 are reserved
+    callback=int_bitmask(0x3E),
     help="The discovery mode for commissionable device discovery. "
-    "2: BLE, 4: On-network, 6: BLE + On-network. Default is BLE.",
+    "2: BLE, 4: On-network, 8: Wi-Fi PAF, 16: NFC, 32: Thread. "
+    "Bits may be combined, e.g. 6: BLE + On-network. Default is BLE.",
 )
 @optgroup.option(
     "--enable-dynamic-passcode",

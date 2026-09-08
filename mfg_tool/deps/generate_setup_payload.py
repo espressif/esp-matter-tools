@@ -128,6 +128,12 @@ def validate_args(args):
             print('{} is out of range, should be in range from {} to {}'.format(name, min_value, max_value))
             sys.exit(1)
 
+    def check_int_bitmask(value, allowed_mask, name):
+        if value is not None and (value <= 0 or (value & ~allowed_mask)):
+            allowed = ', '.join(str(1 << i) for i in range(allowed_mask.bit_length()) if allowed_mask & (1 << i))
+            print('{} {} is not allowed, use {} or any sum of them (e.g. 6 = 2 + 4)'.format(name, value, allowed))
+            sys.exit(1)
+
     if args.passcode is not None:
         if ((args.passcode < 0x0000001 and args.passcode > 0x5F5E0FE) or (args.passcode in INVALID_PASSCODES)):
             print('Invalid passcode:' + str(args.passcode))
@@ -136,7 +142,8 @@ def validate_args(args):
     check_int_range(args.discriminator, 0x0000, 0x0FFF, 'Discriminator')
     check_int_range(args.product_id, 0x0000, 0xFFFF, 'Product id')
     check_int_range(args.vendor_id, 0x0000, 0xFFFF, 'Vendor id')
-    check_int_range(args.discovery_cap_bitmask, 0x0001, 0x0007, 'Discovery Capability Mask')
+    # 0x3E = bits 1-5 (BLE, On-network, Wi-Fi PAF, NFC, Thread); bit 0 and bits 6-7 are reserved
+    check_int_bitmask(args.discovery_cap_bitmask, 0x3E, 'Discovery Capability Mask')
 
 
 def main():
@@ -153,7 +160,8 @@ def main():
                                Default is 0.', choices=[0, 1, 2])
     parser.add_argument('-dm', '--discovery-cap-bitmask', type=any_base_int, default=4,
                                help='Commissionable device discovery capability bitmask. \
-                               0:SoftAP, 1:BLE, 2:OnNetwork. Default: OnNetwork')
+                               2:BLE, 4:OnNetwork, 8:Wi-Fi PAF, 16:NFC, 32:Thread. Bits may \
+                               be combined. Default: OnNetwork')
     args = parser.parse_args()
     validate_args(args)
 

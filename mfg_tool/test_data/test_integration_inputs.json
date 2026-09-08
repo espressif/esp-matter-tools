@@ -483,6 +483,26 @@
       "expected_output": "Generated output files at:",
       "validate_cn_in_path": true,
       "validate_cert": true
+    },
+    {
+      "test_num": 68,
+      "description": "factory partition with discovery-mode BLE+Thread (Matter 1.6)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -dm 34 --pai -k test_data/Chip-Test-PAI-FFF2-8001-Key.pem -c test_data/Chip-Test-PAI-FFF2-8001-Cert.pem -cd test_data/Chip-Test-CD-FFF2-8001.der",
+      "expected_output": "Generated output files at:",
+      "validate_cert": true,
+      "validate_cn_in_path": true
+    },
+    {
+      "test_num": 69,
+      "description": "Error: discovery-mode with reserved bit (68)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -dm 68",
+      "expected_output": "68 is not allowed, use 2, 4, 8, 16, 32"
+    },
+    {
+      "test_num": 70,
+      "description": "Error: discovery-mode with no transport (0)",
+      "command": "esp-matter-mfg-tool -v 0xFFF2 -p 0x8001 -dm 0",
+      "expected_output": "0 is not allowed, use 2, 4, 8, 16, 32"
     }
   ]
 }

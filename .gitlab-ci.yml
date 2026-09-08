@@ -23,7 +23,7 @@ ruff_check:
     - build
 
   script:
-    - python3 -m pip install --upgrade pip ruff
+    - python3 -m pip install --upgrade pip "ruff==0.15.17"
     - ruff check .
     - cd mfg_tool
     # TODO - Enable this to other modules as well

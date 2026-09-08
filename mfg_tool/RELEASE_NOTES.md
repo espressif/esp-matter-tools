@@ -1,3 +1,11 @@
+# [1.0.25] - (8-September-2026)
+
+* `--discovery-mode` now accepts the discovery capability bits added in Matter 1.6:
+  `8` (Wi-Fi Public Action Frame), `16` (NFC) and `32` (Thread), in addition to `2` (BLE)
+  and `4` (On-Network). Bits may be combined; at least one capability bit must be set
+  (`0` is rejected) and reserved bits (0 and 6-7) must be 0. Previously only `2`, `4`
+  and `6` were accepted.
+
 # [1.0.24] - (9-June-2026)
 
 * Added `--mqtt-host` option to specify the MQTT broker hostname for RainMaker credentials.

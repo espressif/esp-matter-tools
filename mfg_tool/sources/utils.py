@@ -150,12 +150,22 @@ def check_date_format(date_str):
 def check_int_range(value, min_value, max_value, name):
     VERIFY_OR_EXIT(not(value and ((value < min_value) or (value > max_value))), f'{name} is out of range, should be in range [{min_value}, {max_value}]')
 
+def format_allowed_bits(allowed_mask):
+    """
+    Format the individual bit values of a mask as a human-readable list, e.g. 0x3E -> "2, 4, 8, 16, 32"
+    """
+    return ', '.join(str(1 << i) for i in range(allowed_mask.bit_length()) if allowed_mask & (1 << i))
 
+# Validate that an integer sets at least one allowed bit and no reserved bits (0 is not allowed)
+def check_int_bitmask(value, allowed_mask, name):
+    if value is not None and (value <= 0 or (value & ~allowed_mask)):
+        VERIFY_OR_EXIT(False, f'{name} {value} is not allowed, use {format_allowed_bits(allowed_mask)} or any sum of them (e.g. 6 = 2 + 4)')
 
 # Validates discriminator and passcode
 def validate_commissionable_data(args):
     check_int_range(args.discriminator, 0x0000, 0x0FFF, 'Discriminator')
-    check_int_range(args.discovery_mode, 0, 7, 'Discovery mode')
+    # 0x3E = bits 1-5 (BLE, On-network, Wi-Fi PAF, NFC, Thread); bit 0 and bits 6-7 are reserved
+    check_int_bitmask(args.discovery_mode, 0x3E, 'Discovery mode')
     if args.passcode is not None:
         VERIFY_OR_EXIT(not((args.passcode < 0x0000001 and args.passcode > 0x5F5E0FE) or (args.passcode in INVALID_PASSCODES)), f'Invalid passcode {args.passcode}')
 
