@@ -136,11 +136,27 @@ class TestDiscoveryMode:
         assert result.exit_code == 0
         assert get_ns(mock_main_internal).discovery_mode == 4
 
-    @pytest.mark.parametrize("val", ["0", "1", "3", "5", "7"])
+    # Matter 1.6 (section 5.1.3.1, Table 60) adds Wi-Fi PAF (8), NFC (16) and
+    # Thread (32) bits. Any combination of bits 1-5 (mask 0x3E) is valid.
+    @pytest.mark.parametrize(
+        "val, expected",
+        [("8", 8), ("16", 16), ("32", 32), ("34", 34), ("0x3E", 0x3E)],
+    )
+    def test_valid_bitmask_values(self, runner, mock_main_internal, val, expected):
+        result = runner.invoke(main, BASE_ARGS + ["-dm", val])
+        assert result.exit_code == 0
+        assert get_ns(mock_main_internal).discovery_mode == expected
+
+    # Invalid values are rejected: 0 advertises no transport, 1/3/5/7/0x3F set
+    # reserved bit 0, and 64/0x40/255 set reserved bits 6-7.
+    @pytest.mark.parametrize(
+        "val", ["0", "1", "3", "5", "7", "0x3F", "64", "0x40", "255"]
+    )
     def test_invalid_values_rejected(self, runner, val):
         result = runner.invoke(main, BASE_ARGS + ["-dm", val])
         assert result.exit_code != 0
-        assert "invalid choice" in result.output.lower()
+        assert "not allowed" in result.output.lower()
+        assert "2, 4, 8, 16, 32" in result.output
 
 
 class TestCommissioningFlow:
