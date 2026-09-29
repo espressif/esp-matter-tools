@@ -330,6 +330,28 @@ def validate_certificate_validity(valid_from: str, lifetime: int, cert_file: str
         logging.error(f"Certificate validity validation failed for {cert_file}: {str(e)}")
         return False
 
+def validate_certificate_not_expired(cert_file: str) -> bool:
+    """
+    Validate that a certificate is currently within its validity period.
+
+    Used for user-provided certificates, where the --lifetime / --valid-from
+    generation parameters do not apply, but the certificate must still be usable now.
+
+    Args:
+        cert_file (str): Path to the certificate file.
+    Returns:
+        bool: True if the current time is within [not_valid_before, not_valid_after], False otherwise.
+    """
+    try:
+        cert = load_cert_from_file(cert_file)
+        now = datetime.now(timezone.utc)
+        VERIFY_OR_RAISE(cert.not_valid_before_utc <= now <= cert.not_valid_after_utc,
+                        f"Certificate is not currently valid (valid from {cert.not_valid_before_utc} to {cert.not_valid_after_utc})")
+        return True
+    except Exception as e:
+        logging.error(f"Certificate validity validation failed for {cert_file}: {str(e)}")
+        return False
+
 def validate_vid_pid_with_pai_cert(vid: int, pid: int, pai_cert_file: str) -> bool:
     """
     Validate input VID and PID with the PAI certificate.
@@ -652,6 +674,7 @@ def validate_certificates(args):
     if args.pai:
         VERIFY_OR_EXIT(args.cert, "PAI certificate is required")
         VERIFY_OR_EXIT(validate_pai_cert(args.cert), "PAI certificate is not valid")
+        VERIFY_OR_EXIT(validate_certificate_not_expired(args.cert), "PAI certificate is expired or not yet valid")
         # In case of dac certificate and dac privatekey as a input pai certificate private key can be optional
         if args.key:
             VERIFY_OR_EXIT(verify_certificate_private_key(args.cert, args.key), "PAI certificate and private key do not match")
@@ -660,6 +683,7 @@ def validate_certificates(args):
     if args.paa:
         VERIFY_OR_EXIT(args.cert, "PAA certificate is required")
         VERIFY_OR_EXIT(validate_paa_cert(args.cert), "PAA certificate is not valid")
+        VERIFY_OR_EXIT(validate_certificate_not_expired(args.cert), "PAA certificate is expired or not yet valid")
         VERIFY_OR_EXIT(args.key, "PAA private key is required")
         VERIFY_OR_EXIT(verify_certificate_private_key(args.cert, args.key), "PAA certificate and private key do not match")
 
@@ -667,12 +691,19 @@ def validate_certificates(args):
         VERIFY_OR_EXIT(args.dac_key, "DAC private key is required")
         VERIFY_OR_EXIT(args.cert, "PAI certificate is required")
         VERIFY_OR_EXIT(validate_dac_cert(args.dac_cert), "DAC certificate is not valid")
+        VERIFY_OR_EXIT(validate_certificate_not_expired(args.dac_cert), "DAC certificate is expired or not yet valid")
         VERIFY_OR_EXIT(verify_certificate_private_key(args.dac_cert, args.dac_key), "DAC certificate and private key do not match")
         VERIFY_OR_EXIT(validate_certificate_chain(args.dac_cert, args.cert), "DAC certificate chain is not valid")
 
-    if (args.valid_from or args.lifetime) and args.cert:
+    # --valid-from / --lifetime only apply to certificates that the tool GENERATES.
+    # Validate that the signing cert (PAA/PAI) covers the generated child's validity
+    # window only when a child cert is actually generated:
+    #   --paa : the PAI is generated and signed by the PAA
+    #   --pai : the DAC is generated (unless a DAC is supplied) and signed by the PAI
+    # User-supplied PAI/DAC certs are validated for current validity and chain
+    # consistency above; the generation lifetime does not apply to them.
+    dac_supplied = bool(args.dac_cert and args.dac_key)
+    generating_child = args.paa or (args.pai and not dac_supplied)
+    if args.cert and generating_child:
         VERIFY_OR_EXIT(validate_certificate_validity(args.valid_from, args.lifetime, args.cert),
                       f"{'PAA' if args.paa else 'PAI'} Certificate validity period is outside the specified parameters (from: {args.valid_from}, lifetime: {args.lifetime} days)")
-        if args.dac_cert:
-            VERIFY_OR_EXIT(validate_certificate_validity(args.valid_from, args.lifetime, args.dac_cert),
-                          f"DAC certificate validity period is outside the specified parameters (from: {args.valid_from}, lifetime: {args.lifetime} days)")
