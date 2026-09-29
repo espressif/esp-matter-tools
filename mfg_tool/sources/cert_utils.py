@@ -579,10 +579,10 @@ def validate_certificate_chain(cert_file: str, issuer_cert_file: str) -> bool:
                        f"Issuer-subject mismatch: {cert.issuer} != {issuer_cert.subject}")
 
         # Check certificate validity periods
-        VERIFY_OR_RAISE(issuer_cert.not_valid_before <= cert.not_valid_before <= issuer_cert.not_valid_after,
-                       f"Certificate is not currently valid. Valid from {issuer_cert.not_valid_before} to {issuer_cert.not_valid_after}")
-        VERIFY_OR_RAISE(issuer_cert.not_valid_before <= cert.not_valid_after <= issuer_cert.not_valid_after,
-                       f"Certificate is not currently valid. Valid from {issuer_cert.not_valid_before} to {issuer_cert.not_valid_after}")
+        VERIFY_OR_RAISE(issuer_cert.not_valid_before_utc <= cert.not_valid_before_utc <= issuer_cert.not_valid_after_utc,
+                       f"Certificate is not currently valid. Valid from {issuer_cert.not_valid_before_utc} to {issuer_cert.not_valid_after_utc}")
+        VERIFY_OR_RAISE(issuer_cert.not_valid_before_utc <= cert.not_valid_after_utc <= issuer_cert.not_valid_after_utc,
+                       f"Certificate is not currently valid. Valid from {issuer_cert.not_valid_before_utc} to {issuer_cert.not_valid_after_utc}")
 
         # Check for authority key identifier and subject key identifier
         try:

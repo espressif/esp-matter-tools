@@ -28,6 +28,7 @@ import logging
 import binascii
 from bitarray import bitarray
 from bitarray.util import ba2int
+from esp_secure_cert.configure_ds import supported_targets_ecdsa
 
 from deps.spake2p import generate_verifier
 
@@ -222,7 +223,8 @@ def validate_attestation_info(args):
 
 # Validates DS peripheral related arguments
 def validate_ds_peripheral_info(args):
-    VERIFY_OR_EXIT(not(args.ds_peripheral and args.target.lower() != "esp32h2"), "DS peripheral is only supported for esp32h2 target")
+    VERIFY_OR_EXIT(not(args.ds_peripheral and args.target.lower() not in supported_targets_ecdsa),
+                   f"DS peripheral is only supported for targets: {', '.join(supported_targets_ecdsa)}")
     VERIFY_OR_EXIT(not(args.ds_peripheral and args.efuse_key_id == -1), "--efuse-key-id <value> is required when -ds or --ds-peripheral option is used")
     VERIFY_OR_EXIT(args.ds_peripheral is None or (not args.port or args.count == 1),"Port not specified or number of partitions count is greater than 1")
 

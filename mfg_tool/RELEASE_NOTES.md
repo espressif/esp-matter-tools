@@ -1,3 +1,13 @@
+# [1.0.28] - (8-October-2026)
+
+* ECDSA DAC provisioning (`-ds` / `--ds-peripheral`) is no longer restricted to `esp32h2`.
+  Supported targets now come from esp-secure-cert-tool
+  (currently `esp32h2`, `esp32p4`, `esp32c5`, `esp32c61`, `esp32s31`), and the
+  `--target` value is passed through to secure cert partition generation.
+* Fixed `CryptographyDeprecationWarning` in certificate chain validation by switching to
+  the timezone-aware `not_valid_before_utc` / `not_valid_after_utc` properties.
+- dependencies: esp-secure-cert-tool requirement changed from `==2.3.6` to `>=2.6.1`.
+
 # [1.0.27] - (7-October-2026)
 
 * `--valid-from` / `--lifetime` are no longer applied to user-supplied certificates.
