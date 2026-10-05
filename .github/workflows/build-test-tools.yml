@@ -84,8 +84,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-    container: python:${{ matrix.python_version }}-bullseye
+        python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    container: python:${{ matrix.python_version }}-slim
     steps:
       - uses: actions/checkout@v4
       - name: Download mfg_tool dist
@@ -139,8 +139,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ["3.10", "3.11", "3.12", "3.13"]
-    container: python:${{ matrix.python_version }}-bullseye
+        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    container: python:${{ matrix.python_version }}-slim
     steps:
       - uses: actions/checkout@v4
       - name: Download dmv_tool dist
@@ -168,8 +168,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ["3.10", "3.11", "3.12", "3.13"]
-    container: python:${{ matrix.python_version }}-bullseye
+        python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    container: python:${{ matrix.python_version }}-slim
     steps:
       - uses: actions/checkout@v4
       - name: Install test deps

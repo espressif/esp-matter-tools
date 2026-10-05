@@ -79,14 +79,14 @@ build_dmv_tool:
 
 test_mfg_tool:
   stage: test
-  image: python:${PYTHON_VERSION}-bullseye # Reliable for evolving test dependencies
+  image: python:${PYTHON_VERSION}-slim
 
   tags:
     - build
 
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"] # TODO - 3.14 will be added after python:3.14-bullseye will be available
+      - PYTHON_VERSION: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
   needs:
     - job: build_mfg_tool
@@ -103,7 +103,7 @@ test_mfg_tool:
 
 test_dmv_tool:
   stage: test
-  image: python:${PYTHON_VERSION}-bullseye
+  image: python:${PYTHON_VERSION}-slim
 
   tags:
     - build
@@ -127,7 +127,7 @@ test_dmv_tool:
 
 test_dm_diff_tool:
   stage: test
-  image: python:${PYTHON_VERSION}-bullseye
+  image: python:${PYTHON_VERSION}-slim
 
   tags:
     - build
