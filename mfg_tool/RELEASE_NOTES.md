@@ -1,3 +1,12 @@
+# [1.0.27] - (7-October-2026)
+
+* `--valid-from` / `--lifetime` are no longer applied to user-supplied certificates.
+  Previously a DAC/PAI supplied via `--dac-cert` / `--cert` with a validity period shorter
+  than the default 100-year `--lifetime` was rejected. The lifetime window is now enforced
+  only on the signing certificate when a child certificate is actually generated
+  (`--paa`, or `--pai` without `--dac-cert`). User-supplied certificates are instead
+  validated to be currently within their validity period.
+
 # [1.0.25] - (8-September-2026)
 
 * `--discovery-mode` now accepts the discovery capability bits added in Matter 1.6:
