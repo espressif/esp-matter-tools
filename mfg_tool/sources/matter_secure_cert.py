@@ -55,6 +55,7 @@ class MatterSecureCert:
     pai_cert: bytes
     ds_peripheral: bool = False
     efuse_key_id: Optional[int] = None
+    target: Optional[str] = None
     discriminator: Optional[int] = None
     iteration_count: Optional[int] = None
     salt: Optional[str] = None
@@ -67,6 +68,9 @@ class MatterSecureCert:
 
         if (self.ds_peripheral is False) != (self.efuse_key_id is None):
             raise ValueError("either both or none of ds-peripheral and efuse-key-id must be provided")
+
+        if self.ds_peripheral and not self.target:
+            raise ValueError("target is required when ds-peripheral is used")
 
         # check if all the optional arguments are provided together
         required_args = [self.discriminator, self.iteration_count, self.salt, self.verifier, self.rd_id_uid]
@@ -202,8 +206,9 @@ class MatterSecureCert:
             secure_cert.add_entry(MatterSecureCert.get_random1_entry_as_json())
             secure_cert.add_entry(MatterSecureCert.get_random2_entry_as_json())
 
-        # at the moment we only support esp32h2 for ds-peripheral
-        target_chip = "esp32h2" if self.ds_peripheral else None
+        # target only matters for ds-peripheral; supported targets are validated
+        # against esp_secure_cert.configure_ds.supported_targets_ecdsa upfront
+        target_chip = self.target if self.ds_peripheral else None
 
         output_buf = io.StringIO()
         output_stream = sys.stderr if logging.getLogger().level <= logging.DEBUG else output_buf
@@ -239,17 +244,18 @@ any_base_int = AnyBaseInt()
 @click.option("--pai", type=click.File("rb"), required=True, help="Path to the PAI certificate")
 @click.option("--ds", is_flag=True, help="Whether the DAC private key is for DS peripheral")
 @click.option("--efuse-key-id", type=int, help="EFUSE key id")
+@click.option("--target", help="Target chip (required with --ds), e.g. esp32h2, esp32c5")
 @click.option("--port", help="Port to flash the secure cert partition")
 @click.option("--discriminator", type=any_base_int, help="Discriminator")
 @click.option("--iterations", type=any_base_int, help="Iteration count")
 @click.option("--salt", help="spake2p salt encoded as base64 string")
 @click.option("--verifier", help="spake2p verifier encoded as base64 string")
 @click.option("--rd-id-uid", help="unique id for rotating device id encoded as base64 string")
-def main(dac, dac_key, pai, ds, efuse_key_id, port, discriminator, iterations, salt, verifier, rd_id_uid):
+def main(dac, dac_key, pai, ds, efuse_key_id, target, port, discriminator, iterations, salt, verifier, rd_id_uid):
     dac = dac.read()
     dac_key = dac_key.read()
     pai = pai.read()
-    obj = MatterSecureCert(dac, dac_key, pai, ds, efuse_key_id, discriminator, iterations, salt, verifier, rd_id_uid)
+    obj = MatterSecureCert(dac, dac_key, pai, ds, efuse_key_id, target, discriminator, iterations, salt, verifier, rd_id_uid)
     secure_cert_bin_name = obj.generate_partition(port)
     print(f"Secure cert binary generated: {secure_cert_bin_name}")
 

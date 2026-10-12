@@ -273,3 +273,32 @@ esptool.py -p (PORT) write_flash (FACTORY_PARTITION_ADDR) path/to/factory_partit
 ```
 esptool.py -p (PORT) write_flash --encrypt (NVS_KEYS_PARTITION_ADDR) path/to/nvs_key_partition.bin
 ```
+
+## FAQ
+
+### eFuse key burning fails with `Timed out waiting for Efuse controller command to complete`
+
+When using `-ds` / `--ds-peripheral` with `--port`, the tool burns the DAC private key
+into an eFuse key block via `espefuse`. If the installed `esptool` is older than your
+chip's silicon revision, `espefuse` prints a warning like:
+
+```
+WARNING: This chip does not appear to be a ESP32-C5 (chip magic value 0x5fd1406f).
+Probably it is unsupported by this version of esptool.
+```
+
+and the subsequent key burn fails with a timeout. Fix: upgrade esptool in the same
+Python environment as esp-matter-mfg-tool:
+
+```
+pip install -U esptool
+```
+
+Then, before retrying, verify the failed attempt did not partially write the key block:
+
+```
+espefuse.py --port (PORT) summary
+```
+
+If the chosen `BLOCK_KEYx` is no longer empty or its `KEY_PURPOSE_x` is already set,
+use a different free key block via `--efuse-key-id`, since eFuse bits cannot be cleared.

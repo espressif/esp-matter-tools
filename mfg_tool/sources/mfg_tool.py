@@ -416,6 +416,7 @@ def generate_matter_secure_cert_partition(args, device_index, row_data, dacs):
         pai_cert=pai_cert,
         ds_peripheral=args.ds_peripheral,
         efuse_key_id=args.efuse_key_id if args.efuse_key_id != -1 else None,
+        target=args.target,
         discriminator=discriminator,
         iteration_count=iteration_count,
         salt=salt,
