@@ -1,3 +1,7 @@
+# [1.0.29] - (22-October-2026)
+
+* `--mfg-date` accepts two formats: `YYYY-MM-DD` and `YYYYMMDD`, for compatibility with older esp-matter SDKs.
+
 # [1.0.28] - (8-October-2026)
 
 * ECDSA DAC provisioning (`-ds` / `--ds-peripheral`) is no longer restricted to `esp32h2`.

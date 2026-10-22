@@ -143,9 +143,19 @@ def check_str_range(s, min_len, max_len, name):
     VERIFY_OR_EXIT(not(s and ((len(s) < min_len) or (len(s) > max_len))), f'{name} must be between {min_len} and {max_len} characters')
 
 
-# Validate the date format
+# Validate the date format.
+# A '-' in the 5th character selects YYYY-MM-DD (total length 10 or 18).
+# Otherwise the first 8 characters are YYYYMMDD (total length 8 or 16).
+# Extra characters after the date are manufacturer-specific.
 def check_date_format(date_str):
-    VERIFY_OR_EXIT(not(date_str and not re.match(r'^\d{8}?$', date_str[0:8])), "First 8 bytes should be in ISO 8601 format YYYYMMDD (e.g., 20250416), last 8 can be anything specific to the manufacturer")
+    if not date_str:
+        return
+    if len(date_str) >= 5 and date_str[4] == '-':
+        VERIFY_OR_EXIT(len(date_str) in (10, 18) and re.match(r'^\d{4}-\d{2}-\d{2}$', date_str[0:10]),
+                       "First 10 characters should be YYYY-MM-DD (e.g., 2025-04-16); total length must be 10 or 18")
+    else:
+        VERIFY_OR_EXIT(len(date_str) in (8, 16) and re.match(r'^\d{8}$', date_str[0:8]),
+                       "First 8 characters should be YYYYMMDD (e.g., 20250416); total length must be 8 or 16")
 
 # Validate the input integer range
 def check_int_range(value, min_value, max_value, name):
@@ -179,7 +189,7 @@ def validate_device_instance_info(args):
     check_str_range(args.vendor_name, 1, 32, 'Vendor name')
     check_str_range(args.product_name, 1, 32, 'Product name')
     check_str_range(args.hw_ver_str, 1, 64, 'Hardware version string')
-    check_str_range(args.mfg_date, 8, 16, 'Manufacturing date')
+    check_str_range(args.mfg_date, 8, 18, 'Manufacturing date')
     check_str_range(args.rd_id_uid, 32, 32, 'Rotating device Unique id')
     check_str_range(args.part_number, 1, 32, 'Part number')
     check_date_format(args.mfg_date)
