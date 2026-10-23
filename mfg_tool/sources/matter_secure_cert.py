@@ -221,8 +221,6 @@ class MatterSecureCert:
 
 
 # here onwards, cli functionality to test this script in a standalone manner
-# TODO: Once the tlv_parse.py lands, we can use that to parse the secure cert partition
-# and write some unit tests for the same
 
 
 class AnyBaseInt(click.ParamType):
