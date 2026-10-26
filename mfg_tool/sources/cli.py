@@ -311,7 +311,10 @@ class MultiValueOption(GroupedOption):
 @optgroup.option("--product-name", help="Product name")
 @optgroup.option("--hw-ver", callback=any_base_int, help="Hardware version")
 @optgroup.option("--hw-ver-str", help="Hardware version string")
-@optgroup.option("--mfg-date", help="Manufacturing date in format YYYY-MM-DD")
+@optgroup.option(
+    "--mfg-date",
+    help="Manufacturing date: YYYY-MM-DD (length 10 or 18) or YYYYMMDD (length 8 or 16)",
+)
 @optgroup.option("--serial-num", help="Serial number")
 @optgroup.option(
     "--enable-rotating-device-id",
