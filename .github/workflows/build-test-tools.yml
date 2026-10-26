@@ -27,8 +27,8 @@ jobs:
       dmv_tool: ${{ steps.filter.outputs.dmv_tool }}
       dm_diff_tool: ${{ steps.filter.outputs.dm_diff_tool }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.9-alpine
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install ruff
         run: python3 -m pip install --upgrade pip ruff
       - name: Ruff check
@@ -61,7 +61,7 @@ jobs:
         python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     container: python:${{ matrix.python_version }}-alpine
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build
         run: |
           cd mfg_tool
@@ -71,7 +71,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python_version }}
       - name: Upload mfg_tool dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mfg_tool-${{ matrix.python_version }}
           path: mfg_tool/dist/${{ matrix.python_version }}
@@ -87,9 +87,9 @@ jobs:
         python_version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     container: python:${{ matrix.python_version }}-slim
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download mfg_tool dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: mfg_tool-${{ matrix.python_version }}
           path: mfg_tool/dist/${{ matrix.python_version }}
@@ -116,7 +116,7 @@ jobs:
         python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     container: python:${{ matrix.python_version }}-alpine
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build
         run: |
           cd dmv_tool
@@ -126,7 +126,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python_version }}
       - name: Upload dmv_tool dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dmv_tool-${{ matrix.python_version }}
           path: dmv_tool/dist/${{ matrix.python_version }}
@@ -142,9 +142,9 @@ jobs:
         python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     container: python:${{ matrix.python_version }}-slim
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download dmv_tool dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dmv_tool-${{ matrix.python_version }}
           path: dmv_tool/dist/${{ matrix.python_version }}
@@ -171,7 +171,7 @@ jobs:
         python_version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     container: python:${{ matrix.python_version }}-slim
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install test deps
         run: |
           cd dm_diff_tool
